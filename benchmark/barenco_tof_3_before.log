@@ -1,0 +1,16 @@
+Equal (took 2.552ms)
+Proof:
+  [HH] p0, p7 <- 23 + 2p2 + 4
+  [HH] p1, p2 <- 01 + 3
+  [HH] p3, p8 <- 3
+  [HH] p9, p14 <- 0p11 + 3
+  [HH] p10, p11 <- 1
+  [HH] p12, p13 <- 1
+  [HH] p16, p17 <- 01 + 3
+  [HH] p18, p19 <- 01 + 3
+  [HH] p20, p25 <- 01 + 0p22 + 3
+  [HH] p21, p22 <- 1
+  [Elim] p23
+  [HH] p26, p27 <- 3
+  [Elim] p15
+  [Elim] p28

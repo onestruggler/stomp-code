@@ -1,0 +1,7636 @@
+.v 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157 158 159 160 161 162 163 164 165 166 167 168 169 170 171 172 173 174 175 176 177 178 179 180 181 182 183 184 185 186 187 188 189 190 191 192 193 194 195 196 197 198 199 200 201 202 203 204 205 206 207 208 209 210 211 212 213 214 215 216 217 218 219 220 221 222 223 224 225 226 227 228 229 230 231 232 233 234 235 236 237 238 239 240 241 242 243 244 245 246 247 248 249 250 251 252 253 254 255 256 257 258 259 260 261 262 263 264 265 266 267 268 269 270 271 272 273 274 275 276 277 278 279 280 281 282 283 284 285 286 287 288 289 290 291 292 293 294 295 296 297 298 299 300 301 302 303 304 305 306 307 308 309 310 311 312 313 314 315 316 317 318 319 320 321 322 323 324 325 326 327 328 329 330 331 
+.i 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 
+BEGIN
+cnot 9 19
+H 19
+H 27
+H 26
+H 25
+H 24
+H 23
+H 22
+H 21
+H 20
+H 28
+H 29
+H 30
+H 31
+H 32
+H 33
+H 34
+H 35
+H 36
+H 37
+H 38
+H 39
+H 40
+H 41
+H 42
+H 43
+H 44
+H 45
+H 46
+H 47
+H 48
+H 49
+H 50
+H 51
+H 52
+H 53
+H 54
+H 55
+H 56
+H 57
+H 58
+H 59
+H 60
+H 61
+H 62
+H 63
+H 64
+H 65
+H 66
+H 67
+H 68
+H 69
+H 70
+H 71
+H 72
+H 73
+H 74
+H 75
+H 76
+H 77
+H 78
+H 79
+H 80
+H 81
+H 82
+H 83
+H 84
+H 85
+H 86
+H 87
+H 88
+H 89
+H 90
+H 91
+H 92
+H 93
+H 94
+H 95
+H 96
+H 97
+H 98
+H 99
+H 100
+H 101
+H 102
+H 103
+H 104
+H 105
+H 106
+H 107
+H 108
+H 109
+H 110
+H 111
+H 112
+H 113
+H 114
+H 115
+H 116
+H 117
+H 118
+H 119
+H 120
+H 121
+H 122
+H 123
+H 124
+H 125
+H 126
+H 127
+H 128
+H 129
+H 130
+H 131
+H 132
+H 133
+H 134
+H 135
+H 136
+H 137
+H 138
+H 139
+H 140
+H 141
+H 142
+H 143
+H 144
+H 145
+H 146
+H 147
+H 148
+H 149
+H 150
+H 151
+H 152
+H 153
+H 154
+H 155
+H 156
+H 157
+H 158
+H 159
+H 160
+H 161
+H 162
+H 163
+H 164
+H 165
+H 166
+H 167
+H 168
+H 169
+H 170
+H 171
+H 172
+H 173
+H 174
+H 175
+H 176
+H 177
+H 178
+H 179
+H 180
+H 181
+H 182
+H 183
+H 184
+H 185
+H 186
+H 187
+H 188
+H 189
+H 190
+H 191
+H 192
+H 193
+H 194
+H 195
+H 196
+H 197
+H 198
+H 199
+H 200
+H 201
+H 202
+H 203
+H 204
+H 205
+H 206
+H 207
+H 208
+H 209
+H 210
+H 211
+H 212
+H 213
+H 214
+H 215
+H 216
+H 217
+H 218
+H 219
+H 220
+H 221
+H 222
+H 223
+H 224
+H 225
+H 226
+H 227
+H 228
+H 229
+H 230
+H 231
+H 232
+H 233
+H 234
+H 235
+H 236
+H 237
+H 238
+H 239
+H 240
+H 241
+H 242
+H 243
+H 244
+H 245
+H 246
+H 247
+H 248
+H 249
+H 250
+H 251
+H 252
+H 253
+H 254
+H 255
+H 256
+H 257
+H 258
+H 259
+H 260
+H 261
+H 262
+H 263
+H 264
+H 265
+H 266
+H 267
+H 268
+H 269
+H 270
+H 271
+H 272
+H 273
+H 274
+H 275
+H 276
+H 277
+H 278
+H 279
+H 280
+H 281
+H 282
+H 283
+H 284
+H 285
+H 286
+H 287
+H 288
+H 289
+H 290
+H 291
+H 292
+H 293
+H 294
+H 295
+H 296
+H 297
+H 298
+H 299
+H 300
+H 301
+H 302
+H 303
+H 304
+H 305
+H 306
+H 307
+H 308
+H 309
+H 310
+H 311
+H 312
+H 313
+H 314
+H 315
+H 316
+H 317
+H 318
+H 319
+H 320
+H 321
+H 322
+H 323
+H 324
+H 325
+H 326
+H 327
+H 328
+H 329
+H 330
+H 331
+cnot 8 18
+cnot 7 17
+cnot 6 16
+cnot 5 15
+cnot 4 14
+cnot 3 13
+cnot 2 12
+cnot 1 11
+cnot 0 283
+cnot 10 283
+T 283
+cnot 10 283
+cnot 0 283
+cnot 0 27
+cnot 10 27
+T 27
+cnot 10 27
+cnot 0 27
+cnot 99 107
+T 107
+Z 107
+S 107
+cnot 99 107
+cnot 15 47
+T 47
+cnot 15 47
+cnot 6 40
+T 40
+Z 40
+S 40
+cnot 6 40
+cnot 127 166
+cnot 164 166
+T 166
+cnot 164 166
+cnot 127 166
+cnot 2 140
+T 140
+Z 140
+S 140
+cnot 2 140
+cnot 0 331
+cnot 10 331
+T 331
+cnot 10 331
+cnot 0 331
+cnot 14 96
+T 96
+Z 96
+S 96
+cnot 14 96
+cnot 70 72
+T 72
+Z 72
+S 72
+cnot 70 72
+T 215
+Z 215
+cnot 41 45
+cnot 43 45
+T 45
+cnot 43 45
+cnot 41 45
+cnot 110 112
+T 112
+Z 112
+S 112
+cnot 110 112
+cnot 11 243
+T 243
+cnot 11 243
+cnot 113 145
+cnot 135 145
+T 145
+cnot 135 145
+cnot 113 145
+cnot 3 107
+T 107
+Z 107
+S 107
+cnot 3 107
+cnot 179 219
+T 219
+Z 219
+S 219
+cnot 179 219
+T 135
+Z 135
+cnot 249 265
+T 265
+Z 265
+S 265
+cnot 249 265
+cnot 120 122
+T 122
+Z 122
+S 122
+cnot 120 122
+cnot 14 112
+T 112
+Z 112
+S 112
+cnot 14 112
+cnot 113 145
+T 145
+Z 145
+S 145
+cnot 113 145
+cnot 4 14
+T 14
+cnot 4 14
+cnot 181 220
+cnot 212 220
+T 220
+cnot 212 220
+cnot 181 220
+cnot 179 235
+T 235
+Z 235
+S 235
+cnot 179 235
+T 39
+Z 39
+cnot 174 214
+cnot 203 214
+T 214
+cnot 203 214
+cnot 174 214
+cnot 11 195
+T 195
+cnot 11 195
+cnot 59 72
+cnot 70 72
+T 72
+cnot 70 72
+cnot 59 72
+cnot 16 34
+T 34
+cnot 16 34
+cnot 214 216
+T 216
+Z 216
+S 216
+cnot 214 216
+cnot 179 207
+cnot 199 207
+T 207
+cnot 199 207
+cnot 179 207
+cnot 0 315
+cnot 10 315
+T 315
+cnot 10 315
+cnot 0 315
+cnot 140 182
+T 182
+Z 182
+S 182
+cnot 140 182
+cnot 15 79
+T 79
+Z 79
+S 79
+cnot 15 79
+T 327
+S 327
+cnot 0 322
+T 322
+Z 322
+S 322
+cnot 0 322
+cnot 167 215
+T 215
+Z 215
+S 215
+cnot 167 215
+cnot 1 209
+T 209
+Z 209
+S 209
+cnot 1 209
+cnot 56 62
+cnot 57 62
+T 62
+cnot 57 62
+cnot 56 62
+T 71
+Z 71
+T 55
+Z 55
+T 311
+Z 311
+cnot 41 50
+cnot 46 50
+T 50
+cnot 46 50
+cnot 41 50
+cnot 251 320
+cnot 318 320
+T 320
+cnot 318 320
+cnot 251 320
+cnot 174 192
+T 192
+Z 192
+S 192
+cnot 174 192
+cnot 144 146
+T 146
+Z 146
+S 146
+cnot 144 146
+cnot 2 12
+T 12
+Z 12
+cnot 2 12
+cnot 4 67
+cnot 14 67
+T 67
+Z 67
+S 67
+cnot 14 67
+cnot 4 67
+cnot 125 149
+T 149
+Z 149
+S 149
+cnot 125 149
+cnot 125 165
+cnot 159 165
+T 165
+cnot 159 165
+cnot 125 165
+cnot 62 64
+T 64
+Z 64
+S 64
+cnot 62 64
+cnot 3 97
+cnot 13 97
+T 97
+Z 97
+S 97
+cnot 13 97
+cnot 3 97
+cnot 120 131
+cnot 122 131
+T 131
+cnot 122 131
+cnot 120 131
+cnot 318 320
+T 320
+Z 320
+S 320
+cnot 318 320
+cnot 288 290
+T 290
+Z 290
+S 290
+cnot 288 290
+T 7
+S 7
+cnot 87 103
+T 103
+Z 103
+S 103
+cnot 87 103
+cnot 32 34
+T 34
+Z 34
+S 34
+cnot 32 34
+cnot 249 313
+T 313
+Z 313
+S 313
+cnot 249 313
+cnot 244 292
+cnot 287 292
+T 292
+cnot 287 292
+cnot 244 292
+cnot 0 306
+T 306
+Z 306
+S 306
+cnot 0 306
+T 247
+Z 247
+T 167
+cnot 290 300
+T 300
+Z 300
+S 300
+cnot 290 300
+cnot 85 93
+T 93
+Z 93
+S 93
+cnot 85 93
+cnot 125 165
+T 165
+Z 165
+S 165
+cnot 125 165
+cnot 244 302
+T 302
+Z 302
+S 302
+cnot 244 302
+cnot 0 267
+cnot 10 267
+T 267
+cnot 10 267
+cnot 0 267
+cnot 310 312
+T 312
+Z 312
+S 312
+cnot 310 312
+T 23
+S 23
+cnot 14 99
+cnot 96 99
+T 99
+cnot 96 99
+cnot 14 99
+cnot 125 149
+cnot 143 149
+T 149
+cnot 143 149
+cnot 125 149
+cnot 93 101
+T 101
+Z 101
+S 101
+cnot 93 101
+cnot 18 28
+T 28
+Z 28
+S 28
+cnot 18 28
+cnot 12 230
+T 230
+Z 230
+S 230
+cnot 12 230
+cnot 12 195
+cnot 182 195
+T 195
+cnot 182 195
+cnot 12 195
+cnot 257 262
+T 262
+Z 262
+S 262
+cnot 257 262
+T 44
+Z 44
+cnot 193 198
+T 198
+Z 198
+S 198
+cnot 193 198
+cnot 87 112
+T 112
+Z 112
+S 112
+cnot 87 112
+cnot 317 322
+T 322
+Z 322
+S 322
+cnot 317 322
+cnot 3 124
+T 124
+Z 124
+S 124
+cnot 3 124
+T 156
+Z 156
+cnot 61 66
+T 66
+Z 66
+S 66
+cnot 61 66
+cnot 146 155
+T 155
+Z 155
+S 155
+cnot 146 155
+cnot 11 306
+cnot 297 306
+T 306
+cnot 297 306
+cnot 11 306
+cnot 249 286
+cnot 279 286
+T 286
+cnot 279 286
+cnot 249 286
+cnot 265 270
+T 270
+Z 270
+S 270
+cnot 265 270
+cnot 53 114
+cnot 87 114
+T 114
+cnot 87 114
+cnot 53 114
+cnot 228 289
+cnot 277 289
+T 289
+cnot 277 289
+cnot 228 289
+cnot 137 142
+T 142
+Z 142
+S 142
+cnot 137 142
+cnot 19 28
+T 28
+Z 28
+S 28
+cnot 19 28
+cnot 228 274
+cnot 260 274
+T 274
+cnot 260 274
+cnot 228 274
+cnot 10 307
+T 307
+Z 307
+S 307
+cnot 10 307
+T 316
+S 316
+cnot 122 131
+T 131
+Z 131
+S 131
+cnot 122 131
+cnot 113 134
+T 134
+Z 134
+S 134
+cnot 113 134
+cnot 2 139
+T 139
+Z 139
+S 139
+cnot 2 139
+cnot 19 204
+T 204
+Z 204
+S 204
+cnot 19 204
+cnot 3 108
+T 108
+Z 108
+S 108
+cnot 3 108
+cnot 0 316
+cnot 10 316
+T 316
+cnot 10 316
+cnot 0 316
+cnot 10 323
+T 323
+Z 323
+S 323
+cnot 10 323
+cnot 14 23
+T 23
+cnot 14 23
+cnot 5 58
+cnot 15 58
+T 58
+Z 58
+S 58
+cnot 15 58
+cnot 5 58
+cnot 13 141
+cnot 138 141
+T 141
+cnot 138 141
+cnot 13 141
+cnot 19 188
+T 188
+Z 188
+S 188
+cnot 19 188
+cnot 16 53
+T 53
+Z 53
+S 53
+cnot 16 53
+cnot 249 293
+cnot 286 293
+T 293
+cnot 286 293
+cnot 249 293
+cnot 108 129
+T 129
+Z 129
+S 129
+cnot 108 129
+T 92
+Z 92
+cnot 19 188
+cnot 147 188
+T 188
+cnot 147 188
+cnot 19 188
+cnot 41 46
+T 46
+Z 46
+S 46
+cnot 41 46
+cnot 237 290
+T 290
+Z 290
+S 290
+cnot 237 290
+cnot 120 146
+cnot 144 146
+T 146
+cnot 144 146
+cnot 120 146
+T 268
+S 268
+cnot 14 119
+T 119
+Z 119
+S 119
+cnot 14 119
+cnot 263 272
+T 272
+Z 272
+S 272
+cnot 263 272
+cnot 191 200
+T 200
+Z 200
+S 200
+cnot 191 200
+cnot 4 68
+cnot 14 68
+T 68
+Z 68
+S 68
+cnot 14 68
+cnot 4 68
+cnot 149 154
+T 154
+Z 154
+S 154
+cnot 149 154
+cnot 112 117
+T 117
+Z 117
+S 117
+cnot 112 117
+cnot 15 72
+T 72
+Z 72
+S 72
+cnot 15 72
+cnot 278 287
+T 287
+Z 287
+S 287
+cnot 278 287
+T 172
+Z 172
+T 28
+Z 28
+cnot 293 298
+T 298
+Z 298
+S 298
+cnot 293 298
+cnot 271 280
+T 280
+Z 280
+S 280
+cnot 271 280
+cnot 127 168
+T 168
+Z 168
+S 168
+cnot 127 168
+cnot 178 187
+T 187
+Z 187
+S 187
+cnot 178 187
+cnot 13 153
+cnot 150 153
+T 153
+cnot 150 153
+cnot 13 153
+cnot 19 44
+T 44
+Z 44
+S 44
+cnot 19 44
+cnot 236 241
+T 241
+Z 241
+S 241
+cnot 236 241
+T 204
+Z 204
+cnot 5 58
+T 58
+Z 58
+S 58
+cnot 5 58
+cnot 14 123
+cnot 121 123
+T 123
+cnot 121 123
+cnot 14 123
+cnot 12 209
+T 209
+Z 209
+S 209
+cnot 12 209
+cnot 4 84
+cnot 14 84
+T 84
+Z 84
+S 84
+cnot 14 84
+cnot 4 84
+cnot 249 302
+T 302
+Z 302
+S 302
+cnot 249 302
+cnot 16 21
+T 21
+cnot 16 21
+cnot 0 268
+cnot 10 268
+T 268
+cnot 10 268
+cnot 0 268
+T 188
+Z 188
+cnot 167 176
+T 176
+Z 176
+S 176
+cnot 167 176
+cnot 309 314
+T 314
+Z 314
+S 314
+cnot 309 314
+cnot 181 194
+cnot 183 194
+T 194
+cnot 183 194
+cnot 181 194
+cnot 147 188
+T 188
+Z 188
+S 188
+cnot 147 188
+cnot 273 278
+T 278
+Z 278
+S 278
+cnot 273 278
+cnot 125 146
+T 146
+Z 146
+S 146
+cnot 125 146
+cnot 280 285
+T 285
+Z 285
+S 285
+cnot 280 285
+cnot 87 96
+T 96
+Z 96
+S 96
+cnot 87 96
+cnot 12 161
+T 161
+cnot 12 161
+cnot 2 180
+cnot 12 180
+T 180
+Z 180
+S 180
+cnot 12 180
+cnot 2 180
+cnot 174 226
+cnot 218 226
+T 226
+cnot 218 226
+cnot 174 226
+cnot 19 92
+T 92
+Z 92
+S 92
+cnot 19 92
+cnot 210 251
+T 251
+Z 251
+S 251
+cnot 210 251
+cnot 1 246
+T 246
+Z 246
+S 246
+cnot 1 246
+cnot 15 56
+T 56
+cnot 15 56
+cnot 72 77
+T 77
+Z 77
+S 77
+cnot 72 77
+cnot 255 264
+T 264
+Z 264
+S 264
+cnot 255 264
+cnot 1 210
+cnot 11 210
+T 210
+Z 210
+S 210
+cnot 11 210
+cnot 1 210
+cnot 304 309
+T 309
+Z 309
+S 309
+cnot 304 309
+cnot 69 75
+T 75
+Z 75
+S 75
+cnot 69 75
+cnot 244 264
+T 264
+Z 264
+S 264
+cnot 244 264
+cnot 181 219
+T 219
+Z 219
+S 219
+cnot 181 219
+cnot 82 90
+T 90
+Z 90
+S 90
+cnot 82 90
+cnot 291 301
+T 301
+Z 301
+S 301
+cnot 291 301
+cnot 211 221
+T 221
+Z 221
+S 221
+cnot 211 221
+cnot 12 208
+T 208
+Z 208
+S 208
+cnot 12 208
+cnot 80 84
+T 84
+Z 84
+S 84
+cnot 80 84
+cnot 168 172
+T 172
+Z 172
+S 172
+cnot 168 172
+cnot 302 310
+T 310
+Z 310
+S 310
+cnot 302 310
+cnot 94 102
+T 102
+Z 102
+S 102
+cnot 94 102
+T 205
+Z 205
+cnot 237 290
+cnot 288 290
+T 290
+cnot 288 290
+cnot 237 290
+cnot 2 170
+T 170
+Z 170
+S 170
+cnot 2 170
+cnot 15 83
+cnot 81 83
+T 83
+cnot 81 83
+cnot 15 83
+cnot 249 319
+T 319
+Z 319
+S 319
+cnot 249 319
+cnot 1 239
+cnot 11 239
+T 239
+Z 239
+S 239
+cnot 11 239
+cnot 1 239
+cnot 109 115
+T 115
+Z 115
+S 115
+cnot 109 115
+cnot 3 107
+cnot 13 107
+T 107
+Z 107
+S 107
+cnot 13 107
+cnot 3 107
+cnot 213 219
+T 219
+Z 219
+S 219
+cnot 213 219
+cnot 127 137
+T 137
+Z 137
+S 137
+cnot 127 137
+cnot 228 257
+cnot 246 257
+T 257
+cnot 246 257
+cnot 228 257
+cnot 14 86
+T 86
+cnot 14 86
+cnot 65 71
+T 71
+Z 71
+S 71
+cnot 65 71
+cnot 12 176
+T 176
+cnot 12 176
+cnot 14 97
+cnot 88 97
+T 97
+cnot 88 97
+cnot 14 97
+cnot 13 115
+T 115
+cnot 13 115
+T 125
+S 125
+cnot 12 233
+cnot 230 233
+T 233
+cnot 230 233
+cnot 12 233
+cnot 229 235
+T 235
+Z 235
+S 235
+cnot 229 235
+cnot 251 325
+T 325
+Z 325
+S 325
+cnot 251 325
+T 301
+Z 301
+cnot 313 319
+T 319
+Z 319
+S 319
+cnot 313 319
+cnot 1 231
+T 231
+Z 231
+S 231
+cnot 1 231
+cnot 10 306
+T 306
+Z 306
+S 306
+cnot 10 306
+cnot 11 324
+cnot 320 324
+T 324
+cnot 320 324
+cnot 11 324
+cnot 80 91
+cnot 84 91
+T 91
+cnot 84 91
+cnot 80 91
+cnot 113 135
+T 135
+Z 135
+S 135
+cnot 113 135
+cnot 68 88
+T 88
+Z 88
+S 88
+cnot 68 88
+cnot 12 223
+cnot 220 223
+T 223
+cnot 220 223
+cnot 12 223
+cnot 142 150
+T 150
+Z 150
+S 150
+cnot 142 150
+cnot 10 322
+T 322
+Z 322
+S 322
+cnot 10 322
+cnot 320 324
+T 324
+Z 324
+S 324
+cnot 320 324
+T 237
+S 237
+cnot 237 291
+T 291
+Z 291
+S 291
+cnot 237 291
+cnot 3 13
+T 13
+S 13
+cnot 3 13
+cnot 2 25
+cnot 12 25
+T 25
+Z 25
+S 25
+cnot 12 25
+cnot 2 25
+cnot 233 239
+T 239
+Z 239
+S 239
+cnot 233 239
+cnot 105 111
+T 111
+Z 111
+S 111
+cnot 105 111
+cnot 135 145
+T 145
+Z 145
+S 145
+cnot 135 145
+cnot 218 226
+T 226
+Z 226
+S 226
+cnot 218 226
+cnot 7 17
+T 17
+S 17
+cnot 7 17
+cnot 120 156
+T 156
+Z 156
+S 156
+cnot 120 156
+cnot 2 169
+cnot 12 169
+T 169
+Z 169
+S 169
+cnot 12 169
+cnot 2 169
+cnot 251 293
+T 293
+Z 293
+S 293
+cnot 251 293
+T 26
+S 26
+T 202
+Z 202
+cnot 11 317
+cnot 314 317
+T 317
+cnot 314 317
+cnot 11 317
+cnot 11 269
+cnot 266 269
+T 269
+cnot 266 269
+cnot 11 269
+cnot 12 243
+cnot 241 243
+T 243
+cnot 241 243
+cnot 12 243
+cnot 170 185
+T 185
+Z 185
+S 185
+cnot 170 185
+cnot 4 82
+cnot 14 82
+T 82
+Z 82
+S 82
+cnot 14 82
+cnot 4 82
+cnot 217 260
+T 260
+Z 260
+S 260
+cnot 217 260
+cnot 15 66
+T 66
+Z 66
+S 66
+cnot 15 66
+T 218
+Z 218
+cnot 16 47
+T 47
+Z 47
+S 47
+cnot 16 47
+cnot 125 136
+T 136
+Z 136
+S 136
+cnot 125 136
+cnot 181 208
+T 208
+Z 208
+S 208
+cnot 181 208
+cnot 237 278
+cnot 273 278
+T 278
+cnot 273 278
+cnot 237 278
+cnot 6 21
+T 21
+Z 21
+S 21
+cnot 6 21
+cnot 2 178
+cnot 12 178
+T 178
+Z 178
+S 178
+cnot 12 178
+cnot 2 178
+cnot 4 67
+T 67
+Z 67
+S 67
+cnot 4 67
+cnot 5 48
+T 48
+Z 48
+S 48
+cnot 5 48
+cnot 11 222
+T 222
+cnot 11 222
+cnot 249 292
+T 292
+Z 292
+S 292
+cnot 249 292
+cnot 0 282
+cnot 10 282
+T 282
+cnot 10 282
+cnot 0 282
+cnot 11 267
+cnot 252 267
+T 267
+cnot 252 267
+cnot 11 267
+cnot 113 124
+T 124
+Z 124
+S 124
+cnot 113 124
+cnot 0 330
+cnot 10 330
+T 330
+cnot 10 330
+cnot 0 330
+cnot 179 199
+cnot 192 199
+T 199
+cnot 192 199
+cnot 179 199
+cnot 19 92
+cnot 73 92
+T 92
+cnot 73 92
+cnot 19 92
+cnot 87 106
+T 106
+Z 106
+S 106
+cnot 87 106
+T 74
+Z 74
+cnot 2 162
+cnot 12 162
+T 162
+Z 162
+S 162
+cnot 12 162
+cnot 2 162
+T 330
+S 330
+cnot 2 161
+T 161
+Z 161
+S 161
+cnot 2 161
+cnot 19 259
+cnot 204 259
+T 259
+cnot 204 259
+cnot 19 259
+cnot 252 267
+T 267
+Z 267
+S 267
+cnot 252 267
+cnot 181 224
+cnot 219 224
+T 224
+cnot 219 224
+cnot 181 224
+T 58
+Z 58
+cnot 80 93
+cnot 91 93
+T 93
+cnot 91 93
+cnot 80 93
+cnot 59 78
+T 78
+Z 78
+S 78
+cnot 59 78
+cnot 1 196
+cnot 11 196
+T 196
+Z 196
+S 196
+cnot 11 196
+cnot 1 196
+T 10
+cnot 158 189
+T 189
+Z 189
+S 189
+cnot 158 189
+T 250
+Z 250
+cnot 152 183
+T 183
+Z 183
+S 183
+cnot 152 183
+cnot 11 297
+cnot 294 297
+T 297
+cnot 294 297
+cnot 11 297
+cnot 12 139
+T 139
+cnot 12 139
+cnot 13 24
+T 24
+cnot 13 24
+cnot 45 49
+T 49
+Z 49
+S 49
+cnot 45 49
+cnot 12 194
+T 194
+Z 194
+S 194
+cnot 12 194
+cnot 0 295
+cnot 10 295
+T 295
+cnot 10 295
+cnot 0 295
+cnot 15 75
+T 75
+Z 75
+S 75
+cnot 15 75
+cnot 80 102
+T 102
+Z 102
+S 102
+cnot 80 102
+cnot 13 161
+T 161
+Z 161
+S 161
+cnot 13 161
+cnot 16 38
+T 38
+cnot 16 38
+cnot 0 326
+T 326
+Z 326
+S 326
+cnot 0 326
+cnot 228 262
+cnot 257 262
+T 262
+cnot 257 262
+cnot 228 262
+cnot 181 242
+cnot 238 242
+T 242
+cnot 238 242
+cnot 181 242
+T 331
+S 331
+T 59
+cnot 36 42
+T 42
+Z 42
+S 42
+cnot 36 42
+cnot 7 29
+cnot 17 29
+T 29
+Z 29
+S 29
+cnot 17 29
+cnot 7 29
+cnot 53 118
+cnot 114 118
+T 118
+cnot 114 118
+cnot 53 118
+cnot 249 319
+cnot 313 319
+T 319
+cnot 313 319
+cnot 249 319
+cnot 237 301
+cnot 291 301
+T 301
+cnot 291 301
+cnot 237 301
+T 235
+Z 235
+cnot 19 63
+T 63
+Z 63
+S 63
+cnot 19 63
+cnot 85 105
+T 105
+Z 105
+S 105
+cnot 85 105
+cnot 87 112
+cnot 110 112
+T 112
+cnot 110 112
+cnot 87 112
+cnot 85 103
+cnot 101 103
+T 103
+cnot 101 103
+cnot 85 103
+cnot 224 230
+T 230
+Z 230
+S 230
+cnot 224 230
+cnot 12 162
+T 162
+cnot 12 162
+cnot 4 79
+cnot 14 79
+T 79
+Z 79
+S 79
+cnot 14 79
+cnot 4 79
+cnot 174 192
+cnot 185 192
+T 192
+cnot 185 192
+cnot 174 192
+T 251
+cnot 154 160
+T 160
+Z 160
+S 160
+cnot 154 160
+cnot 17 37
+T 37
+Z 37
+S 37
+cnot 17 37
+cnot 200 206
+T 206
+Z 206
+S 206
+cnot 200 206
+cnot 11 327
+T 327
+Z 327
+S 327
+cnot 11 327
+cnot 12 178
+T 178
+cnot 12 178
+cnot 170 185
+cnot 174 185
+T 185
+cnot 174 185
+cnot 170 185
+cnot 321 325
+T 325
+Z 325
+S 325
+cnot 321 325
+cnot 14 84
+T 84
+cnot 14 84
+T 27
+S 27
+T 283
+S 283
+cnot 11 231
+T 231
+cnot 11 231
+cnot 179 207
+T 207
+Z 207
+S 207
+cnot 179 207
+cnot 167 201
+cnot 189 201
+T 201
+cnot 189 201
+cnot 167 201
+cnot 100 106
+T 106
+Z 106
+S 106
+cnot 100 106
+cnot 13 151
+cnot 141 151
+T 151
+cnot 141 151
+cnot 13 151
+cnot 19 31
+T 31
+Z 31
+S 31
+cnot 19 31
+cnot 162 184
+T 184
+Z 184
+S 184
+cnot 162 184
+cnot 13 97
+T 97
+cnot 13 97
+cnot 116 130
+cnot 125 130
+T 130
+cnot 125 130
+cnot 116 130
+cnot 312 318
+T 318
+Z 318
+S 318
+cnot 312 318
+cnot 13 177
+T 177
+Z 177
+S 177
+cnot 13 177
+cnot 244 264
+cnot 255 264
+T 264
+cnot 255 264
+cnot 244 264
+cnot 56 62
+T 62
+Z 62
+S 62
+cnot 56 62
+cnot 64 70
+T 70
+Z 70
+S 70
+cnot 64 70
+cnot 11 295
+T 295
+Z 295
+S 295
+cnot 11 295
+cnot 217 275
+cnot 261 275
+T 275
+cnot 261 275
+cnot 217 275
+cnot 41 45
+T 45
+Z 45
+S 45
+cnot 41 45
+cnot 2 152
+T 152
+Z 152
+S 152
+cnot 2 152
+cnot 244 272
+cnot 263 272
+T 272
+cnot 263 272
+cnot 244 272
+cnot 57 71
+cnot 65 71
+T 71
+cnot 65 71
+cnot 57 71
+T 123
+Z 123
+cnot 181 230
+T 230
+Z 230
+S 230
+cnot 181 230
+cnot 11 282
+cnot 269 282
+T 282
+cnot 269 282
+cnot 11 282
+cnot 1 246
+cnot 11 246
+T 246
+Z 246
+S 246
+cnot 11 246
+cnot 1 246
+cnot 184 193
+T 193
+Z 193
+S 193
+cnot 184 193
+cnot 14 107
+T 107
+Z 107
+S 107
+cnot 14 107
+cnot 297 306
+T 306
+Z 306
+S 306
+cnot 297 306
+cnot 41 50
+T 50
+Z 50
+S 50
+cnot 41 50
+cnot 244 311
+cnot 303 311
+T 311
+cnot 303 311
+cnot 244 311
+cnot 11 248
+T 248
+cnot 11 248
+cnot 90 95
+T 95
+Z 95
+S 95
+cnot 90 95
+cnot 5 22
+T 22
+Z 22
+S 22
+cnot 5 22
+cnot 186 191
+T 191
+Z 191
+S 191
+cnot 186 191
+cnot 251 312
+T 312
+Z 312
+S 312
+cnot 251 312
+T 80
+Z 80
+S 80
+cnot 3 98
+cnot 13 98
+T 98
+Z 98
+S 98
+cnot 13 98
+cnot 3 98
+cnot 216 225
+T 225
+Z 225
+S 225
+cnot 216 225
+cnot 88 97
+T 97
+Z 97
+S 97
+cnot 88 97
+cnot 2 151
+T 151
+Z 151
+S 151
+cnot 2 151
+T 0
+cnot 14 123
+T 123
+Z 123
+S 123
+cnot 14 123
+cnot 182 195
+T 195
+Z 195
+S 195
+cnot 182 195
+cnot 251 266
+cnot 253 266
+T 266
+cnot 253 266
+cnot 251 266
+cnot 42 47
+T 47
+Z 47
+S 47
+cnot 42 47
+cnot 181 234
+cnot 227 234
+T 234
+cnot 227 234
+cnot 181 234
+cnot 127 138
+cnot 129 138
+T 138
+cnot 129 138
+cnot 127 138
+cnot 54 61
+cnot 59 61
+T 61
+cnot 59 61
+cnot 54 61
+cnot 12 221
+T 221
+Z 221
+S 221
+cnot 12 221
+cnot 2 176
+cnot 12 176
+T 176
+Z 176
+S 176
+cnot 12 176
+cnot 2 176
+cnot 5 54
+T 54
+Z 54
+S 54
+cnot 5 54
+cnot 6 40
+cnot 16 40
+T 40
+Z 40
+S 40
+cnot 16 40
+cnot 6 40
+cnot 174 203
+T 203
+Z 203
+S 203
+cnot 174 203
+cnot 287 292
+T 292
+Z 292
+S 292
+cnot 287 292
+cnot 251 280
+T 280
+Z 280
+S 280
+cnot 251 280
+cnot 158 202
+cnot 190 202
+T 202
+cnot 190 202
+cnot 158 202
+cnot 95 100
+T 100
+Z 100
+S 100
+cnot 95 100
+cnot 14 115
+cnot 109 115
+T 115
+cnot 109 115
+cnot 14 115
+cnot 244 302
+cnot 300 302
+T 302
+cnot 300 302
+cnot 244 302
+cnot 0 328
+cnot 10 328
+T 328
+cnot 10 328
+cnot 0 328
+cnot 13 139
+cnot 128 139
+T 139
+cnot 128 139
+cnot 13 139
+cnot 14 75
+T 75
+cnot 14 75
+cnot 244 300
+cnot 290 300
+T 300
+cnot 290 300
+cnot 244 300
+cnot 228 277
+T 277
+Z 277
+S 277
+cnot 228 277
+cnot 1 26
+T 26
+Z 26
+S 26
+cnot 1 26
+cnot 12 173
+T 173
+cnot 12 173
+cnot 12 182
+cnot 140 182
+T 182
+cnot 140 182
+cnot 12 182
+cnot 0 296
+cnot 10 296
+T 296
+cnot 10 296
+cnot 0 296
+cnot 59 72
+T 72
+Z 72
+S 72
+cnot 59 72
+cnot 39 44
+T 44
+Z 44
+S 44
+cnot 39 44
+cnot 53 118
+cnot 87 118
+T 118
+cnot 87 118
+cnot 53 118
+cnot 19 44
+cnot 39 44
+T 44
+cnot 39 44
+cnot 19 44
+cnot 1 250
+T 250
+Z 250
+S 250
+cnot 1 250
+cnot 53 118
+T 118
+Z 118
+S 118
+cnot 53 118
+cnot 129 138
+T 138
+Z 138
+S 138
+cnot 129 138
+cnot 11 232
+T 232
+cnot 11 232
+cnot 13 126
+T 126
+cnot 13 126
+cnot 179 192
+T 192
+Z 192
+S 192
+cnot 179 192
+cnot 207 212
+T 212
+Z 212
+S 212
+cnot 207 212
+cnot 117 119
+T 119
+Z 119
+S 119
+cnot 117 119
+cnot 53 55
+T 55
+Z 55
+S 55
+cnot 53 55
+cnot 251 281
+T 281
+Z 281
+S 281
+cnot 251 281
+cnot 181 230
+cnot 224 230
+T 230
+cnot 224 230
+cnot 181 230
+cnot 159 165
+T 165
+Z 165
+S 165
+cnot 159 165
+cnot 0 296
+T 296
+Z 296
+S 296
+cnot 0 296
+cnot 167 189
+T 189
+Z 189
+S 189
+cnot 167 189
+cnot 245 247
+T 247
+Z 247
+S 247
+cnot 245 247
+cnot 18 28
+cnot 19 28
+T 28
+cnot 19 28
+cnot 18 28
+cnot 15 60
+cnot 48 60
+T 60
+cnot 48 60
+cnot 15 60
+cnot 85 101
+cnot 93 101
+T 101
+cnot 93 101
+cnot 85 101
+cnot 85 103
+T 103
+Z 103
+S 103
+cnot 85 103
+cnot 125 159
+T 159
+Z 159
+S 159
+cnot 125 159
+cnot 167 205
+T 205
+Z 205
+S 205
+cnot 167 205
+cnot 190 202
+T 202
+Z 202
+S 202
+cnot 190 202
+cnot 228 276
+T 276
+Z 276
+S 276
+cnot 228 276
+T 177
+Z 177
+cnot 232 255
+cnot 244 255
+T 255
+cnot 244 255
+cnot 232 255
+cnot 11 281
+T 281
+Z 281
+S 281
+cnot 11 281
+cnot 174 218
+T 218
+Z 218
+S 218
+cnot 174 218
+cnot 251 265
+T 265
+Z 265
+S 265
+cnot 251 265
+cnot 244 292
+T 292
+Z 292
+S 292
+cnot 244 292
+cnot 82 90
+cnot 85 90
+T 90
+cnot 85 90
+cnot 82 90
+cnot 11 329
+T 329
+Z 329
+S 329
+cnot 11 329
+cnot 158 187
+cnot 178 187
+T 187
+cnot 178 187
+cnot 158 187
+cnot 181 208
+cnot 198 208
+T 208
+cnot 198 208
+cnot 181 208
+cnot 74 78
+T 78
+Z 78
+S 78
+cnot 74 78
+cnot 228 260
+T 260
+Z 260
+S 260
+cnot 228 260
+cnot 1 11
+T 11
+Z 11
+S 11
+cnot 1 11
+cnot 101 103
+T 103
+Z 103
+S 103
+cnot 101 103
+cnot 12 236
+T 236
+Z 236
+S 236
+cnot 12 236
+cnot 179 227
+cnot 225 227
+T 227
+cnot 225 227
+cnot 179 227
+T 113
+Z 113
+S 113
+cnot 179 193
+T 193
+Z 193
+S 193
+cnot 179 193
+cnot 6 34
+T 34
+Z 34
+S 34
+cnot 6 34
+cnot 127 149
+T 149
+Z 149
+S 149
+cnot 127 149
+T 33
+Z 33
+T 289
+Z 289
+cnot 14 106
+T 106
+Z 106
+S 106
+cnot 14 106
+T 145
+Z 145
+T 65
+Z 65
+cnot 3 97
+T 97
+Z 97
+S 97
+cnot 3 97
+cnot 14 117
+cnot 112 117
+T 117
+cnot 112 117
+cnot 14 117
+T 321
+S 321
+cnot 158 202
+T 202
+Z 202
+S 202
+cnot 158 202
+cnot 77 79
+T 79
+Z 79
+S 79
+cnot 77 79
+cnot 1 195
+cnot 11 195
+T 195
+Z 195
+S 195
+cnot 11 195
+cnot 1 195
+cnot 19 33
+cnot 31 33
+T 33
+cnot 31 33
+cnot 19 33
+cnot 7 29
+T 29
+Z 29
+S 29
+cnot 7 29
+cnot 4 84
+T 84
+Z 84
+S 84
+cnot 4 84
+T 81
+Z 81
+cnot 17 34
+cnot 32 34
+T 34
+cnot 32 34
+cnot 17 34
+cnot 217 258
+cnot 248 258
+T 258
+cnot 248 258
+cnot 217 258
+cnot 170 174
+T 174
+Z 174
+S 174
+cnot 170 174
+cnot 13 175
+T 175
+Z 175
+S 175
+cnot 13 175
+cnot 16 40
+T 40
+cnot 16 40
+T 1
+Z 1
+S 1
+cnot 1 243
+cnot 11 243
+T 243
+Z 243
+S 243
+cnot 11 243
+cnot 1 243
+cnot 0 328
+T 328
+Z 328
+S 328
+cnot 0 328
+cnot 143 149
+T 149
+Z 149
+S 149
+cnot 143 149
+cnot 3 119
+cnot 13 119
+T 119
+Z 119
+S 119
+cnot 13 119
+cnot 3 119
+cnot 53 87
+T 87
+Z 87
+S 87
+cnot 53 87
+cnot 19 33
+T 33
+Z 33
+S 33
+cnot 19 33
+cnot 4 68
+T 68
+Z 68
+S 68
+cnot 4 68
+cnot 217 275
+T 275
+Z 275
+S 275
+cnot 217 275
+cnot 12 220
+T 220
+Z 220
+S 220
+cnot 12 220
+cnot 0 323
+T 323
+Z 323
+S 323
+cnot 0 323
+cnot 181 220
+T 220
+Z 220
+S 220
+cnot 181 220
+cnot 157 164
+T 164
+Z 164
+S 164
+cnot 157 164
+T 126
+Z 126
+cnot 11 210
+T 210
+cnot 11 210
+cnot 4 79
+T 79
+Z 79
+S 79
+cnot 4 79
+cnot 284 295
+T 295
+Z 295
+S 295
+cnot 284 295
+cnot 208 211
+T 211
+Z 211
+S 211
+cnot 208 211
+T 46
+Z 46
+cnot 15 67
+cnot 60 67
+T 67
+cnot 60 67
+cnot 15 67
+cnot 152 183
+cnot 181 183
+T 183
+cnot 181 183
+cnot 152 183
+cnot 230 233
+T 233
+Z 233
+S 233
+cnot 230 233
+T 158
+Z 158
+S 158
+cnot 96 99
+T 99
+Z 99
+S 99
+cnot 96 99
+T 78
+Z 78
+cnot 108 129
+cnot 127 129
+T 129
+cnot 127 129
+cnot 108 129
+cnot 2 173
+T 173
+Z 173
+S 173
+cnot 2 173
+cnot 237 276
+T 276
+Z 276
+S 276
+cnot 237 276
+cnot 160 163
+T 163
+Z 163
+S 163
+cnot 160 163
+cnot 6 38
+cnot 16 38
+T 38
+Z 38
+S 38
+cnot 16 38
+cnot 6 38
+cnot 76 87
+T 87
+Z 87
+S 87
+cnot 76 87
+cnot 249 312
+T 312
+Z 312
+S 312
+cnot 249 312
+cnot 59 66
+T 66
+Z 66
+S 66
+cnot 59 66
+cnot 0 307
+T 307
+Z 307
+S 307
+cnot 0 307
+cnot 87 110
+cnot 103 110
+T 110
+cnot 103 110
+cnot 87 110
+cnot 1 240
+T 240
+Z 240
+S 240
+cnot 1 240
+cnot 11 322
+T 322
+Z 322
+S 322
+cnot 11 322
+T 238
+Z 238
+cnot 0 326
+cnot 10 326
+T 326
+cnot 10 326
+cnot 0 326
+cnot 210 253
+T 253
+Z 253
+S 253
+cnot 210 253
+cnot 244 303
+T 303
+Z 303
+S 303
+cnot 244 303
+T 94
+Z 94
+cnot 3 122
+T 122
+Z 122
+S 122
+cnot 3 122
+cnot 12 231
+T 231
+Z 231
+S 231
+cnot 12 231
+cnot 179 213
+cnot 206 213
+T 213
+cnot 206 213
+cnot 179 213
+cnot 13 116
+T 116
+cnot 13 116
+cnot 227 234
+T 234
+Z 234
+S 234
+cnot 227 234
+cnot 181 236
+T 236
+Z 236
+S 236
+cnot 181 236
+T 174
+S 174
+cnot 14 97
+T 97
+Z 97
+S 97
+cnot 14 97
+T 30
+Z 30
+cnot 12 247
+T 247
+Z 247
+S 247
+cnot 12 247
+cnot 294 297
+T 297
+Z 297
+S 297
+cnot 294 297
+cnot 38 41
+T 41
+Z 41
+S 41
+cnot 38 41
+cnot 5 48
+cnot 15 48
+T 48
+Z 48
+S 48
+cnot 15 48
+cnot 5 48
+cnot 3 124
+cnot 13 124
+T 124
+Z 124
+S 124
+cnot 13 124
+cnot 3 124
+cnot 16 51
+cnot 49 51
+T 51
+cnot 49 51
+cnot 16 51
+cnot 1 248
+cnot 11 248
+T 248
+Z 248
+S 248
+cnot 11 248
+cnot 1 248
+cnot 249 264
+T 264
+Z 264
+S 264
+cnot 249 264
+cnot 16 51
+T 51
+Z 51
+S 51
+cnot 16 51
+cnot 85 95
+cnot 90 95
+T 95
+cnot 90 95
+cnot 85 95
+cnot 52 63
+T 63
+Z 63
+S 63
+cnot 52 63
+cnot 249 304
+cnot 299 304
+T 304
+cnot 299 304
+cnot 249 304
+T 190
+Z 190
+cnot 12 151
+T 151
+cnot 12 151
+cnot 11 295
+cnot 284 295
+T 295
+cnot 284 295
+cnot 11 295
+cnot 76 89
+cnot 87 89
+T 89
+cnot 87 89
+cnot 76 89
+cnot 1 232
+cnot 11 232
+T 232
+Z 232
+S 232
+cnot 11 232
+cnot 1 232
+cnot 249 280
+T 280
+Z 280
+S 280
+cnot 249 280
+cnot 150 153
+T 153
+Z 153
+S 153
+cnot 150 153
+cnot 3 108
+cnot 13 108
+T 108
+Z 108
+S 108
+cnot 13 108
+cnot 3 108
+cnot 251 305
+cnot 298 305
+T 305
+cnot 298 305
+cnot 251 305
+cnot 217 248
+T 248
+Z 248
+S 248
+cnot 217 248
+cnot 11 306
+T 306
+Z 306
+S 306
+cnot 11 306
+cnot 0 330
+T 330
+Z 330
+S 330
+cnot 0 330
+cnot 134 144
+T 144
+Z 144
+S 144
+cnot 134 144
+cnot 6 16
+T 16
+Z 16
+cnot 6 16
+cnot 248 258
+T 258
+Z 258
+S 258
+cnot 248 258
+cnot 13 169
+cnot 163 169
+T 169
+cnot 163 169
+cnot 13 169
+cnot 8 18
+T 18
+cnot 8 18
+cnot 19 147
+T 147
+Z 147
+S 147
+cnot 19 147
+cnot 164 166
+T 166
+Z 166
+S 166
+cnot 164 166
+cnot 11 267
+T 267
+Z 267
+S 267
+cnot 11 267
+cnot 167 186
+cnot 176 186
+T 186
+cnot 176 186
+cnot 167 186
+cnot 223 231
+T 231
+Z 231
+S 231
+cnot 223 231
+cnot 4 75
+cnot 14 75
+T 75
+Z 75
+S 75
+cnot 14 75
+cnot 4 75
+cnot 8 19
+cnot 18 19
+T 19
+Z 19
+S 19
+cnot 18 19
+cnot 8 19
+cnot 167 191
+T 191
+Z 191
+S 191
+cnot 167 191
+cnot 258 260
+T 260
+Z 260
+S 260
+cnot 258 260
+cnot 251 318
+cnot 312 318
+T 318
+cnot 312 318
+cnot 251 318
+cnot 244 278
+T 278
+Z 278
+S 278
+cnot 244 278
+T 175
+Z 175
+cnot 53 118
+cnot 87 118
+cnot 114 118
+T 118
+Z 118
+S 118
+cnot 114 118
+cnot 87 118
+cnot 53 118
+cnot 125 157
+T 157
+Z 157
+S 157
+cnot 125 157
+T 31
+Z 31
+cnot 59 70
+cnot 64 70
+T 70
+cnot 64 70
+cnot 59 70
+cnot 2 139
+cnot 12 139
+T 139
+Z 139
+S 139
+cnot 12 139
+cnot 2 139
+cnot 237 256
+cnot 240 256
+T 256
+cnot 240 256
+cnot 237 256
+cnot 174 216
+T 216
+Z 216
+S 216
+cnot 174 216
+cnot 19 259
+T 259
+Z 259
+S 259
+cnot 19 259
+cnot 300 302
+T 302
+Z 302
+S 302
+cnot 300 302
+cnot 228 246
+T 246
+Z 246
+S 246
+cnot 228 246
+cnot 176 186
+T 186
+Z 186
+S 186
+cnot 176 186
+cnot 228 262
+T 262
+Z 262
+S 262
+cnot 228 262
+cnot 2 180
+T 180
+Z 180
+S 180
+cnot 2 180
+cnot 10 268
+T 268
+Z 268
+S 268
+cnot 10 268
+T 111
+Z 111
+cnot 274 276
+T 276
+Z 276
+S 276
+cnot 274 276
+cnot 198 208
+T 208
+Z 208
+S 208
+cnot 198 208
+cnot 303 311
+T 311
+Z 311
+S 311
+cnot 303 311
+cnot 3 115
+T 115
+Z 115
+S 115
+cnot 3 115
+cnot 199 207
+T 207
+Z 207
+S 207
+cnot 199 207
+cnot 1 221
+cnot 11 221
+T 221
+Z 221
+S 221
+cnot 11 221
+cnot 1 221
+cnot 0 323
+cnot 10 323
+T 323
+cnot 10 323
+cnot 0 323
+cnot 17 37
+cnot 35 37
+T 37
+cnot 35 37
+cnot 17 37
+cnot 10 316
+T 316
+Z 316
+S 316
+cnot 10 316
+T 127
+Z 127
+cnot 85 111
+cnot 105 111
+T 111
+cnot 105 111
+cnot 85 111
+T 303
+S 303
+cnot 153 161
+T 161
+Z 161
+S 161
+cnot 153 161
+cnot 127 160
+cnot 154 160
+T 160
+cnot 154 160
+cnot 127 160
+cnot 14 109
+cnot 106 109
+T 109
+cnot 106 109
+cnot 14 109
+cnot 0 10
+T 10
+Z 10
+S 10
+cnot 0 10
+T 159
+Z 159
+cnot 57 65
+T 65
+Z 65
+S 65
+cnot 57 65
+cnot 87 95
+T 95
+Z 95
+S 95
+cnot 87 95
+cnot 324 326
+T 326
+Z 326
+S 326
+cnot 324 326
+cnot 251 325
+cnot 321 325
+T 325
+cnot 321 325
+cnot 251 325
+cnot 132 134
+T 134
+Z 134
+S 134
+cnot 132 134
+cnot 237 301
+T 301
+Z 301
+S 301
+cnot 237 301
+cnot 179 227
+T 227
+Z 227
+S 227
+cnot 179 227
+T 63
+Z 63
+T 319
+Z 319
+cnot 4 86
+T 86
+Z 86
+S 86
+cnot 4 86
+cnot 120 146
+T 146
+Z 146
+S 146
+cnot 120 146
+cnot 0 282
+T 282
+Z 282
+S 282
+cnot 0 282
+cnot 0 307
+cnot 10 307
+T 307
+cnot 10 307
+cnot 0 307
+cnot 11 315
+T 315
+Z 315
+S 315
+cnot 11 315
+cnot 234 236
+T 236
+Z 236
+S 236
+cnot 234 236
+cnot 13 173
+T 173
+Z 173
+S 173
+cnot 13 173
+cnot 4 76
+cnot 14 76
+T 76
+Z 76
+S 76
+cnot 14 76
+cnot 4 76
+T 244
+Z 244
+cnot 210 253
+cnot 251 253
+T 253
+cnot 251 253
+cnot 210 253
+cnot 87 100
+cnot 95 100
+T 100
+cnot 95 100
+cnot 87 100
+cnot 16 45
+T 45
+Z 45
+S 45
+cnot 16 45
+cnot 179 193
+cnot 184 193
+T 193
+cnot 184 193
+cnot 179 193
+cnot 1 222
+T 222
+Z 222
+S 222
+cnot 1 222
+cnot 127 160
+T 160
+Z 160
+S 160
+cnot 127 160
+cnot 253 266
+T 266
+Z 266
+S 266
+cnot 253 266
+cnot 179 225
+cnot 216 225
+T 225
+cnot 216 225
+cnot 179 225
+cnot 12 209
+cnot 197 209
+T 209
+cnot 197 209
+cnot 12 209
+T 20
+S 20
+cnot 2 140
+cnot 12 140
+T 140
+Z 140
+S 140
+cnot 12 140
+cnot 2 140
+cnot 80 93
+T 93
+Z 93
+S 93
+cnot 80 93
+cnot 17 32
+cnot 29 32
+T 32
+cnot 29 32
+cnot 17 32
+T 180
+Z 180
+cnot 15 77
+cnot 72 77
+T 77
+cnot 72 77
+cnot 15 77
+cnot 167 191
+cnot 186 191
+T 191
+cnot 186 191
+cnot 167 191
+cnot 19 52
+T 52
+Z 52
+S 52
+cnot 19 52
+cnot 17 30
+T 30
+cnot 17 30
+cnot 181 194
+T 194
+Z 194
+S 194
+cnot 181 194
+cnot 174 191
+T 191
+Z 191
+S 191
+cnot 174 191
+cnot 6 36
+cnot 16 36
+T 36
+Z 36
+S 36
+cnot 16 36
+cnot 6 36
+cnot 237 263
+cnot 256 263
+T 263
+cnot 256 263
+cnot 237 263
+cnot 12 169
+T 169
+cnot 12 169
+cnot 10 283
+T 283
+Z 283
+S 283
+cnot 10 283
+cnot 14 79
+T 79
+cnot 14 79
+cnot 10 27
+T 27
+Z 27
+S 27
+cnot 10 27
+cnot 76 89
+T 89
+Z 89
+S 89
+cnot 76 89
+cnot 12 25
+T 25
+cnot 12 25
+cnot 13 138
+T 138
+Z 138
+S 138
+cnot 13 138
+cnot 125 143
+cnot 136 143
+T 143
+cnot 136 143
+cnot 125 143
+cnot 181 242
+T 242
+Z 242
+S 242
+cnot 181 242
+cnot 53 114
+T 114
+Z 114
+S 114
+cnot 53 114
+cnot 10 267
+T 267
+Z 267
+S 267
+cnot 10 267
+cnot 14 88
+cnot 68 88
+T 88
+cnot 68 88
+cnot 14 88
+cnot 13 122
+T 122
+cnot 13 122
+cnot 127 142
+cnot 137 142
+T 142
+cnot 137 142
+cnot 127 142
+cnot 3 116
+T 116
+Z 116
+S 116
+cnot 3 116
+T 148
+Z 148
+cnot 127 154
+cnot 149 154
+T 154
+cnot 149 154
+cnot 127 154
+cnot 104 133
+T 133
+Z 133
+S 133
+cnot 104 133
+cnot 251 294
+cnot 285 294
+T 294
+cnot 285 294
+cnot 251 294
+cnot 162 179
+T 179
+Z 179
+S 179
+cnot 162 179
+cnot 38 43
+cnot 41 43
+T 43
+cnot 41 43
+cnot 38 43
+cnot 152 181
+T 181
+Z 181
+S 181
+cnot 152 181
+cnot 1 26
+cnot 11 26
+T 26
+Z 26
+S 26
+cnot 11 26
+cnot 1 26
+cnot 269 282
+T 282
+Z 282
+S 282
+cnot 269 282
+T 52
+Z 52
+cnot 10 315
+T 315
+Z 315
+S 315
+cnot 10 315
+cnot 10 331
+T 331
+Z 331
+S 331
+cnot 10 331
+T 228
+cnot 7 30
+cnot 17 30
+T 30
+Z 30
+S 30
+cnot 17 30
+cnot 7 30
+cnot 14 119
+cnot 117 119
+T 119
+cnot 117 119
+cnot 14 119
+cnot 3 126
+cnot 13 126
+T 126
+Z 126
+S 126
+cnot 13 126
+cnot 3 126
+cnot 1 250
+cnot 11 250
+T 250
+Z 250
+S 250
+cnot 11 250
+cnot 1 250
+cnot 237 273
+cnot 262 273
+T 273
+cnot 262 273
+cnot 237 273
+T 4
+cnot 120 144
+cnot 134 144
+T 144
+cnot 134 144
+cnot 120 144
+cnot 228 289
+T 289
+Z 289
+S 289
+cnot 228 289
+T 133
+Z 133
+cnot 15 79
+cnot 77 79
+T 79
+cnot 77 79
+cnot 15 79
+cnot 2 178
+T 178
+Z 178
+S 178
+cnot 2 178
+cnot 158 190
+T 190
+Z 190
+S 190
+cnot 158 190
+cnot 175 177
+T 177
+Z 177
+S 177
+cnot 175 177
+cnot 155 157
+T 157
+Z 157
+S 157
+cnot 155 157
+cnot 6 38
+T 38
+Z 38
+S 38
+cnot 6 38
+T 37
+Z 37
+cnot 327 329
+T 329
+Z 329
+S 329
+cnot 327 329
+cnot 181 227
+T 227
+Z 227
+S 227
+cnot 181 227
+cnot 1 239
+T 239
+Z 239
+S 239
+cnot 1 239
+cnot 261 275
+T 275
+Z 275
+S 275
+cnot 261 275
+cnot 13 107
+T 107
+cnot 13 107
+cnot 2 161
+cnot 12 161
+T 161
+Z 161
+S 161
+cnot 12 161
+cnot 2 161
+T 325
+Z 325
+cnot 10 330
+T 330
+Z 330
+S 330
+cnot 10 330
+cnot 57 71
+T 71
+Z 71
+S 71
+cnot 57 71
+cnot 5 47
+cnot 15 47
+T 47
+Z 47
+S 47
+cnot 15 47
+cnot 5 47
+cnot 15 81
+T 81
+Z 81
+S 81
+cnot 15 81
+cnot 0 268
+T 268
+Z 268
+S 268
+cnot 0 268
+T 229
+Z 229
+cnot 179 219
+cnot 213 219
+T 219
+cnot 213 219
+cnot 179 219
+cnot 12 152
+T 152
+cnot 12 152
+cnot 174 200
+cnot 191 200
+T 200
+cnot 191 200
+cnot 174 200
+cnot 179 235
+cnot 229 235
+T 235
+cnot 229 235
+cnot 179 235
+cnot 19 133
+T 133
+Z 133
+S 133
+cnot 19 133
+T 85
+cnot 120 148
+T 148
+Z 148
+S 148
+cnot 120 148
+cnot 179 229
+T 229
+Z 229
+S 229
+cnot 179 229
+cnot 249 312
+cnot 310 312
+T 312
+cnot 310 312
+cnot 249 312
+cnot 249 279
+T 279
+Z 279
+S 279
+cnot 249 279
+T 5
+Z 5
+S 5
+T 261
+S 261
+cnot 127 150
+cnot 142 150
+T 150
+cnot 142 150
+cnot 127 150
+cnot 3 115
+cnot 13 115
+T 115
+Z 115
+S 115
+cnot 13 115
+cnot 3 115
+cnot 222 254
+T 254
+Z 254
+S 254
+cnot 222 254
+cnot 187 189
+T 189
+Z 189
+S 189
+cnot 187 189
+T 245
+Z 245
+cnot 276 288
+T 288
+Z 288
+S 288
+cnot 276 288
+cnot 91 93
+T 93
+Z 93
+S 93
+cnot 91 93
+cnot 59 78
+cnot 74 78
+T 78
+cnot 74 78
+cnot 59 78
+cnot 5 51
+T 51
+Z 51
+S 51
+cnot 5 51
+cnot 35 37
+T 37
+Z 37
+S 37
+cnot 35 37
+cnot 11 221
+T 221
+cnot 11 221
+cnot 217 260
+cnot 258 260
+T 260
+cnot 258 260
+cnot 217 260
+T 165
+Z 165
+T 277
+S 277
+cnot 167 203
+cnot 201 203
+T 203
+cnot 201 203
+cnot 167 203
+cnot 31 33
+T 33
+Z 33
+S 33
+cnot 31 33
+cnot 174 206
+T 206
+Z 206
+S 206
+cnot 174 206
+cnot 162 184
+cnot 179 184
+T 184
+cnot 179 184
+cnot 162 184
+T 21
+S 21
+cnot 1 231
+cnot 11 231
+T 231
+Z 231
+S 231
+cnot 11 231
+cnot 1 231
+cnot 57 64
+cnot 62 64
+T 64
+cnot 62 64
+cnot 57 64
+cnot 222 254
+cnot 249 254
+T 254
+cnot 249 254
+cnot 222 254
+cnot 2 162
+T 162
+Z 162
+S 162
+cnot 2 162
+T 181
+Z 181
+S 181
+cnot 10 282
+T 282
+Z 282
+S 282
+cnot 10 282
+cnot 13 139
+T 139
+Z 139
+S 139
+cnot 13 139
+cnot 232 244
+T 244
+Z 244
+S 244
+cnot 232 244
+cnot 0 316
+T 316
+Z 316
+S 316
+cnot 0 316
+cnot 43 45
+T 45
+Z 45
+S 45
+cnot 43 45
+cnot 48 60
+T 60
+Z 60
+S 60
+cnot 48 60
+cnot 167 215
+cnot 205 215
+T 215
+cnot 205 215
+cnot 167 215
+cnot 12 197
+cnot 194 197
+T 197
+cnot 194 197
+cnot 12 197
+cnot 12 211
+cnot 208 211
+T 211
+cnot 208 211
+cnot 12 211
+cnot 171 173
+T 173
+Z 173
+S 173
+cnot 171 173
+cnot 13 128
+cnot 98 128
+T 128
+cnot 98 128
+cnot 13 128
+cnot 60 67
+T 67
+Z 67
+S 67
+cnot 60 67
+cnot 232 255
+T 255
+Z 255
+S 255
+cnot 232 255
+cnot 249 280
+cnot 271 280
+T 280
+cnot 271 280
+cnot 249 280
+cnot 203 214
+T 214
+Z 214
+S 214
+cnot 203 214
+cnot 281 284
+T 284
+Z 284
+S 284
+cnot 281 284
+cnot 2 25
+T 25
+Z 25
+S 25
+cnot 2 25
+cnot 0 322
+cnot 10 322
+T 322
+cnot 10 322
+cnot 0 322
+cnot 237 240
+T 240
+Z 240
+S 240
+cnot 237 240
+cnot 174 216
+cnot 214 216
+T 216
+cnot 214 216
+cnot 174 216
+cnot 11 326
+T 326
+Z 326
+S 326
+cnot 11 326
+cnot 15 58
+T 58
+cnot 15 58
+cnot 127 138
+T 138
+Z 138
+S 138
+cnot 127 138
+cnot 54 61
+T 61
+Z 61
+S 61
+cnot 54 61
+cnot 2 170
+cnot 12 170
+T 170
+Z 170
+S 170
+cnot 12 170
+cnot 2 170
+T 50
+Z 50
+cnot 3 126
+T 126
+Z 126
+S 126
+cnot 3 126
+cnot 179 206
+T 206
+Z 206
+S 206
+cnot 179 206
+T 226
+Z 226
+cnot 11 246
+T 246
+cnot 11 246
+cnot 0 306
+cnot 10 306
+T 306
+cnot 10 306
+cnot 0 306
+cnot 286 293
+T 293
+Z 293
+S 293
+cnot 286 293
+cnot 305 308
+T 308
+Z 308
+S 308
+cnot 305 308
+T 2
+Z 2
+cnot 12 243
+T 243
+Z 243
+S 243
+cnot 12 243
+cnot 298 305
+T 305
+Z 305
+S 305
+cnot 298 305
+T 242
+Z 242
+cnot 192 199
+T 199
+Z 199
+S 199
+cnot 192 199
+cnot 16 55
+T 55
+Z 55
+S 55
+cnot 16 55
+cnot 256 263
+T 263
+Z 263
+S 263
+cnot 256 263
+cnot 181 212
+cnot 207 212
+T 212
+cnot 207 212
+cnot 181 212
+cnot 11 294
+T 294
+Z 294
+S 294
+cnot 11 294
+cnot 125 155
+cnot 146 155
+T 155
+cnot 146 155
+cnot 125 155
+cnot 308 315
+T 315
+Z 315
+S 315
+cnot 308 315
+cnot 264 271
+T 271
+Z 271
+S 271
+cnot 264 271
+cnot 204 259
+T 259
+Z 259
+S 259
+cnot 204 259
+cnot 12 195
+T 195
+Z 195
+S 195
+cnot 12 195
+cnot 136 143
+T 143
+Z 143
+S 143
+cnot 136 143
+cnot 73 92
+T 92
+Z 92
+S 92
+cnot 73 92
+cnot 11 308
+cnot 305 308
+T 308
+cnot 305 308
+cnot 11 308
+cnot 87 96
+cnot 89 96
+T 96
+cnot 89 96
+cnot 87 96
+cnot 80 102
+cnot 94 102
+T 102
+cnot 94 102
+cnot 80 102
+cnot 251 281
+cnot 270 281
+T 281
+cnot 270 281
+cnot 251 281
+cnot 13 160
+T 160
+Z 160
+S 160
+cnot 13 160
+cnot 11 315
+cnot 308 315
+T 315
+cnot 308 315
+cnot 11 315
+cnot 251 294
+T 294
+Z 294
+S 294
+cnot 251 294
+cnot 29 32
+T 32
+Z 32
+S 32
+cnot 29 32
+cnot 4 75
+T 75
+Z 75
+S 75
+cnot 4 75
+cnot 292 299
+T 299
+Z 299
+S 299
+cnot 292 299
+cnot 5 56
+T 56
+Z 56
+S 56
+cnot 5 56
+cnot 84 91
+T 91
+Z 91
+S 91
+cnot 84 91
+cnot 130 137
+T 137
+Z 137
+S 137
+cnot 130 137
+cnot 0 295
+T 295
+Z 295
+S 295
+cnot 0 295
+cnot 3 24
+cnot 13 24
+T 24
+Z 24
+S 24
+cnot 13 24
+cnot 3 24
+cnot 272 279
+T 279
+Z 279
+S 279
+cnot 272 279
+cnot 1 196
+T 196
+Z 196
+S 196
+cnot 1 196
+cnot 12 247
+cnot 245 247
+T 247
+cnot 245 247
+cnot 12 247
+cnot 127 164
+cnot 157 164
+T 164
+cnot 157 164
+cnot 127 164
+cnot 206 213
+T 213
+Z 213
+S 213
+cnot 206 213
+cnot 17 20
+T 20
+cnot 17 20
+cnot 183 194
+T 194
+Z 194
+S 194
+cnot 183 194
+cnot 11 284
+cnot 281 284
+T 284
+cnot 281 284
+cnot 11 284
+cnot 6 34
+cnot 16 34
+T 34
+Z 34
+S 34
+cnot 16 34
+cnot 6 34
+cnot 181 198
+cnot 193 198
+T 198
+cnot 193 198
+cnot 181 198
+cnot 2 169
+T 169
+Z 169
+S 169
+cnot 2 169
+cnot 244 290
+T 290
+Z 290
+S 290
+cnot 244 290
+cnot 15 51
+T 51
+cnot 15 51
+cnot 2 176
+T 176
+Z 176
+S 176
+cnot 2 176
+cnot 87 106
+cnot 100 106
+T 106
+cnot 100 106
+cnot 87 106
+T 19
+T 275
+Z 275
+cnot 11 239
+T 239
+cnot 11 239
+cnot 3 119
+T 119
+Z 119
+S 119
+cnot 3 119
+cnot 189 201
+T 201
+Z 201
+S 201
+cnot 189 201
+cnot 120 136
+cnot 131 136
+T 136
+cnot 131 136
+cnot 120 136
+cnot 13 173
+cnot 171 173
+T 173
+cnot 171 173
+cnot 13 173
+cnot 244 287
+cnot 278 287
+T 287
+cnot 278 287
+cnot 244 287
+T 179
+Z 179
+cnot 6 36
+T 36
+Z 36
+S 36
+cnot 6 36
+cnot 16 47
+cnot 42 47
+T 47
+cnot 42 47
+cnot 16 47
+cnot 249 310
+cnot 302 310
+T 310
+cnot 302 310
+cnot 249 310
+cnot 260 274
+T 274
+Z 274
+S 274
+cnot 260 274
+cnot 1 209
+cnot 11 209
+T 209
+Z 209
+S 209
+cnot 11 209
+cnot 1 209
+cnot 10 328
+T 328
+Z 328
+S 328
+cnot 10 328
+cnot 277 289
+T 289
+Z 289
+S 289
+cnot 277 289
+cnot 98 128
+T 128
+Z 128
+S 128
+cnot 98 128
+cnot 15 83
+T 83
+Z 83
+S 83
+cnot 15 83
+cnot 12 241
+cnot 236 241
+T 241
+cnot 236 241
+cnot 12 241
+cnot 10 296
+T 296
+Z 296
+S 296
+cnot 10 296
+T 291
+S 291
+cnot 4 82
+T 82
+Z 82
+S 82
+cnot 4 82
+T 35
+Z 35
+cnot 217 261
+T 261
+Z 261
+S 261
+cnot 217 261
+T 147
+Z 147
+cnot 15 67
+T 67
+Z 67
+S 67
+cnot 15 67
+cnot 13 169
+T 169
+Z 169
+S 169
+cnot 13 169
+cnot 1 221
+T 221
+Z 221
+S 221
+cnot 1 221
+T 323
+S 323
+cnot 19 39
+T 39
+Z 39
+S 39
+cnot 19 39
+cnot 125 137
+T 137
+Z 137
+S 137
+cnot 125 137
+cnot 116 130
+T 130
+Z 130
+S 130
+cnot 116 130
+cnot 125 157
+cnot 155 157
+T 157
+cnot 155 157
+cnot 125 157
+cnot 120 134
+T 134
+Z 134
+S 134
+cnot 120 134
+cnot 4 23
+cnot 14 23
+T 23
+Z 23
+S 23
+cnot 14 23
+cnot 4 23
+T 307
+S 307
+cnot 80 94
+T 94
+Z 94
+S 94
+cnot 80 94
+cnot 249 293
+T 293
+Z 293
+S 293
+cnot 249 293
+cnot 2 151
+cnot 12 151
+T 151
+Z 151
+S 151
+cnot 12 151
+cnot 2 151
+cnot 113 132
+cnot 124 132
+T 132
+cnot 124 132
+cnot 113 132
+cnot 11 326
+cnot 324 326
+T 326
+cnot 324 326
+cnot 11 326
+cnot 197 209
+T 209
+Z 209
+S 209
+cnot 197 209
+cnot 167 203
+T 203
+Z 203
+S 203
+cnot 167 203
+cnot 181 193
+T 193
+Z 193
+S 193
+cnot 181 193
+T 83
+Z 83
+T 259
+Z 259
+cnot 12 170
+T 170
+cnot 12 170
+cnot 237 288
+cnot 276 288
+T 288
+cnot 276 288
+cnot 237 288
+cnot 14 76
+T 76
+cnot 14 76
+T 3
+S 3
+cnot 13 177
+cnot 175 177
+T 177
+cnot 175 177
+cnot 13 177
+T 104
+Z 104
+cnot 237 278
+T 278
+Z 278
+S 278
+cnot 237 278
+cnot 14 67
+T 67
+cnot 14 67
+cnot 16 49
+cnot 45 49
+T 49
+cnot 45 49
+cnot 16 49
+cnot 16 42
+cnot 36 42
+T 42
+cnot 36 42
+cnot 16 42
+cnot 251 298
+cnot 293 298
+T 298
+cnot 293 298
+cnot 251 298
+cnot 59 66
+cnot 61 66
+T 66
+cnot 61 66
+cnot 59 66
+cnot 59 64
+T 64
+Z 64
+S 64
+cnot 59 64
+cnot 5 22
+cnot 15 22
+T 22
+Z 22
+S 22
+cnot 15 22
+cnot 5 22
+cnot 11 320
+T 320
+Z 320
+S 320
+cnot 11 320
+cnot 1 222
+cnot 11 222
+T 222
+Z 222
+S 222
+cnot 11 222
+cnot 1 222
+T 120
+cnot 17 34
+T 34
+Z 34
+S 34
+cnot 17 34
+cnot 251 285
+cnot 280 285
+T 285
+cnot 280 285
+cnot 251 285
+cnot 251 270
+cnot 265 270
+T 270
+cnot 265 270
+cnot 251 270
+cnot 54 59
+T 59
+Z 59
+S 59
+cnot 54 59
+cnot 237 262
+T 262
+Z 262
+S 262
+cnot 237 262
+T 40
+Z 40
+T 296
+S 296
+cnot 228 276
+cnot 274 276
+T 276
+cnot 274 276
+cnot 228 276
+cnot 219 224
+T 224
+Z 224
+S 224
+cnot 219 224
+cnot 299 304
+T 304
+Z 304
+S 304
+cnot 299 304
+cnot 181 238
+T 238
+Z 238
+S 238
+cnot 181 238
+T 328
+S 328
+cnot 251 320
+T 320
+Z 320
+S 320
+cnot 251 320
+cnot 12 231
+cnot 223 231
+T 231
+cnot 223 231
+cnot 12 231
+cnot 3 24
+T 24
+Z 24
+S 24
+cnot 3 24
+cnot 158 189
+cnot 187 189
+T 189
+cnot 187 189
+cnot 158 189
+cnot 12 245
+T 245
+Z 245
+S 245
+cnot 12 245
+cnot 251 314
+cnot 309 314
+T 314
+cnot 309 314
+cnot 251 314
+cnot 11 240
+T 240
+cnot 11 240
+cnot 166 171
+T 171
+Z 171
+S 171
+cnot 166 171
+cnot 38 43
+T 43
+Z 43
+S 43
+cnot 38 43
+cnot 179 216
+T 216
+Z 216
+S 216
+cnot 179 216
+cnot 5 54
+cnot 15 54
+T 54
+Z 54
+S 54
+cnot 15 54
+cnot 5 54
+cnot 19 104
+T 104
+Z 104
+S 104
+cnot 19 104
+cnot 249 265
+cnot 254 265
+T 265
+cnot 254 265
+cnot 249 265
+cnot 251 304
+T 304
+Z 304
+S 304
+cnot 251 304
+cnot 56 57
+T 57
+Z 57
+S 57
+cnot 56 57
+cnot 3 122
+cnot 13 122
+T 122
+Z 122
+S 122
+cnot 13 122
+cnot 3 122
+cnot 251 309
+cnot 304 309
+T 309
+cnot 304 309
+cnot 251 309
+cnot 116 125
+T 125
+Z 125
+S 125
+cnot 116 125
+cnot 10 295
+T 295
+Z 295
+S 295
+cnot 10 295
+cnot 14 115
+T 115
+Z 115
+S 115
+cnot 14 115
+cnot 249 299
+cnot 292 299
+T 299
+cnot 292 299
+cnot 249 299
+cnot 131 136
+T 136
+Z 136
+S 136
+cnot 131 136
+T 8
+cnot 13 163
+cnot 160 163
+T 163
+cnot 160 163
+cnot 13 163
+cnot 2 152
+cnot 12 152
+T 152
+Z 152
+S 152
+cnot 12 152
+cnot 2 152
+cnot 7 20
+T 20
+Z 20
+S 20
+cnot 7 20
+cnot 13 166
+T 166
+Z 166
+S 166
+cnot 13 166
+T 168
+Z 168
+T 24
+S 24
+cnot 1 210
+T 210
+Z 210
+S 210
+cnot 1 210
+cnot 285 294
+T 294
+Z 294
+S 294
+cnot 285 294
+cnot 127 172
+T 172
+Z 172
+S 172
+cnot 127 172
+cnot 125 137
+cnot 130 137
+T 137
+cnot 130 137
+cnot 125 137
+cnot 19 133
+cnot 104 133
+T 133
+cnot 104 133
+cnot 19 133
+cnot 11 322
+cnot 317 322
+T 322
+cnot 317 322
+cnot 11 322
+cnot 13 150
+T 150
+Z 150
+S 150
+cnot 13 150
+cnot 249 271
+cnot 264 271
+T 271
+cnot 264 271
+cnot 249 271
+cnot 174 226
+T 226
+Z 226
+S 226
+cnot 174 226
+cnot 244 279
+cnot 272 279
+T 279
+cnot 272 279
+cnot 244 279
+cnot 113 134
+cnot 132 134
+T 134
+cnot 132 134
+cnot 113 134
+cnot 251 305
+T 305
+Z 305
+S 305
+cnot 251 305
+T 57
+Z 57
+S 57
+T 313
+S 313
+cnot 11 252
+cnot 196 252
+T 252
+cnot 196 252
+cnot 11 252
+cnot 2 173
+cnot 12 173
+T 173
+Z 173
+S 173
+cnot 12 173
+cnot 2 173
+cnot 5 47
+T 47
+Z 47
+S 47
+cnot 5 47
+cnot 127 172
+cnot 168 172
+T 172
+cnot 168 172
+cnot 127 172
+cnot 240 256
+T 256
+Z 256
+S 256
+cnot 240 256
+cnot 11 305
+T 305
+Z 305
+S 305
+cnot 11 305
+cnot 225 227
+T 227
+Z 227
+S 227
+cnot 225 227
+T 249
+Z 249
+S 249
+cnot 15 75
+cnot 69 75
+T 75
+cnot 69 75
+cnot 15 75
+cnot 163 169
+T 169
+Z 169
+S 169
+cnot 163 169
+cnot 11 209
+T 209
+cnot 11 209
+cnot 201 203
+T 203
+Z 203
+S 203
+cnot 201 203
+cnot 4 76
+T 76
+Z 76
+S 76
+cnot 4 76
+cnot 120 136
+T 136
+Z 136
+S 136
+cnot 120 136
+cnot 121 123
+T 123
+Z 123
+S 123
+cnot 121 123
+cnot 212 220
+T 220
+Z 220
+S 220
+cnot 212 220
+cnot 5 51
+cnot 15 51
+T 51
+Z 51
+S 51
+cnot 15 51
+cnot 5 51
+cnot 19 73
+T 73
+Z 73
+S 73
+cnot 19 73
+cnot 13 151
+T 151
+Z 151
+S 151
+cnot 13 151
+T 25
+S 25
+cnot 181 207
+T 207
+Z 207
+S 207
+cnot 181 207
+cnot 241 243
+T 243
+Z 243
+S 243
+cnot 241 243
+cnot 1 195
+T 195
+Z 195
+S 195
+cnot 1 195
+cnot 46 50
+T 50
+Z 50
+S 50
+cnot 46 50
+cnot 85 111
+T 111
+Z 111
+S 111
+cnot 85 111
+cnot 196 252
+T 252
+Z 252
+S 252
+cnot 196 252
+T 105
+Z 105
+cnot 124 132
+T 132
+Z 132
+S 132
+cnot 124 132
+cnot 85 95
+T 95
+Z 95
+S 95
+cnot 85 95
+T 217
+Z 217
+S 217
+cnot 17 35
+T 35
+Z 35
+S 35
+cnot 17 35
+cnot 1 243
+T 243
+Z 243
+S 243
+cnot 1 243
+cnot 12 180
+T 180
+cnot 12 180
+cnot 237 263
+T 263
+Z 263
+S 263
+cnot 237 263
+cnot 14 82
+T 82
+cnot 14 82
+cnot 5 15
+T 15
+Z 15
+S 15
+cnot 5 15
+cnot 158 178
+T 178
+Z 178
+S 178
+cnot 158 178
+cnot 6 21
+cnot 16 21
+T 21
+Z 21
+S 21
+cnot 16 21
+cnot 6 21
+cnot 13 119
+T 119
+cnot 13 119
+T 121
+Z 121
+cnot 181 236
+cnot 234 236
+T 236
+cnot 234 236
+cnot 181 236
+cnot 11 329
+cnot 327 329
+T 329
+cnot 327 329
+cnot 11 329
+cnot 148 156
+T 156
+Z 156
+S 156
+cnot 148 156
+cnot 127 157
+T 157
+Z 157
+S 157
+cnot 127 157
+cnot 251 321
+T 321
+Z 321
+S 321
+cnot 251 321
+T 41
+Z 41
+S 41
+cnot 13 161
+cnot 153 161
+T 161
+cnot 153 161
+cnot 13 161
+cnot 205 215
+T 215
+Z 215
+S 215
+cnot 205 215
+cnot 141 151
+T 151
+Z 151
+S 151
+cnot 141 151
+cnot 49 51
+T 51
+Z 51
+S 51
+cnot 49 51
+T 73
+Z 73
+cnot 81 83
+T 83
+Z 83
+S 83
+cnot 81 83
+T 329
+Z 329
+cnot 10 326
+T 326
+Z 326
+S 326
+cnot 10 326
+cnot 238 242
+T 242
+Z 242
+S 242
+cnot 238 242
+cnot 138 141
+T 141
+Z 141
+S 141
+cnot 138 141
+T 86
+Z 86
+cnot 12 239
+cnot 233 239
+T 239
+cnot 233 239
+cnot 12 239
+cnot 266 269
+T 269
+Z 269
+S 269
+cnot 266 269
+cnot 7 20
+cnot 17 20
+T 20
+Z 20
+S 20
+cnot 17 20
+cnot 7 20
+cnot 5 56
+cnot 15 56
+T 56
+Z 56
+S 56
+cnot 15 56
+cnot 5 56
+T 6
+Z 6
+cnot 12 239
+T 239
+Z 239
+S 239
+cnot 12 239
+cnot 13 124
+T 124
+cnot 13 124
+cnot 3 116
+cnot 13 116
+T 116
+Z 116
+S 116
+cnot 13 116
+cnot 3 116
+cnot 244 311
+T 311
+Z 311
+S 311
+cnot 244 311
+cnot 1 232
+T 232
+Z 232
+S 232
+cnot 1 232
+cnot 127 150
+T 150
+Z 150
+S 150
+cnot 127 150
+cnot 1 240
+cnot 11 240
+T 240
+Z 240
+S 240
+cnot 11 240
+cnot 1 240
+cnot 4 23
+T 23
+Z 23
+S 23
+cnot 4 23
+T 22
+S 22
+cnot 11 250
+T 250
+cnot 11 250
+cnot 13 108
+T 108
+cnot 13 108
+cnot 270 281
+T 281
+Z 281
+S 281
+cnot 270 281
+cnot 3 98
+T 98
+Z 98
+S 98
+cnot 3 98
+cnot 314 317
+T 317
+Z 317
+S 317
+cnot 314 317
+cnot 15 69
+cnot 66 69
+T 69
+cnot 66 69
+cnot 15 69
+cnot 254 265
+T 265
+Z 265
+S 265
+cnot 254 265
+cnot 57 64
+T 64
+Z 64
+S 64
+cnot 57 64
+cnot 89 96
+T 96
+Z 96
+S 96
+cnot 89 96
+cnot 251 314
+T 314
+Z 314
+S 314
+cnot 251 314
+cnot 128 139
+T 139
+Z 139
+S 139
+cnot 128 139
+cnot 0 267
+T 267
+Z 267
+S 267
+cnot 0 267
+cnot 185 192
+T 192
+Z 192
+S 192
+cnot 185 192
+cnot 14 121
+T 121
+Z 121
+S 121
+cnot 14 121
+cnot 19 63
+cnot 52 63
+T 63
+cnot 52 63
+cnot 19 63
+cnot 16 55
+cnot 53 55
+T 55
+cnot 53 55
+cnot 16 55
+cnot 279 286
+T 286
+Z 286
+S 286
+cnot 279 286
+cnot 13 171
+cnot 166 171
+T 171
+cnot 166 171
+cnot 13 171
+cnot 12 221
+cnot 211 221
+T 221
+cnot 211 221
+cnot 12 221
+cnot 14 107
+cnot 99 107
+T 107
+cnot 99 107
+cnot 14 107
+T 102
+Z 102
+cnot 4 86
+cnot 14 86
+T 86
+Z 86
+S 86
+cnot 14 86
+cnot 4 86
+cnot 7 30
+T 30
+Z 30
+S 30
+cnot 7 30
+cnot 106 109
+T 109
+Z 109
+S 109
+cnot 106 109
+cnot 0 283
+T 283
+Z 283
+S 283
+cnot 0 283
+cnot 0 27
+T 27
+Z 27
+S 27
+cnot 0 27
+cnot 11 314
+T 314
+Z 314
+S 314
+cnot 11 314
+cnot 220 223
+T 223
+Z 223
+S 223
+cnot 220 223
+cnot 262 273
+T 273
+Z 273
+S 273
+cnot 262 273
+cnot 0 331
+T 331
+Z 331
+S 331
+cnot 0 331
+cnot 244 263
+T 263
+Z 263
+S 263
+cnot 244 263
+cnot 82 85
+T 85
+Z 85
+S 85
+cnot 82 85
+cnot 222 249
+T 249
+Z 249
+S 249
+cnot 222 249
+cnot 15 22
+T 22
+cnot 15 22
+cnot 127 166
+T 166
+Z 166
+S 166
+cnot 127 166
+cnot 8 19
+T 19
+Z 19
+S 19
+cnot 8 19
+cnot 108 127
+T 127
+Z 127
+S 127
+cnot 108 127
+cnot 194 197
+T 197
+Z 197
+S 197
+cnot 194 197
+cnot 11 266
+T 266
+Z 266
+S 266
+cnot 11 266
+cnot 66 69
+T 69
+Z 69
+S 69
+cnot 66 69
+cnot 244 279
+T 279
+Z 279
+S 279
+cnot 244 279
+cnot 11 26
+T 26
+cnot 11 26
+cnot 251 266
+T 266
+Z 266
+S 266
+cnot 251 266
+cnot 249 304
+T 304
+Z 304
+S 304
+cnot 249 304
+cnot 59 74
+T 74
+Z 74
+S 74
+cnot 59 74
+cnot 0 315
+T 315
+Z 315
+S 315
+cnot 0 315
+cnot 120 156
+cnot 148 156
+T 156
+cnot 148 156
+cnot 120 156
+cnot 103 110
+T 110
+Z 110
+S 110
+cnot 103 110
+cnot 11 282
+T 282
+Z 282
+S 282
+cnot 11 282
+cnot 174 206
+cnot 200 206
+T 206
+cnot 200 206
+cnot 174 206
+cnot 15 54
+T 54
+cnot 15 54
+cnot 1 248
+T 248
+Z 248
+S 248
+cnot 1 248
+cnot 246 257
+T 257
+Z 257
+S 257
+cnot 246 257
+cnot 227 235
+Z 235
+S 235
+cnot 227 235
+cnot 148 158
+Z 158
+S 158
+cnot 148 158
+Z 183
+S 183
+cnot 122 132
+Z 132
+S 132
+cnot 122 132
+Z 103
+S 103
+Z 119
+S 119
+cnot 218 228
+Z 228
+S 228
+cnot 218 228
+Z 295
+S 295
+Z 151
+S 151
+cnot 127 175
+Z 175
+S 175
+cnot 127 175
+cnot 178 188
+Z 188
+S 188
+cnot 178 188
+cnot 157 165
+Z 165
+S 165
+cnot 157 165
+Z 231
+S 231
+Z 87
+Z 263
+S 263
+Z 279
+S 279
+cnot 12 182
+Z 182
+S 182
+cnot 12 182
+cnot 146 156
+Z 156
+S 156
+cnot 146 156
+Z 199
+S 199
+cnot 229 237
+Z 237
+S 237
+cnot 229 237
+Z 300
+S 300
+cnot 101 106
+Z 106
+S 106
+cnot 101 106
+cnot 57 62
+Z 62
+S 62
+cnot 57 62
+cnot 99 108
+Z 108
+S 108
+cnot 99 108
+Z 76
+S 76
+cnot 244 313
+Z 313
+S 313
+cnot 244 313
+cnot 181 234
+Z 234
+S 234
+cnot 181 234
+cnot 77 82
+Z 82
+S 82
+cnot 77 82
+cnot 68 89
+Z 89
+S 89
+cnot 68 89
+Z 60
+S 60
+cnot 142 151
+Z 151
+S 151
+cnot 142 151
+Z 236
+S 236
+cnot 12 241
+Z 241
+S 241
+cnot 12 241
+cnot 49 54
+Z 54
+S 54
+cnot 49 54
+cnot 13 98
+cnot 13 98
+cnot 320 325
+Z 325
+S 325
+cnot 320 325
+S 12
+cnot 45 50
+Z 50
+S 50
+cnot 45 50
+cnot 11 196
+cnot 11 196
+cnot 73 94
+Z 94
+S 94
+cnot 73 94
+Z 252
+S 252
+cnot 11 308
+Z 308
+S 308
+cnot 11 308
+cnot 225 230
+Z 230
+S 230
+cnot 225 230
+cnot 249 286
+Z 286
+S 286
+cnot 249 286
+cnot 125 130
+Z 130
+S 130
+cnot 125 130
+Z 284
+S 284
+cnot 82 91
+Z 91
+S 91
+cnot 82 91
+cnot 201 206
+Z 206
+S 206
+cnot 201 206
+cnot 249 254
+Z 254
+S 254
+cnot 249 254
+cnot 164 169
+Z 169
+S 169
+cnot 164 169
+cnot 223 232
+Z 232
+S 232
+cnot 223 232
+cnot 117 122
+Z 122
+S 122
+cnot 117 122
+cnot 144 149
+Z 149
+S 149
+cnot 144 149
+cnot 302 311
+Z 311
+S 311
+cnot 302 311
+Z 108
+S 108
+cnot 241 246
+Z 246
+S 246
+cnot 241 246
+Z 220
+S 220
+Z 140
+S 140
+Z 124
+S 124
+cnot 199 208
+Z 208
+S 208
+cnot 199 208
+cnot 11 324
+Z 324
+S 324
+cnot 11 324
+cnot 85 90
+Z 90
+S 90
+cnot 85 90
+cnot 293 299
+Z 299
+S 299
+cnot 293 299
+cnot 271 281
+Z 281
+S 281
+cnot 271 281
+Z 253
+S 253
+Z 173
+S 173
+Z 29
+S 29
+Z 285
+S 285
+cnot 309 315
+Z 315
+S 315
+cnot 309 315
+cnot 130 138
+Z 138
+S 138
+cnot 130 138
+cnot 208 212
+Z 212
+S 212
+cnot 208 212
+cnot 273 279
+Z 279
+S 279
+cnot 273 279
+cnot 206 214
+Z 214
+S 214
+cnot 206 214
+cnot 160 164
+Z 164
+S 164
+cnot 160 164
+cnot 96 100
+Z 100
+S 100
+cnot 96 100
+cnot 32 36
+Z 36
+S 36
+cnot 32 36
+Z 189
+S 189
+cnot 288 292
+Z 292
+S 292
+cnot 288 292
+cnot 174 214
+Z 214
+S 214
+cnot 174 214
+Z 109
+S 109
+Z 221
+S 221
+cnot 255 265
+Z 265
+S 265
+cnot 255 265
+cnot 54 62
+Z 62
+S 62
+cnot 54 62
+cnot 257 263
+Z 263
+S 263
+cnot 257 263
+Z 141
+S 141
+cnot 193 199
+Z 199
+S 199
+cnot 193 199
+cnot 61 67
+Z 67
+S 67
+cnot 61 67
+cnot 317 323
+Z 323
+S 323
+cnot 317 323
+cnot 265 271
+Z 271
+S 271
+cnot 265 271
+cnot 300 304
+Z 304
+S 304
+cnot 300 304
+cnot 137 143
+Z 143
+S 143
+cnot 137 143
+Z 45
+S 45
+cnot 220 224
+Z 224
+S 224
+cnot 220 224
+Z 157
+S 157
+cnot 286 294
+Z 294
+S 294
+cnot 286 294
+Z 77
+S 77
+cnot 249 271
+Z 271
+S 271
+cnot 249 271
+Z 61
+S 61
+Z 317
+S 317
+cnot 298 306
+Z 306
+S 306
+cnot 298 306
+cnot 251 309
+Z 309
+S 309
+cnot 251 309
+cnot 324 328
+Z 328
+S 328
+cnot 324 328
+cnot 132 136
+Z 136
+S 136
+cnot 132 136
+cnot 263 273
+Z 273
+S 273
+cnot 263 273
+cnot 191 201
+Z 201
+S 201
+cnot 191 201
+cnot 149 155
+Z 155
+S 155
+cnot 149 155
+Z 93
+S 93
+cnot 13 163
+Z 163
+S 163
+cnot 13 163
+cnot 16 36
+cnot 16 36
+S 13
+Z 269
+S 269
+cnot 21 32
+Z 32
+S 32
+cnot 21 32
+Z 282
+S 282
+cnot 251 318
+Z 318
+S 318
+cnot 251 318
+cnot 98 129
+Z 129
+S 129
+cnot 98 129
+Z 186
+S 186
+cnot 158 205
+Z 205
+S 205
+cnot 158 205
+cnot 228 291
+Z 291
+S 291
+cnot 228 291
+Z 106
+S 106
+cnot 167 218
+Z 218
+S 218
+cnot 167 218
+cnot 116 131
+Z 131
+S 131
+cnot 116 131
+Z 138
+S 138
+Z 122
+S 122
+Z 298
+S 298
+cnot 167 186
+Z 186
+S 186
+cnot 167 186
+Z 42
+S 42
+Z 154
+S 154
+Z 314
+S 314
+cnot 251 270
+Z 270
+S 270
+cnot 251 270
+cnot 125 168
+Z 168
+S 168
+cnot 125 168
+Z 234
+S 234
+Z 90
+S 90
+Z 266
+S 266
+cnot 104 135
+Z 135
+S 135
+cnot 104 135
+cnot 181 224
+Z 224
+S 224
+cnot 181 224
+cnot 14 109
+Z 109
+S 109
+cnot 14 109
+cnot 260 275
+Z 275
+S 275
+cnot 260 275
+Z 170
+S 170
+cnot 141 152
+Z 152
+S 152
+cnot 141 152
+Z 43
+S 43
+cnot 112 118
+Z 118
+S 118
+cnot 112 118
+cnot 173 177
+Z 177
+S 177
+cnot 173 177
+Z 299
+S 299
+cnot 135 147
+Z 147
+S 147
+cnot 135 147
+cnot 90 96
+Z 96
+S 96
+cnot 90 96
+Z 155
+S 155
+Z 75
+S 75
+cnot 29 33
+Z 33
+S 33
+cnot 29 33
+cnot 236 242
+Z 242
+S 242
+cnot 236 242
+cnot 121 125
+Z 125
+S 125
+cnot 121 125
+Z 315
+S 315
+cnot 53 57
+Z 57
+S 57
+cnot 53 57
+cnot 168 174
+Z 174
+S 174
+cnot 168 174
+cnot 245 249
+Z 249
+S 249
+cnot 245 249
+Z 91
+S 91
+cnot 46 52
+Z 52
+S 52
+cnot 46 52
+cnot 14 68
+cnot 14 68
+cnot 280 286
+Z 286
+S 286
+cnot 280 286
+S 11
+cnot 74 80
+Z 80
+S 80
+cnot 74 80
+Z 267
+S 267
+cnot 237 273
+Z 273
+S 273
+cnot 237 273
+cnot 183 195
+Z 195
+S 195
+cnot 183 195
+cnot 203 215
+Z 215
+S 215
+cnot 203 215
+cnot 281 285
+Z 285
+S 285
+cnot 281 285
+cnot 304 310
+Z 310
+S 310
+cnot 304 310
+Z 171
+S 171
+cnot 72 78
+Z 78
+S 78
+cnot 72 78
+Z 203
+S 203
+cnot 114 120
+Z 120
+S 120
+cnot 114 120
+Z 187
+S 187
+cnot 251 327
+Z 327
+S 327
+cnot 251 327
+Z 107
+S 107
+cnot 186 192
+Z 192
+S 192
+cnot 186 192
+cnot 166 172
+Z 172
+S 172
+cnot 166 172
+cnot 81 85
+Z 85
+S 85
+cnot 81 85
+cnot 38 44
+Z 44
+S 44
+cnot 38 44
+cnot 305 309
+Z 309
+S 309
+cnot 305 309
+Z 219
+S 219
+cnot 238 244
+Z 244
+S 244
+cnot 238 244
+cnot 42 48
+Z 48
+S 48
+cnot 42 48
+cnot 108 130
+Z 130
+S 130
+cnot 108 130
+Z 139
+S 139
+Z 64
+S 64
+Z 320
+S 320
+Z 48
+S 48
+Z 304
+S 304
+Z 224
+S 224
+cnot 153 162
+Z 162
+S 162
+cnot 153 162
+cnot 180 181
+Z 181
+S 181
+cnot 180 181
+Z 256
+S 256
+Z 240
+S 240
+cnot 217 258
+Z 258
+S 258
+cnot 217 258
+Z 160
+S 160
+cnot 234 239
+Z 239
+S 239
+cnot 234 239
+cnot 80 105
+Z 105
+S 105
+cnot 80 105
+cnot 37 38
+Z 38
+S 38
+cnot 37 38
+cnot 325 326
+Z 326
+S 326
+cnot 325 326
+S 16
+cnot 92 93
+Z 93
+S 93
+cnot 92 93
+Z 272
+S 272
+cnot 165 166
+Z 166
+S 166
+cnot 165 166
+cnot 127 164
+Z 164
+S 164
+cnot 127 164
+cnot 188 189
+Z 189
+S 189
+cnot 188 189
+Z 192
+S 192
+cnot 301 302
+Z 302
+S 302
+cnot 301 302
+Z 176
+S 176
+Z 96
+S 96
+cnot 181 198
+Z 198
+S 198
+cnot 181 198
+Z 208
+S 208
+Z 128
+S 128
+cnot 172 173
+Z 173
+S 173
+cnot 172 173
+Z 112
+S 112
+cnot 44 45
+Z 45
+S 45
+cnot 44 45
+cnot 23 60
+Z 60
+S 60
+cnot 23 60
+Z 32
+S 32
+Z 288
+S 288
+cnot 28 29
+Z 29
+S 29
+cnot 28 29
+cnot 158 187
+Z 187
+S 187
+cnot 158 187
+Z 144
+S 144
+cnot 133 134
+Z 134
+S 134
+cnot 133 134
+cnot 156 157
+Z 157
+S 157
+cnot 156 157
+cnot 287 293
+Z 293
+S 293
+cnot 287 293
+cnot 66 70
+Z 70
+S 70
+cnot 66 70
+S 17
+Z 273
+S 273
+cnot 258 262
+Z 262
+S 262
+cnot 258 262
+cnot 95 101
+Z 101
+S 101
+cnot 95 101
+cnot 181 183
+Z 183
+S 183
+cnot 181 183
+cnot 272 280
+Z 280
+S 280
+cnot 272 280
+cnot 194 198
+Z 198
+S 198
+cnot 194 198
+Z 193
+S 193
+cnot 252 268
+Z 268
+S 268
+cnot 252 268
+Z 97
+S 97
+Z 209
+S 209
+cnot 246 258
+Z 258
+S 258
+cnot 246 258
+Z 129
+S 129
+cnot 266 270
+Z 270
+S 270
+cnot 266 270
+cnot 138 142
+Z 142
+S 142
+cnot 138 142
+cnot 129 139
+Z 139
+S 139
+cnot 129 139
+cnot 114 118
+Z 118
+S 118
+cnot 114 118
+cnot 232 256
+Z 256
+S 256
+cnot 232 256
+cnot 274 278
+Z 278
+S 278
+cnot 274 278
+cnot 207 213
+Z 213
+S 213
+cnot 207 213
+cnot 297 307
+Z 307
+S 307
+cnot 297 307
+cnot 12 140
+cnot 12 140
+cnot 270 282
+Z 282
+S 282
+cnot 270 282
+cnot 314 318
+Z 318
+S 318
+cnot 314 318
+cnot 254 266
+Z 266
+S 266
+cnot 254 266
+cnot 192 200
+Z 200
+S 200
+cnot 192 200
+Z 49
+S 49
+cnot 256 264
+Z 264
+S 264
+cnot 256 264
+Z 305
+S 305
+cnot 11 297
+Z 297
+S 297
+cnot 11 297
+Z 225
+S 225
+cnot 237 303
+Z 303
+S 303
+cnot 237 303
+cnot 120 144
+Z 144
+S 144
+cnot 120 144
+cnot 179 225
+Z 225
+S 225
+cnot 179 225
+cnot 15 69
+Z 69
+S 69
+cnot 15 69
+cnot 106 110
+Z 110
+S 110
+cnot 106 110
+Z 257
+S 257
+cnot 262 274
+Z 274
+S 274
+cnot 262 274
+Z 241
+S 241
+cnot 125 143
+Z 143
+S 143
+cnot 125 143
+Z 161
+S 161
+cnot 264 272
+Z 272
+S 272
+cnot 264 272
+cnot 221 223
+Z 223
+S 223
+cnot 221 223
+cnot 136 144
+Z 144
+S 144
+cnot 136 144
+Z 142
+S 142
+cnot 69 76
+Z 76
+S 76
+cnot 69 76
+cnot 163 170
+Z 170
+S 170
+cnot 163 170
+Z 302
+S 302
+cnot 244 287
+Z 287
+S 287
+cnot 244 287
+Z 62
+S 62
+Z 318
+S 318
+cnot 109 116
+Z 116
+S 116
+cnot 109 116
+cnot 213 220
+Z 220
+S 220
+cnot 213 220
+cnot 127 142
+Z 142
+S 142
+cnot 127 142
+cnot 290 301
+Z 301
+S 301
+cnot 290 301
+cnot 17 32
+Z 32
+S 32
+cnot 17 32
+cnot 87 118
+Z 118
+S 118
+cnot 87 118
+S 14
+Z 270
+S 270
+Z 254
+S 254
+Z 286
+S 286
+cnot 326 329
+Z 329
+S 329
+cnot 326 329
+Z 206
+S 206
+cnot 13 180
+Z 180
+S 180
+cnot 13 180
+cnot 244 255
+Z 255
+S 255
+cnot 244 255
+Z 110
+S 110
+Z 222
+S 222
+cnot 140 183
+Z 183
+S 183
+cnot 140 183
+cnot 306 308
+Z 308
+S 308
+cnot 306 308
+cnot 249 321
+Z 321
+S 321
+cnot 249 321
+Z 95
+S 95
+Z 271
+S 271
+S 15
+Z 255
+S 255
+cnot 322 324
+Z 324
+S 324
+cnot 322 324
+cnot 174 200
+Z 200
+S 200
+cnot 174 200
+cnot 159 167
+Z 167
+S 167
+cnot 159 167
+cnot 278 288
+Z 288
+S 288
+cnot 278 288
+cnot 94 104
+Z 104
+S 104
+cnot 94 104
+cnot 85 101
+Z 101
+S 101
+cnot 85 101
+cnot 282 284
+Z 284
+S 284
+cnot 282 284
+Z 287
+S 287
+cnot 13 141
+Z 141
+S 141
+cnot 13 141
+cnot 103 111
+Z 111
+S 111
+cnot 103 111
+Z 207
+S 207
+cnot 181 245
+Z 245
+S 245
+cnot 181 245
+Z 191
+S 191
+cnot 11 331
+Z 331
+S 331
+cnot 11 331
+cnot 65 73
+Z 73
+S 73
+cnot 65 73
+cnot 14 88
+Z 88
+S 88
+cnot 14 88
+Z 223
+S 223
+Z 143
+S 143
+cnot 184 194
+Z 194
+S 194
+cnot 184 194
+cnot 105 113
+Z 113
+S 113
+cnot 105 113
+Z 47
+S 47
+cnot 89 97
+Z 97
+S 97
+cnot 89 97
+cnot 16 58
+Z 58
+S 58
+cnot 16 58
+cnot 185 193
+Z 193
+S 193
+cnot 185 193
+Z 79
+S 79
+cnot 216 226
+Z 226
+S 226
+cnot 216 226
+cnot 88 98
+Z 98
+S 98
+cnot 88 98
+cnot 279 287
+Z 287
+S 287
+cnot 279 287
+Z 239
+S 239
+cnot 16 42
+Z 42
+S 42
+cnot 16 42
+cnot 63 64
+Z 64
+S 64
+cnot 63 64
+cnot 30 31
+Z 31
+S 31
+cnot 30 31
+cnot 235 236
+Z 236
+S 236
+cnot 235 236
+cnot 226 227
+Z 227
+S 227
+cnot 226 227
+cnot 319 320
+Z 320
+S 320
+cnot 319 320
+Z 164
+S 164
+cnot 86 87
+Z 87
+S 87
+cnot 86 87
+Z 276
+S 276
+cnot 222 255
+Z 255
+S 255
+cnot 222 255
+cnot 85 114
+Z 114
+S 114
+cnot 85 114
+cnot 111 112
+Z 112
+S 112
+cnot 111 112
+cnot 50 51
+Z 51
+S 51
+cnot 50 51
+cnot 276 289
+Z 289
+S 289
+cnot 276 289
+cnot 78 79
+Z 79
+S 79
+cnot 78 79
+cnot 55 56
+Z 56
+S 56
+cnot 55 56
+Z 196
+S 196
+cnot 311 312
+Z 312
+S 312
+cnot 311 312
+cnot 83 84
+Z 84
+S 84
+cnot 83 84
+cnot 27 252
+Z 252
+S 252
+cnot 27 252
+cnot 126 127
+Z 127
+S 127
+cnot 126 127
+cnot 197 210
+Z 210
+S 210
+cnot 197 210
+cnot 102 103
+Z 103
+S 103
+cnot 102 103
+Z 100
+S 100
+cnot 250 251
+Z 251
+S 251
+cnot 250 251
+Z 212
+S 212
+cnot 11 284
+Z 284
+S 284
+cnot 11 284
+cnot 249 310
+Z 310
+S 310
+cnot 249 310
+Z 132
+S 132
+Z 116
+S 116
+cnot 48 61
+Z 61
+S 61
+cnot 48 61
+cnot 15 48
+cnot 15 48
+Z 36
+S 36
+cnot 202 203
+Z 203
+S 203
+cnot 202 203
+Z 292
+S 292
+cnot 228 257
+Z 257
+S 257
+cnot 228 257
+cnot 118 119
+Z 119
+S 119
+cnot 118 119
+cnot 242 243
+Z 243
+S 243
+cnot 242 243
+cnot 123 124
+Z 124
+S 124
+cnot 123 124
+cnot 189 202
+Z 202
+S 202
+cnot 189 202
+cnot 52 65
+Z 65
+S 65
+cnot 52 65
+cnot 18 19
+cnot 18 19
+cnot 12 233
+Z 233
+S 233
+cnot 12 233
+cnot 275 276
+Z 276
+S 276
+cnot 275 276
+cnot 71 72
+Z 72
+S 72
+cnot 71 72
+cnot 247 248
+Z 248
+S 248
+cnot 247 248
+Z 68
+S 68
+Z 324
+S 324
+Z 308
+S 308
+cnot 58 59
+Z 59
+S 59
+cnot 58 59
+cnot 11 252
+Z 252
+S 252
+cnot 11 252
+Z 84
+S 84
+cnot 259 260
+Z 260
+S 260
+cnot 259 260
+Z 260
+S 260
+cnot 215 216
+Z 216
+S 216
+cnot 215 216
+cnot 87 121
+Z 121
+S 121
+cnot 87 121
+Z 117
+S 117
+cnot 47 49
+Z 49
+S 49
+cnot 47 49
+cnot 251 253
+Z 253
+S 253
+cnot 251 253
+Z 293
+S 293
+cnot 269 283
+Z 283
+S 283
+cnot 269 283
+Z 149
+S 149
+Z 69
+S 69
+cnot 179 213
+Z 213
+S 213
+cnot 179 213
+Z 309
+S 309
+cnot 170 186
+Z 186
+S 186
+cnot 170 186
+cnot 128 140
+Z 140
+S 140
+cnot 128 140
+Z 53
+S 53
+cnot 195 197
+Z 197
+S 197
+cnot 195 197
+cnot 67 69
+Z 69
+S 69
+cnot 67 69
+cnot 14 126
+Z 126
+S 126
+cnot 14 126
+cnot 115 117
+Z 117
+S 117
+cnot 115 117
+cnot 151 153
+Z 153
+S 153
+cnot 151 153
+cnot 87 89
+Z 89
+S 89
+cnot 87 89
+cnot 107 109
+Z 109
+S 109
+cnot 107 109
+cnot 11 317
+Z 317
+S 317
+cnot 11 317
+cnot 13 171
+Z 171
+S 171
+cnot 13 171
+cnot 315 317
+Z 317
+S 317
+cnot 315 317
+cnot 239 241
+Z 241
+S 241
+cnot 239 241
+cnot 253 267
+Z 267
+S 267
+cnot 253 267
+cnot 59 61
+Z 61
+S 61
+cnot 59 61
+cnot 284 296
+Z 296
+S 296
+cnot 284 296
+cnot 139 141
+Z 141
+S 141
+cnot 139 141
+cnot 267 269
+Z 269
+S 269
+cnot 267 269
+cnot 11 269
+Z 269
+S 269
+cnot 11 269
+cnot 75 77
+Z 77
+S 77
+cnot 75 77
+cnot 251 285
+Z 285
+S 285
+cnot 251 285
+Z 197
+S 197
+cnot 125 155
+Z 155
+S 155
+cnot 125 155
+cnot 167 201
+Z 201
+S 201
+cnot 167 201
+cnot 244 272
+Z 272
+S 272
+cnot 244 272
+Z 101
+S 101
+cnot 231 233
+Z 233
+S 233
+cnot 231 233
+cnot 295 297
+Z 297
+S 297
+cnot 295 297
+cnot 127 129
+Z 129
+S 129
+cnot 127 129
+Z 213
+S 213
+cnot 13 128
+Z 128
+S 128
+cnot 13 128
+cnot 59 70
+Z 70
+S 70
+cnot 59 70
+Z 34
+S 34
+Z 290
+S 290
+Z 146
+S 146
+cnot 154 161
+Z 161
+S 161
+cnot 154 161
+cnot 200 207
+Z 207
+S 207
+cnot 200 207
+cnot 87 114
+Z 114
+S 114
+cnot 87 114
+Z 66
+S 66
+Z 322
+S 322
+cnot 237 256
+Z 256
+S 256
+cnot 237 256
+Z 306
+S 306
+cnot 100 107
+Z 107
+S 107
+cnot 100 107
+cnot 127 154
+Z 154
+S 154
+cnot 127 154
+cnot 162 185
+Z 185
+S 185
+cnot 162 185
+Z 82
+S 82
+cnot 113 132
+Z 132
+S 132
+cnot 113 132
+Z 258
+S 258
+cnot 312 319
+Z 319
+S 319
+cnot 312 319
+cnot 56 63
+Z 63
+S 63
+cnot 56 63
+cnot 64 71
+Z 71
+S 71
+cnot 64 71
+cnot 174 229
+Z 229
+S 229
+cnot 174 229
+Z 162
+S 162
+cnot 113 148
+Z 148
+S 148
+cnot 113 148
+cnot 237 288
+Z 288
+S 288
+cnot 237 288
+cnot 14 117
+Z 117
+S 117
+cnot 14 117
+cnot 179 238
+Z 238
+S 238
+cnot 179 238
+S 18
+Z 274
+S 274
+cnot 120 159
+Z 159
+S 159
+cnot 120 159
+Z 194
+S 194
+Z 178
+S 178
+Z 98
+S 98
+cnot 12 211
+Z 211
+S 211
+cnot 12 211
+cnot 211 222
+Z 222
+S 222
+cnot 211 222
+cnot 36 43
+Z 43
+S 43
+cnot 36 43
+Z 210
+S 210
+cnot 147 190
+Z 190
+S 190
+cnot 147 190
+Z 130
+S 130
+cnot 224 231
+Z 231
+S 231
+cnot 224 231
+Z 114
+S 114
+Z 243
+S 243
+cnot 76 90
+Z 90
+S 90
+cnot 76 90
+cnot 43 47
+Z 47
+S 47
+cnot 43 47
+Z 163
+S 163
+cnot 175 179
+Z 179
+S 179
+cnot 175 179
+cnot 179 199
+Z 199
+S 199
+cnot 179 199
+cnot 79 83
+Z 83
+S 83
+cnot 79 83
+Z 195
+S 195
+cnot 119 123
+Z 123
+S 123
+cnot 119 123
+Z 99
+S 99
+cnot 41 53
+Z 53
+S 53
+cnot 41 53
+cnot 205 217
+Z 217
+S 217
+cnot 205 217
+Z 211
+S 211
+cnot 12 250
+Z 250
+S 250
+cnot 12 250
+Z 131
+S 131
+cnot 243 247
+Z 247
+S 247
+cnot 243 247
+Z 115
+S 115
+cnot 51 55
+Z 55
+S 55
+cnot 51 55
+cnot 182 196
+Z 196
+S 196
+cnot 182 196
+cnot 91 95
+Z 95
+S 95
+cnot 91 95
+Z 67
+S 67
+cnot 187 191
+Z 191
+S 191
+cnot 187 191
+Z 51
+S 51
+cnot 217 277
+Z 277
+S 277
+cnot 217 277
+cnot 35 39
+Z 39
+S 39
+cnot 35 39
+cnot 13 153
+Z 153
+S 153
+cnot 13 153
+cnot 31 35
+Z 35
+S 35
+cnot 31 35
+Z 227
+S 227
+cnot 190 204
+Z 204
+S 204
+cnot 190 204
+cnot 17 29
+cnot 17 29
+cnot 228 274
+Z 274
+S 274
+cnot 228 274
+cnot 145 146
+Z 146
+S 146
+cnot 145 146
+Z 216
+S 216
+cnot 87 100
+Z 100
+S 100
+cnot 87 100
+cnot 196 253
+Z 253
+S 253
+cnot 196 253
+cnot 124 133
+Z 133
+S 133
+cnot 124 133
+Z 136
+S 136
+cnot 15 60
+Z 60
+S 60
+cnot 15 60
+Z 152
+S 152
+cnot 93 102
+Z 102
+S 102
+cnot 93 102
+cnot 171 176
+Z 176
+S 176
+cnot 171 176
+Z 72
+S 72
+Z 56
+S 56
+Z 312
+S 312
+cnot 14 99
+Z 99
+S 99
+cnot 14 99
+cnot 177 178
+Z 178
+S 178
+cnot 177 178
+cnot 110 115
+Z 115
+S 115
+cnot 110 115
+Z 232
+S 232
+cnot 70 75
+Z 75
+S 75
+cnot 70 75
+cnot 57 74
+Z 74
+S 74
+cnot 57 74
+cnot 16 49
+Z 49
+S 49
+cnot 16 49
+Z 88
+S 88
+cnot 179 184
+Z 184
+S 184
+cnot 179 184
+Z 264
+S 264
+Z 248
+S 248
+cnot 204 261
+Z 261
+S 261
+cnot 204 261
+cnot 12 197
+Z 197
+S 197
+cnot 12 197
+cnot 214 219
+Z 219
+S 219
+cnot 214 219
+cnot 33 34
+Z 34
+S 34
+cnot 33 34
+cnot 240 257
+Z 257
+S 257
+cnot 240 257
+cnot 289 290
+Z 290
+S 290
+cnot 289 290
+Z 280
+S 280
+cnot 212 221
+Z 221
+S 221
+cnot 212 221
+Z 200
+S 200
+cnot 155 160
+Z 160
+S 160
+cnot 155 160
+cnot 329 330
+Z 330
+S 330
+cnot 329 330
+cnot 40 41
+Z 41
+S 41
+cnot 40 41
+Z 184
+S 184
+cnot 169 171
+Z 171
+S 171
+cnot 169 171
+cnot 41 43
+Z 43
+S 43
+cnot 41 43
+cnot 131 137
+Z 137
+S 137
+cnot 131 137
+Z 233
+S 233
+cnot 308 316
+Z 316
+S 316
+cnot 308 316
+Z 89
+S 89
+cnot 97 99
+Z 99
+S 99
+cnot 97 99
+cnot 150 154
+Z 154
+S 154
+cnot 150 154
+Z 265
+S 265
+cnot 15 77
+Z 77
+S 77
+cnot 15 77
+cnot 161 163
+Z 163
+S 163
+cnot 161 163
+cnot 285 295
+Z 295
+S 295
+cnot 285 295
+cnot 84 92
+Z 92
+S 92
+cnot 84 92
+cnot 292 300
+Z 300
+S 300
+cnot 292 300
+Z 169
+S 169
+cnot 26 182
+Z 182
+S 182
+cnot 26 182
+cnot 22 42
+Z 42
+S 42
+cnot 22 42
+cnot 249 299
+Z 299
+S 299
+cnot 249 299
+cnot 59 81
+Z 81
+S 81
+cnot 59 81
+Z 281
+S 281
+cnot 62 66
+Z 66
+S 66
+cnot 62 66
+cnot 230 234
+Z 234
+S 234
+cnot 230 234
+cnot 318 322
+Z 322
+S 322
+cnot 318 322
+Z 201
+S 201
+Z 185
+S 185
+cnot 87 118
+cnot 114 118
+S 118
+cnot 114 118
+cnot 87 118
+cnot 60 68
+Z 68
+S 68
+cnot 60 68
+cnot 210 254
+Z 254
+S 254
+cnot 210 254
+cnot 244 300
+Z 300
+S 300
+cnot 244 300
+Z 137
+S 137
+cnot 310 314
+Z 314
+S 314
+cnot 310 314
+cnot 24 88
+Z 88
+S 88
+cnot 24 88
+cnot 18 30
+Z 30
+S 30
+cnot 18 30
+cnot 299 305
+Z 305
+S 305
+cnot 299 305
+Z 297
+S 297
+cnot 20 28
+Z 28
+S 28
+cnot 20 28
+cnot 219 225
+Z 225
+S 225
+cnot 219 225
+Z 153
+S 153
+cnot 152 184
+Z 184
+S 184
+cnot 152 184
+cnot 294 298
+Z 298
+S 298
+cnot 294 298
+cnot 209 211
+Z 211
+S 211
+cnot 209 211
+cnot 198 209
+Z 209
+S 209
+cnot 198 209
+Z 262
+S 262
+Z 246
+S 246
+cnot 25 128
+Z 128
+S 128
+cnot 25 128
+cnot 233 240
+Z 240
+S 240
+cnot 233 240
+Z 166
+S 166
+Z 278
+S 278
+cnot 15 86
+Z 86
+S 86
+cnot 15 86
+Z 198
+S 198
+Z 182
+S 182
+cnot 251 298
+Z 298
+S 298
+cnot 251 298
+Z 214
+S 214
+Z 134
+S 134
+cnot 181 212
+Z 212
+S 212
+cnot 181 212
+cnot 143 150
+Z 150
+S 150
+cnot 143 150
+cnot 134 145
+Z 145
+S 145
+cnot 134 145
+cnot 248 259
+Z 259
+S 259
+cnot 248 259
+Z 118
+S 118
+cnot 12 223
+Z 223
+S 223
+cnot 12 223
+cnot 120 131
+Z 131
+S 131
+cnot 120 131
+Z 38
+S 38
+Z 294
+S 294
+cnot 80 91
+Z 91
+S 91
+cnot 80 91
+cnot 174 185
+Z 185
+S 185
+cnot 174 185
+Z 150
+S 150
+cnot 87 110
+Z 110
+S 110
+cnot 87 110
+Z 70
+S 70
+Z 326
+S 326
+Z 310
+S 310
+cnot 39 46
+Z 46
+S 46
+cnot 39 46
+Z 54
+S 54
+Z 230
+S 230
+cnot 176 187
+Z 187
+S 187
+cnot 176 187
+cnot 17 40
+Z 40
+S 40
+cnot 17 40
+cnot 34 37
+Z 37
+S 37
+cnot 34 37
+swap 28 20
+swap 29 20
+swap 30 18
+swap 31 18
+swap 32 21
+swap 33 20
+swap 34 20
+swap 35 18
+swap 36 21
+swap 37 20
+swap 38 20
+swap 39 18
+swap 40 17
+swap 41 17
+swap 42 22
+swap 43 21
+swap 44 20
+swap 45 20
+swap 46 18
+swap 47 21
+swap 48 22
+swap 49 21
+swap 50 20
+swap 51 20
+swap 52 18
+swap 53 17
+swap 54 21
+swap 55 20
+swap 56 20
+swap 57 17
+swap 58 16
+swap 59 16
+swap 60 23
+swap 61 22
+swap 62 21
+swap 63 20
+swap 64 20
+swap 65 18
+swap 66 21
+swap 67 22
+swap 68 23
+swap 69 22
+swap 70 21
+swap 71 20
+swap 72 20
+swap 73 18
+swap 74 17
+swap 75 21
+swap 76 22
+swap 77 21
+swap 78 20
+swap 79 20
+swap 80 17
+swap 81 16
+swap 82 21
+swap 83 20
+swap 84 20
+swap 85 16
+swap 86 15
+swap 87 15
+swap 88 24
+swap 89 23
+swap 90 22
+swap 91 21
+swap 92 20
+swap 93 20
+swap 94 18
+swap 95 21
+swap 96 22
+swap 97 23
+swap 98 24
+swap 99 23
+swap 100 22
+swap 101 21
+swap 102 20
+swap 103 20
+swap 104 18
+swap 105 17
+swap 106 21
+swap 107 22
+swap 108 23
+swap 109 22
+swap 110 21
+swap 111 20
+swap 112 20
+swap 113 17
+swap 114 16
+swap 115 21
+swap 116 22
+swap 117 21
+swap 118 20
+swap 119 20
+swap 120 16
+swap 121 15
+swap 122 21
+swap 123 20
+swap 124 20
+swap 125 15
+swap 126 14
+swap 127 14
+swap 128 25
+swap 129 24
+swap 130 23
+swap 131 22
+swap 132 21
+swap 133 20
+swap 134 20
+swap 135 18
+swap 136 21
+swap 137 22
+swap 138 23
+swap 139 24
+swap 140 25
+swap 141 24
+swap 142 23
+swap 143 22
+swap 144 21
+swap 145 20
+swap 146 20
+swap 147 18
+swap 148 17
+swap 149 21
+swap 150 22
+swap 151 23
+swap 152 24
+swap 153 23
+swap 154 22
+swap 155 21
+swap 156 20
+swap 157 20
+swap 158 17
+swap 159 16
+swap 160 21
+swap 161 22
+swap 162 23
+swap 163 22
+swap 164 21
+swap 165 20
+swap 166 20
+swap 167 16
+swap 168 15
+swap 169 21
+swap 170 22
+swap 171 21
+swap 172 20
+swap 173 20
+swap 174 15
+swap 175 14
+swap 176 21
+swap 177 20
+swap 178 20
+swap 179 14
+swap 180 13
+swap 181 13
+swap 182 26
+swap 183 25
+swap 184 24
+swap 185 23
+swap 186 22
+swap 187 21
+swap 188 20
+swap 189 20
+swap 190 18
+swap 191 21
+swap 192 22
+swap 193 23
+swap 194 24
+swap 195 25
+swap 196 26
+swap 197 25
+swap 198 24
+swap 199 23
+swap 200 22
+swap 201 21
+swap 202 20
+swap 203 20
+swap 204 18
+swap 205 17
+swap 206 21
+swap 207 22
+swap 208 23
+swap 209 24
+swap 210 25
+swap 211 24
+swap 212 23
+swap 213 22
+swap 214 21
+swap 215 20
+swap 216 20
+swap 217 17
+swap 218 16
+swap 219 21
+swap 220 22
+swap 221 23
+swap 222 24
+swap 223 23
+swap 224 22
+swap 225 21
+swap 226 20
+swap 227 20
+swap 228 16
+swap 229 15
+swap 230 21
+swap 231 22
+swap 232 23
+swap 233 22
+swap 234 21
+swap 235 20
+swap 236 20
+swap 237 15
+swap 238 14
+swap 239 21
+swap 240 22
+swap 241 21
+swap 242 20
+swap 243 20
+swap 244 14
+swap 245 13
+swap 246 21
+swap 247 20
+swap 248 20
+swap 249 13
+swap 250 12
+swap 251 12
+swap 252 27
+swap 253 26
+swap 254 25
+swap 255 24
+swap 256 23
+swap 257 22
+swap 258 21
+swap 259 20
+swap 260 20
+swap 261 18
+swap 262 21
+swap 263 22
+swap 264 23
+swap 265 24
+swap 266 25
+swap 267 26
+swap 268 27
+swap 269 26
+swap 270 25
+swap 271 24
+swap 272 23
+swap 273 22
+swap 274 21
+swap 275 20
+swap 276 20
+swap 277 17
+swap 278 21
+swap 279 22
+swap 280 23
+swap 281 24
+swap 282 25
+swap 283 26
+swap 284 25
+swap 285 24
+swap 286 23
+swap 287 22
+swap 288 21
+swap 289 20
+swap 290 20
+swap 291 16
+swap 292 21
+swap 293 22
+swap 294 23
+swap 295 24
+swap 296 25
+swap 297 24
+swap 298 23
+swap 299 22
+swap 300 21
+swap 301 20
+swap 302 20
+swap 303 15
+swap 304 21
+swap 305 22
+swap 306 23
+swap 307 24
+swap 308 23
+swap 309 22
+swap 310 21
+swap 311 20
+swap 312 20
+swap 313 14
+swap 314 21
+swap 315 22
+swap 316 23
+swap 317 22
+swap 318 21
+swap 319 20
+swap 320 20
+swap 321 13
+swap 322 21
+swap 323 22
+swap 324 21
+swap 325 20
+swap 326 20
+swap 327 12
+swap 328 21
+swap 329 20
+swap 330 20
+swap 331 11
+H 331
+H 330
+H 329
+H 328
+H 327
+H 326
+H 325
+H 324
+H 323
+H 322
+H 321
+H 320
+H 319
+H 318
+H 317
+H 316
+H 315
+H 314
+H 313
+H 312
+H 311
+H 310
+H 309
+H 308
+H 307
+H 306
+H 305
+H 304
+H 303
+H 302
+H 301
+H 300
+H 299
+H 298
+H 297
+H 296
+H 295
+H 294
+H 293
+H 292
+H 291
+H 290
+H 289
+H 288
+H 287
+H 286
+H 285
+H 284
+H 283
+H 282
+H 281
+H 280
+H 279
+H 278
+H 277
+H 276
+H 275
+H 274
+H 273
+H 272
+H 271
+H 270
+H 269
+H 268
+H 267
+H 266
+H 265
+H 264
+H 263
+H 262
+H 261
+H 260
+H 259
+H 258
+H 257
+H 256
+H 255
+H 254
+H 253
+H 252
+H 251
+H 250
+H 249
+H 248
+H 247
+H 246
+H 245
+H 244
+H 243
+H 242
+H 241
+H 240
+H 239
+H 238
+H 237
+H 236
+H 235
+H 234
+H 233
+H 232
+H 231
+H 230
+H 229
+H 228
+H 227
+H 226
+H 225
+H 224
+H 223
+H 222
+H 221
+H 220
+H 219
+H 218
+H 217
+H 216
+H 215
+H 214
+H 213
+H 212
+H 211
+H 210
+H 209
+H 208
+H 207
+H 206
+H 205
+H 204
+H 203
+H 202
+H 201
+H 200
+H 199
+H 198
+H 197
+H 196
+H 195
+H 194
+H 193
+H 192
+H 191
+H 190
+H 189
+H 188
+H 187
+H 186
+H 185
+H 184
+H 183
+H 182
+H 181
+H 180
+H 179
+H 178
+H 177
+H 176
+H 175
+H 174
+H 173
+H 172
+H 171
+H 170
+H 169
+H 168
+H 167
+H 166
+H 165
+H 164
+H 163
+H 162
+H 161
+H 160
+H 159
+H 158
+H 157
+H 156
+H 155
+H 154
+H 153
+H 152
+H 151
+H 150
+H 149
+H 148
+H 147
+H 146
+H 145
+H 144
+H 143
+H 142
+H 141
+H 140
+H 139
+H 138
+H 137
+H 136
+H 135
+H 134
+H 133
+H 132
+H 131
+H 130
+H 129
+H 128
+H 127
+H 126
+H 125
+H 124
+H 123
+H 122
+H 121
+H 120
+H 119
+H 118
+H 117
+H 116
+H 115
+H 114
+H 113
+H 112
+H 111
+H 110
+H 109
+H 108
+H 107
+H 106
+H 105
+H 104
+H 103
+H 102
+H 101
+H 100
+H 99
+H 98
+H 97
+H 96
+H 95
+H 94
+H 93
+H 92
+H 91
+H 90
+H 89
+H 88
+H 87
+H 86
+H 85
+H 84
+H 83
+H 82
+H 81
+H 80
+H 79
+H 78
+H 77
+H 76
+H 75
+H 74
+H 73
+H 72
+H 71
+H 70
+H 69
+H 68
+H 67
+H 66
+H 65
+H 64
+H 63
+H 62
+H 61
+H 60
+H 59
+H 58
+H 57
+H 56
+H 55
+H 54
+H 53
+H 52
+H 51
+H 50
+H 49
+H 48
+H 47
+H 46
+H 45
+H 44
+H 43
+H 42
+H 41
+H 40
+H 39
+H 38
+H 37
+H 36
+H 35
+H 34
+H 33
+H 32
+H 31
+H 30
+H 29
+H 28
+H 20
+H 12
+H 21
+H 13
+H 22
+H 14
+H 23
+H 15
+H 24
+H 16
+H 25
+H 17
+H 26
+H 18
+H 27
+H 19
+H 11
+cnot 0 10
+END

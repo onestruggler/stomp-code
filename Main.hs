@@ -5,7 +5,7 @@ import qualified Fast as Fast
 import Todd
 import qualified ToQC as QC
 
-import QCParser
+import QCParser2
 import TfcParser2
 import QuipperParser
 
@@ -229,13 +229,20 @@ run :: StdGen ->  [(String,String)] -> [String] -> IO ()
 run stdgen options (x:[]) = do
   let file_name = x
   str <- readFile $ x
+
   let ext = reverse $ take 3 (reverse file_name)
+
+--  putStrLn ext
+  
   (ivq,cir_in) <-  case ext of
---        ".qc" -> parseQC str
+        ".qc" -> parseQC str
         "tfc" -> {-# SCC "parseTfc-" #-} parseTfc str
         _ -> parseQuipper str
+  putStrLn (show ivq )
+
   starts <- getCPUTime
 
+    
   let homoids = case lookup "-identity" options of
         Nothing -> []
         Just ids ->  case ids of
@@ -281,6 +288,7 @@ run stdgen options (x:[]) = do
   path <- getExecutablePath
   let fn = takeWhileB (\x -> x /= '/') file_name
   let file_name1 = "Stomp/" ++ fn ++ "_i.qc"
+  putStrLn "Hello"
   writeFile file_name1 cin
   let file_name2 = "Stomp/" ++ fn ++ "_o.qc"
   writeFile file_name2 cio

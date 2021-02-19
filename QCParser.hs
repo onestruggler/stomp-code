@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
-
 module QCParser (parseQC, parseQC') where
 
 import Control.Monad

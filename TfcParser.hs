@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
-
 module TfcParser (parseTfc, parseTfc') where
 
 import Control.Monad

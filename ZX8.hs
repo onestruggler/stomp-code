@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverlappingInstances #-}
-{-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module ZX8 where
 

@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE OverlappingInstances #-}
 
 module ZX8 where
 
@@ -206,7 +205,7 @@ type Gads = MS.HashMap Wires Phase
 instance Hashable Key where
   hashWithSalt s k = hashWithSalt s (Set.toList k)
 
-instance Ord Key where
+instance {-# OVERLAPPING #-} Ord Key where
   compare x y
     | Set.size x == Set.size y = compare (Set.toList x) (Set.toList y)
     | otherwise = compare (Set.size x) (Set.size y)

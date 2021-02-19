@@ -62,7 +62,7 @@ combine :: Parser a -> Parser a -> Parser a
 combine p q = Parser (\s -> parse p s ++ parse q s)
 
 failure :: Parser a
-failure = Parser (\cs -> [])
+failure = Parser (const [])
 
 option :: Parser a -> Parser a -> Parser a
 option p q = Parser $ \s ->
@@ -82,7 +82,7 @@ satisfy p =
 -------------------------------------------------------------------------------
 
 oneOf :: [Char] -> Parser Char
-oneOf s = satisfy (flip elem s)
+oneOf s = satisfy (`elem` s)
 
 chainl :: Parser a -> Parser (a -> a -> a) -> a -> Parser a
 chainl p op a = (p `chainl1` op) <|> return a
@@ -161,8 +161,7 @@ eval ex = case ex of
 
 int :: Parser Expr
 int = do
-  n <- number
-  return (Lit n)
+  Lit <$> number
 
 expr :: Parser Expr
 expr = term `chainl1` addop
@@ -179,7 +178,7 @@ infixOp :: String -> (a -> a -> a) -> Parser (a -> a -> a)
 infixOp x f = reserved x >> return f
 
 addop :: Parser (Expr -> Expr -> Expr)
-addop = (infixOp "+" Add) <|> (infixOp "-" Sub)
+addop = infixOp "+" Add <|> infixOp "-" Sub
 
 mulop :: Parser (Expr -> Expr -> Expr)
 mulop = infixOp "*" Mul
@@ -445,8 +444,7 @@ pS' = do
   spaces
   string "S'"
   spaces
-  target <- number
-  return (S' target)
+  S' <$> number
 
 pZ = do
   char '['
@@ -507,25 +505,25 @@ pgates = do
 
 pcir_in :: Parser Cir
 pcir_in = do
-  many $ satisfy (\x -> x /= ':')
+  many $ satisfy (/= ':')
   char ':'
   spaces
   cir <- pcir
   spaces
-  many $ satisfy (\x -> x /= ';')
+  many $ satisfy (/= ';')
   return cir
 
 pcir_out :: Parser Cir
 pcir_out = do
-  many $ satisfy (\x -> x /= ':')
+  many $ satisfy (/= ':')
   char ':'
   spaces
-  many $ satisfy (\x -> x /= ':')
+  many $ satisfy (/= ':')
   char ':'
   spaces
   cir <- pcir
   spaces
-  many $ satisfy (\x -> x /= ';')
+  many $ satisfy (/= ';')
   return cir
 
 pcir :: Parser Cir
@@ -553,7 +551,7 @@ pcir = do
   gates' <- pgates
   return Cir {n = n', nx = x, ny = y, nz = z, m = m', gates = gates'}
 
-and_gate :: (Qubit, Qubit) -> Circ (Qubit)
+and_gate :: (Qubit, Qubit) -> Circ Qubit
 and_gate (a, b) = do
   c <- qinit False
   qnot_at c `controlled` [a, b]
@@ -561,21 +559,19 @@ and_gate (a, b) = do
 
 and_list :: [Qubit] -> Circ Qubit
 and_list [] = do
-  c <- qinit True
-  return c
+  qinit True
 and_list [q] = do
   return q
 and_list (q : t) = do
   d <- and_list t
-  e <- and_gate (d, q)
-  return e
+  and_gate (d, q)
 
 main' = print_simple PDF and_gate
 
 --main :: IO String
 main2 = do
   args <- getArgs
-  str <- readFile $ (head args)
+  str <- readFile (head args)
   let cir_in = runParser pcir_in str
   let nn_in = n cir_in
   let xn_in = nx cir_in
@@ -615,7 +611,7 @@ main'' = forever $ do
   print $ eval $ run a
 
 genCir :: Cir -> ([Qubit] -> Circ ())
-genCir cir = \qs -> do
+genCir cir qs = do
   let gl = gates cir
 
   return ()

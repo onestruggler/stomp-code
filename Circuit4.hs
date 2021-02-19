@@ -13,9 +13,9 @@ import TfcParser
 desugar = F.desugar_cir
 
 allCli :: [Gate] -> Bool
-allCli cir = all F.isCliffordg cir
+allCli = all F.isCliffordg
 
-type LR a = StateT (([Gate], [Gate])) Maybe a
+type LR a = StateT ([Gate], [Gate]) Maybe a
 
 moveh_step :: [Gate] -> LR [Gate]
 moveh_step [] = mzero
@@ -72,7 +72,7 @@ moveh_step (H i : CZ j k : t)
     t' <- moveh_step $ H i : t
     return $ CZ j k : t'
 moveh_step (H i : CCZ j k m : t)
-  | not $ i `elem` [j, k, m] =
+  | notElem i [j, k, m] =
     do
       t' <- moveh_step $ H i : t
       return $ CCZ j k m : t'
@@ -231,13 +231,13 @@ movecx_step (CX i i' : Z j : t)
 movecx_step (CX i i' : CZ j j' : t)
   | (i == j && i' == j') || (i == j' && i' == j) =
     return $ [CZ j j', Z i', CX i i'] ++ t
-  | (i == j && i' /= j') =
+  | i == j && i' /= j' =
     return $ [CZ j j', CZ i' j', CX j' i'] ++ t
-  | (i == j' && i' /= j) =
+  | i == j' && i' /= j =
     return $ [CZ j j', CZ i' j, CX j i'] ++ t
   | (i' == j && i /= j') || (i' == j' && i /= j) =
     return $ [CZ j j', CX i i'] ++ t
-  | (i /= j && i /= j' && i' /= j && i' /= j') =
+  | i /= j && i /= j' && i' /= j && i' /= j' =
     return $ [CZ j j', CX i i'] ++ t
 movecx_step (CX i i' : CCZ j j' j'' : t)
   | i `elem` [j, j', j''] = mzero -- return $ CX i i' : CCZ j j' j'' : t
@@ -246,7 +246,7 @@ movecx_step (CX i i' : X j : t)
   | i' == j = return $ [X j, X i, CX i i'] ++ t
   | otherwise = return $ [X j, CX i i'] ++ t
 movecx_step (CX i i' : CX j j' : t)
-  | i == j && i' == j' = return $ t
+  | i == j && i' == j' = return t
   | i == j' && i' == j = return $ [Swap j j', CX i i'] ++ t
   | i == j && i' /= j' = return $ [CX j j', CX i i'] ++ t
   | i == j' && i' /= j = return $ [CX j j', CX i i', CX j i'] ++ t
@@ -255,18 +255,16 @@ movecx_step (CX i i' : CX j j' : t)
     t' <- moveh_step $ H i' : CX j j' : t
     return $ [CX i i', H i'] ++ t'
   | (i /= j && i' /= j') && (i /= j' && i' /= j) = do
-    t' <- movecx_step $ [CX i i'] ++ t
-    return $ [CX j j'] ++ t'
+    t' <- movecx_step $ CX i i' : t
+    return $ CX j j' : t'
 movecx_step (CX i i' : Swap j j' : t) =
-  case ((length . sort . nub) [i, i', j, j']) of
+  case (length . sort . nub) [i, i', j, j'] of
     2 -> return $ [Swap j j', CX i' i] ++ t
-    3 -> case i == j of
-      True -> return $ [Swap j j', CX j' i'] ++ t
-      False -> case i == j' of
-        True -> return $ [Swap j j', CX j i'] ++ t
-        False -> case i' == j of
-          True -> return $ [Swap j j', CX i j'] ++ t
-          False -> return $ [Swap j j', CX i j] ++ t
+    3 -> if i == j then return $ [Swap j j', CX j' i'] ++ t else (case i == j' of
+                                                           True -> return $ [Swap j j', CX j i'] ++ t
+                                                           False -> case i' == j of
+                                                             True -> return $ [Swap j j', CX i j'] ++ t
+                                                             False -> return $ [Swap j j', CX i j] ++ t)
     4 -> return $ [Swap j j', CX i i'] ++ t
 
 movecx :: [Gate] -> LR [Gate]
@@ -316,7 +314,7 @@ movecxccx xs@(h : t) = do
   t' <- movecxccx t
   return $ h : t'
 
-type LR' a = State (([Gate], [Gate])) a
+type LR' a = State ([Gate], [Gate]) a
 
 movegf_i :: [Gate] -> LR' ([Gate], Int)
 movegf_i [a]
@@ -408,9 +406,9 @@ repeatedly f a = case f a of
   Nothing -> a
   Just b -> repeatedly f b
 
-mvH f cir = (return cir >>= f >>= (mvH f)) <|> (return cir)
+mvH f cir = (f cir >>= mvH f) <|> return cir
 
-mvH' f cir = (return cir >>= f >>= (mvH' f))
+mvH' f cir = return cir >>= f >>= (mvH' f)
 
 {-
 mvh_n' n cir = moveh cir >>= mvh_n' (n-1)
@@ -419,32 +417,32 @@ mvh_n n cir = (reverse $ fst $ snd  mlr, snd $ snd mlr)
     mlr = runState ( runMaybeT (mvh_n' n cir)) ([],[])
 -}
 
-mvh cir = (reverse $ fst lr, snd lr)
+mvh cir = Data.Bifunctor.first reverse lr
   where
-    lr = unJust $ execStateT ((moveh cir)) ([], [])
+    lr = unJust $ execStateT (moveh cir) ([], [])
 
-mvcx cir = (reverse $ fst lr, snd lr)
+mvcx cir = Data.Bifunctor.first reverse lr
   where
-    lr = unJust $ execStateT ((movecx cir)) ([], [])
+    lr = unJust $ execStateT (movecx cir) ([], [])
 
 mvcxccx' cir = (m, snd lr)
   where
     lr = snd mlr
     m = fst mlr
-    mlr = unJust $ runStateT ((movecxccx cir)) ([], [])
+    mlr = unJust $ runStateT (movecxccx cir) ([], [])
 
 isCX (CX _ _) = True
 isCX _ = False
 
 mvcxccx cir = (l, r)
   where
-    lr = reverse $ (repeatedly movecxccx_step) cir
+    lr = reverse $ repeatedly movecxccx_step cir
     r = reverse $ takeWhile isCX lr
     l = reverse $ dropWhile isCX lr
 
-mvhn n cir = (reverse $ fst lr, snd lr)
+mvhn n cir = Data.Bifunctor.first reverse lr
   where
-    lr = unJust $ execStateT ((movehn n cir)) ([], [])
+    lr = unJust $ execStateT (movehn n cir) ([], [])
 
 unJust :: Maybe a -> a
 unJust (Just a) = a

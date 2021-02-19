@@ -99,7 +99,7 @@ parseCir = do
   skipWithBreak
   body <- endBy parseGate skipWithBreak
   string "END"
-  return $ body
+  return body
 
 parseHeaderLine s = do
   string s
@@ -119,7 +119,7 @@ parseFile = do
   skipMany $ sep <|> delimiter
   skipSpace
   eof
-  return $ DotTfc qubits (inputs) (outputs) (concat cir)
+  return $ DotTfc qubits inputs outputs (concat cir)
 
 parseDotTfc :: String -> Either ParseError DotTfc
 parseDotTfc = parse parseFile ".qc parser"
@@ -132,8 +132,8 @@ d2cir (DotTfc q i o glist) = (length q, map g2g glist)
     qix = MS.fromList (zip q [0 .. length q - 1])
     ix p = unJust $ MS.lookup p qix
     g2g (Gate "t1" ps) = GS.X (ix $ head ps)
-    g2g (Gate "t2" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
-    g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))
+    g2g (Gate "t2" ps) = GS.CX (ix (ps !! 1)) (ix (head ps))
+    g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (head ps)) (ix (ps !! 1))
 
 parseTfc :: String -> IO (Int, [GS.Gate])
 parseTfc bs = case parseDotTfc bs of
@@ -143,4 +143,4 @@ parseTfc' :: String -> IO [GS.Gate]
 parseTfc' fn = do
   bs <- readFile fn
   (p1, p2) <- parseTfc bs
-  return $ p2
+  return p2

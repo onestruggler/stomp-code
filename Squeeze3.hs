@@ -35,12 +35,12 @@ gate'_of_gate :: Gate -> Gate'
 gate'_of_gate (H _) = H'
 gate'_of_gate (X _) = X'
 gate'_of_gate (CX _ _) = CX'
-gate'_of_gate (CCX _ _ _) = CCX'
+gate'_of_gate (CCX {}) = CCX'
 gate'_of_gate (T _) = T'
 gate'_of_gate (S _) = S'
 gate'_of_gate (Z _) = Z'
 gate'_of_gate (CZ _ _) = CZ'
-gate'_of_gate (CCZ _ _ _) = CCZ'
+gate'_of_gate (CCZ {}) = CCZ'
 gate'_of_gate (Swap _ _) = Swap'
 
 wires_of_gate :: Gate -> [Int]
@@ -88,14 +88,14 @@ similar_gate (T _) (T _) = True
 similar_gate (S _) (S _) = True
 similar_gate (Z _) (Z _) = True
 similar_gate (CZ _ _) (CX _ _) = True
-similar_gate (CCZ _ _ _) (CCZ _ _ _) = True
+similar_gate (CCZ {}) (CCZ {}) = True
 similar_gate (X _) (X _) = True
 similar_gate (CX _ _) (CX _ _) = True
-similar_gate (CCX _ _ _) (CCX _ _ _) = True
+similar_gate (CCX {}) (CCX {}) = True
 similar_gate (Swap _ _) (Swap _ _) = True
 similar_gate (Ga p ws) (Ga p' ws')
   | (p + p') `mod` 2 /= 1 && Set.size ws == Set.size ws' = True
-similar_gate (_) (_) = False
+similar_gate _ _ = False
 
 squeezec :: [Gate] -> [Column]
 squeezec xs = foldl' (flip assign_col) [] (reverse xs)
@@ -127,8 +127,8 @@ commute_gate (CCZ i' j' k') (CX i j) = i /= i' && i /= j' && i /= k'
 commute_gate (CX i j) (H k) = k /= i && k /= j
 commute_gate (H k) (CX i j) = k /= i && k /= j
 commute_gate (CX i j) (CX i' j') = i /= j' && j /= i'
-commute_gate (CZ _ _) (CCZ _ _ _) = True
-commute_gate (CCZ _ _ _) (CZ _ _) = True
+commute_gate (CZ _ _) (CCZ {}) = True
+commute_gate (CCZ {}) (CZ _ _) = True
 commute_gate (CZ i j) (CX i' j') = i' /= i && i' /= j
 commute_gate (CX i' j') (CZ i j) = i' /= i && i' /= j
 commute_gate (CZ i j) (CZ i' j') = sort [i, j] /= sort [i', j']
@@ -140,7 +140,7 @@ commute_gate (CCX i' j' k') (CX i j) =
   i /= j' && i /= k' && i' /= j
 commute_gate (Ga p ws) (Ga p' ws') = True
 commute_gate a b
-  | aib == [] = True
+  | null aib = True
   | all (`elem` ac) aib && all (`elem` bc) aib = True
   | at == bt && at == aib = True
   | at == bt && (all (`elem` ac) aib' && all (`elem` bc) aib') = True
@@ -174,7 +174,7 @@ overlap_gate (CCX i j k) (CCX i' j' k') = [i, j, k] `intersect` [i', j', k'] /= 
 overlap_gate (CX i j) (CCX i' j' k') = [i, j] `intersect` [i', j', k'] /= []
 overlap_gate (CCX i' j' k') (CX i j) = [i, j] `intersect` [i', j', k'] /= []
 overlap_gate a b
-  | aib == [] = False
+  | null aib = False
   | otherwise = True
   where
     aw = wires_of_gate a
@@ -206,31 +206,31 @@ col_of_gates :: [Gate] -> Column
 col_of_gates gs = insert_col_m gs empty_col
 
 squee_of_gatess :: [[Gate]] -> [Column]
-squee_of_gatess xss = map col_of_gates xss
+squee_of_gatess = map col_of_gates
 
 gates_of_col :: Column -> [Gate]
 gates_of_col (mig, mgg) = concat (Map.elems mgg)
 
-gates_of_cols cols = concat $ map gates_of_col cols
+gates_of_cols cols = concatMap gates_of_col cols
 
-gatess_of_cols cols = map gates_of_col cols
+gatess_of_cols = map gates_of_col
 
 insert_col_m xs col = foldl' (flip insert_col) col xs
 
 insert_col :: Gate -> Column -> Column
 insert_col g (mig, mgg) = (mig', mgg')
   where
-    mig' = foldl' (flip (\k -> Map.insert k g)) mig gw
+    mig' = foldl' (flip (`Map.insert` g)) mig gw
     mgg' = Map.insertWith (++) (gate'_of_gate g) [g] mgg
     gw = wires_of_gate g
 
 overlap_gc :: Gate -> Column -> Bool
-overlap_gc g (mig, mgg) = not $ all (\x -> Map.lookup x mig == Nothing) (wires_of_gate g)
+overlap_gc g (mig, mgg) = not $ all (\x -> isNothing (Map.lookup x mig)) (wires_of_gate g)
 
 commute_gc :: Gate -> Column -> Bool
 commute_gc g (mig, mgg) = b
   where
-    potential_blocker = map (\x -> Map.lookup x mig) (wires_of_gate g)
+    potential_blocker = map (`Map.lookup` mig) (wires_of_gate g)
     commute_m :: Gate -> Maybe Gate -> Bool
     commute_m a (Just b) = commute_gate a b
     commute_m a Nothing = True
@@ -238,15 +238,13 @@ commute_gc g (mig, mgg) = b
 
 assign_col :: Gate -> [Column] -> [Column]
 assign_col a [] = [insert_col a empty_col]
-assign_col g (h : [])
-  | not (overlap_gc g h) = (insert_col g h) : []
-  | otherwise = (singleton_col g) : h : []
+assign_col g [h]
+  | not (overlap_gc g h) = [(insert_col g h)]
+  | otherwise = [(singleton_col g), h]
 assign_col a (h : t)
-  | commute_gc a h = case gates_of_col (head t') == [a] of
-    True -> case overlap_gc a h of
-      True -> singleton_col a : h : t
-      False -> insert_col a h : t
-    _ -> h : t'
+  | commute_gc a h = if gates_of_col (head t') == [a] then (case overlap_gc a h of
+                                                      True -> singleton_col a : h : t
+                                                      False -> insert_col a h : t) else h : t'
   | otherwise = singleton_col a : h : t
   where
     t' = assign_col a t
@@ -254,13 +252,11 @@ assign_col a (h : t)
 -- | not efficient compared to also computing "commuting", kind of wierd.
 assign_col' :: Gate -> [Column] -> [Column]
 assign_col' a [] = [insert_col a empty_col]
-assign_col' g (h : [])
-  | not (overlap_gc g h) = (insert_col g h) : []
-  | otherwise = (singleton_col g) : h : []
+assign_col' g [h]
+  | not (overlap_gc g h) = [(insert_col g h)]
+  | otherwise = [(singleton_col g), h]
 assign_col' a (h1 : h2 : t)
-  | not (overlap_gc a h1) = case not (overlap_gc a h2) of
-    True -> h1 : t'
-    False -> insert_col a h1 : h2 : t
+  | not (overlap_gc a h1) = if not (overlap_gc a h2) then h1 : t' else insert_col a h1 : h2 : t
   | otherwise = singleton_col a : h1 : h2 : t
   where
     t' = assign_col a (h2 : t)
@@ -307,7 +303,7 @@ delete_col g (mig, mgg) = (mig', mgg')
   where
     mig' = foldl' (flip Map.delete) mig (wires_of_gate g)
     mgg' = Map.update (f g) (gate'_of_gate g) mgg
-    f g x = if x == [] || x == [g] then Nothing else Just (delete g x)
+    f g x = if null x || x == [g] then Nothing else Just (delete g x)
 
 delete_col_m xs col = foldl' (flip delete_col) col xs
 
@@ -344,15 +340,13 @@ instantiate1 (l, r) (Swap i j)
 instantiate1 _ g = g
 
 instantiate_sg :: Subst -> Gate -> Gate
-instantiate_sg [] g = g
-instantiate_sg (h : t) g = instantiate_sg t (instantiate1 h g)
+instantiate_sg t g = foldl (flip instantiate1) g t
 
 instantiate_sgs :: Subst -> [Gate] -> [Gate]
-instantiate_sgs [] c = c
-instantiate_sgs (h : t) c = instantiate_sgs t $ map (instantiate1 h) c
+instantiate_sgs t c = foldl (\ c h -> map (instantiate1 h) c) c t
 
 instantiate_col :: Subst -> Column -> Column
-instantiate_col (bs) (mig, mgg) = (mig', mgg')
+instantiate_col bs (mig, mgg) = (mig', mgg')
   where
     mig' = Map.map (instantiate_sg bs) mig
     mgg' = Map.map (map (instantiate_sg bs)) mgg
@@ -361,7 +355,7 @@ instantiate' :: Subst -> [[Gate]] -> [[Gate]]
 instantiate' [] xs = xs
 instantiate' (h : t) xs = instantiate' t xs'
   where
-    xs' = map (\ys -> map (instantiate1 h) ys) xs
+    xs' = map (map (instantiate1 h)) xs
 
 match_g_g's :: Gate -> [Gate] -> Maybe Subst
 match_g_g's g [] = Nothing
@@ -387,16 +381,12 @@ unify_gate (S i) (S i') = unify_gate (H i) (H i')
 unify_gate (Z i) (Z i') = unify_gate (H i) (H i')
 unify_gate (CZ i j) (CZ i' j')
   | i == i' && j == j' = Just []
-  | i /= i' && j == j' = case i < 0 of
-    True -> Just [(i, i')]
-    False -> case i' < 0 of
-      True -> Just [(i', i)]
-      False -> Nothing
-  | i == i' && j /= j' = case j < 0 of
-    True -> Just [(j, j')]
-    False -> case j' < 0 of
-      True -> Just [(j', j)]
-      False -> Nothing
+  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (case i' < 0 of
+                                                     True -> Just [(i', i)]
+                                                     False -> Nothing)
+  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (case j' < 0 of
+                                                     True -> Just [(j', j)]
+                                                     False -> Nothing)
   | i < 0 && j < 0 = Just [(i, i'), (j, j')]
   | i' < 0 && j' < 0 = Just [(i', i), (j', j)]
   | i < 0 && j' < 0 = Just [(i, i'), (j', j)]
@@ -493,7 +483,7 @@ runRules_rep' rules sc
   | otherwise = runRules_rep' rules sc''
   where
     sc' = runRules' rules sc
-    sc'' = squeeze $ concat $ map gates_of_col sc'
+    sc'' = squeeze $ concatMap gates_of_col sc'
 
 -- | runRules repeatedly
 runRules_rep's :: Rules' -> SqueezedC -> SqueezedC
@@ -518,9 +508,7 @@ runRule :: Rule -> [Column] -> [Column]
 runRule rule [] = []
 runRule rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
   Nothing -> squeeze' (gates_of_col h) $ runRule rule t
-  Just b -> case null lr' || match lr' (drop len xss) == Nothing of
-    True -> runRule rule $ rewrite rule' xss
-    False -> squeeze' [ha] $ runRule rule xss'
+  Just b -> if null lr' || match lr' (drop len xss) == Nothing then runRule rule $ rewrite rule' xss else squeeze' [ha] $ runRule rule xss'
     where
       ha = head $ head $ fst $ fst rule'
       h' = delete_col ha h
@@ -533,9 +521,7 @@ runRule' :: Rule' -> [Column] -> [Column]
 runRule' rule [] = []
 runRule' rule@(Rule l lg r sep) xss@(h : t) = case match l xss of
   Nothing -> h : runRule' rule t
-  Just b -> case null lg' || match lg' (drop len xss) == Nothing of
-    True -> runRule' rule $ rewrite' rule' xss
-    False -> singleton_col ha : runRule' rule xss'
+  Just b -> if null lg' || match lg' (drop len xss) == Nothing then runRule' rule $ rewrite' rule' xss else singleton_col ha : runRule' rule xss'
     where
       ha = head $ head l'
       h' = delete_col ha h
@@ -547,9 +533,7 @@ runRule's :: Rule' -> [Column] -> [Column]
 runRule's rule [] = []
 runRule's rule@(Rule l lg r sep) xss@(h : t) = case match l xss of
   Nothing -> squeeze_SM' (gates_of_col h) $ runRule's rule t
-  Just b -> case null lg' || match lg' (drop len xss) == Nothing of
-    True -> runRule's rule $ rewrite's rule' xss
-    False -> squeeze_SM' [ha] $ runRule's rule xss'
+  Just b -> if null lg' || match lg' (drop len xss) == Nothing then runRule's rule $ rewrite's rule' xss else squeeze_SM' [ha] $ runRule's rule xss'
     where
       ha = head $ head l'
       h' = delete_col ha h
@@ -560,9 +544,9 @@ runRule's rule@(Rule l lg r sep) xss@(h : t) = case match l xss of
 rewrite :: Rule -> [Column] -> [Column]
 rewrite (l@(ll, lr), r@(rl, rr)) xss = xss'
   where
-    xssl = zipWith (\x y -> delete_col_m x y) ll xss
-    xssr = zipWith (\x y -> insert_col_m x y) rr' (xssl ++ repeat (empty_col))
-    xss' = squeeze' ((concat (rl' ++ map gates_of_col xssr))) (drop (length xssl) xss)
+    xssl = zipWith delete_col_m ll xss
+    xssr = zipWith insert_col_m rr' (xssl ++ repeat empty_col)
+    xss' = squeeze' (concat (rl' ++ map gates_of_col xssr)) (drop (length xssl) xss)
     lenl = length xssl
     lenrr = length rr
     rr' = take (max lenl lenrr) $ rr ++ repeat []
@@ -571,22 +555,22 @@ rewrite (l@(ll, lr), r@(rl, rr)) xss = xss'
 rewrite' :: Rule' -> [Column] -> [Column]
 rewrite' rule@(Rule l lg r b4r) xss = xss'
   where
-    rm_lhs = zipWith (\x y -> delete_col_m x y) l xss
+    rm_lhs = zipWith delete_col_m l xss
     len_lhs = length rm_lhs
     rhs = squee_of_gatess r
     col_b4_rhs = take b4r rm_lhs
     col_af_rhs = drop b4r rm_lhs
-    xss' = col_b4_rhs ++ rhs ++ col_af_rhs ++ (drop len_lhs) xss
+    xss' = col_b4_rhs ++ rhs ++ col_af_rhs ++ drop len_lhs xss
 
 rewrite's :: Rule' -> [Column] -> [Column]
 rewrite's rule@(Rule l lg r b4r) xss = xss'
   where
-    rm_lhs = zipWith (\x y -> delete_col_m x y) l xss
+    rm_lhs = zipWith delete_col_m l xss
     len_lhs = length rm_lhs
     rhs = squee_of_gatess r
     col_b4_rhs = map gates_of_col $ take b4r rm_lhs
     col_af_rhs = drop b4r rm_lhs
-    xss' = squeeze_SM' (concat (col_b4_rhs ++ r)) $ col_af_rhs ++ (drop len_lhs) xss
+    xss' = squeeze_SM' (concat (col_b4_rhs ++ r)) $ col_af_rhs ++ drop len_lhs xss
 
 hrules =
   [ (([[H (-1)], [H (-1)]], []), ([], [])),
@@ -672,7 +656,7 @@ cxccx_rules' =
 adjust_CZ_CCZ (CCZ i j k) = CCZ i' j' k'
   where
     xs = sort [i, j, k]
-    i' = xs !! 0
+    i' = head xs
     j' = xs !! 1
     k' = xs !! 2
 adjust_CZ_CCZ (CZ i j) = CZ (min i j) (max i j)
@@ -694,7 +678,7 @@ isCX (CX _ _) = True
 isCX _ = False
 
 isCCX :: Gate -> Bool
-isCCX (CCX _ _ _) = True
+isCCX (CCX {}) = True
 isCCX _ = False
 
 halve_cxccx :: [Gate] -> ([Gate], [Gate])
@@ -713,7 +697,7 @@ mvcxccx xs = (m, r)
   where
     cols = runRules's cxccx_rules' $ squeeze_SM xs
     cols' = reverse $ gatess_of_cols cols
-    cols'_cx = map (\xs -> partition isCX xs) cols'
+    cols'_cx = map (partition isCX) cols'
     cols'_cx' = takeWhile (\(a, b) -> (not . null) a) cols'_cx
     cxs = reverse $ map fst cols'_cx'
     cols_wo_cx = map snd cols'_cx'
@@ -732,10 +716,8 @@ mv_cxccx_rep (m, r) = (m', r')
     xss' = runRules_rep' cxccx_rules' xss
     rc = gates_of_col $ last xss'
     (rcx, rm) = partition isCX rc
-    (m', r') = case rcx == [] of
-      True -> (m, r)
-      False -> mv_cxccx_rep (m'', r'')
-    m'' = concat (map gates_of_col $ take (length xss' -1) xss') ++ rm
+    (m', r') = if rcx == [] then (m, r) else mv_cxccx_rep (m'', r'')
+    m'' = concatMap gates_of_col (take (length xss' -1) xss') ++ rm
     r'' = rcx ++ r
 
 {-

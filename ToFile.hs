@@ -38,7 +38,7 @@ gate2string (Toffoli i j k) = "tof " ++ show k ++ " " ++ show j ++ " " ++ show i
 gate2string (CCX i j k) = "tof " ++ show k ++ " " ++ show j ++ " " ++ show i ++ "\n"
 
 cir2string :: Int -> Int -> [Gate] -> String
-cir2string vq fq gl = qc_header ([0 .. fq -1]) ++ qc_iheader (vq) gl ++ "BEGIN\n" ++ (concat $ map gate2string gl) ++ "END"
+cir2string vq fq gl = qc_header [0 .. fq -1] ++ qc_iheader vq gl ++ "BEGIN\n" ++ concat (map gate2string gl) ++ "END"
 
 cir2qc' :: Int -> Int -> [Gate] -> IO ()
 cir2qc' vq fq xs = putStrLn (cir2string vq fq xs)

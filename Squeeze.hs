@@ -71,14 +71,14 @@ similar_gate (T _) (T _) = True
 similar_gate (S _) (S _) = True
 similar_gate (Z _) (Z _) = True
 similar_gate (CZ _ _) (CX _ _) = True
-similar_gate (CCZ _ _ _) (CCZ _ _ _) = True
+similar_gate (CCZ {}) (CCZ {}) = True
 similar_gate (X _) (X _) = True
 similar_gate (CX _ _) (CX _ _) = True
-similar_gate (CCX _ _ _) (CCX _ _ _) = True
+similar_gate (CCX {}) (CCX {}) = True
 similar_gate (Swap _ _) (Swap _ _) = True
 similar_gate (Ga p ws) (Ga p' ws')
   | (p + p') `mod` 2 /= 1 && Set.size ws == Set.size ws' = True
-similar_gate (_) (_) = False
+similar_gate _ _ = False
 
 squeeze :: [Gate] -> [[Gate]]
 squeeze xs = foldl' (flip assign_column') [] (reverse xs)
@@ -86,7 +86,7 @@ squeeze xs = foldl' (flip assign_column') [] (reverse xs)
 squeeze' :: [Gate] -> [[Gate]] -> [[Gate]]
 squeeze' xs xss = foldl' (flip assign_column') xss (reverse xs)
 
-type LD a = State ([[Gate]]) a
+type LD a = State [[Gate]] a
 
 commute_gate :: Gate -> Gate -> Bool
 commute_gate a b
@@ -100,8 +100,8 @@ commute_gate (CCZ i' j' k') (CX i j) = i /= i' && i /= j' && i /= k'
 commute_gate (CX i j) (H k) = k /= i && k /= j
 commute_gate (H k) (CX i j) = k /= i && k /= j
 commute_gate (CX i j) (CX i' j') = i /= j' && j /= i'
-commute_gate (CZ _ _) (CCZ _ _ _) = True
-commute_gate (CCZ _ _ _) (CZ _ _) = True
+commute_gate (CZ _ _) (CCZ {}) = True
+commute_gate (CCZ {}) (CZ _ _) = True
 commute_gate (CZ i j) (CX i' j') = i' /= i && i' /= j
 commute_gate (CX i' j') (CZ i j) = i' /= i && i' /= j
 commute_gate (CZ i j) (CZ i' j') = sort [i, j] /= sort [i', j']
@@ -113,7 +113,7 @@ commute_gate (CCX i' j' k') (CX i j) =
   i /= j' && i /= k' && i' /= j
 commute_gate (Ga p ws) (Ga p' ws') = True
 commute_gate a b
-  | aib == [] = True
+  | null aib = True
   | all (`elem` ac) aib && all (`elem` bc) aib = True
   | at == bt && at == aib = True
   | at == bt && (all (`elem` ac) aib' && all (`elem` bc) aib') = True
@@ -147,7 +147,7 @@ overlap_gate (CCX i j k) (CCX i' j' k') = [i, j, k] `intersect` [i', j', k'] /= 
 overlap_gate (CX i j) (CCX i' j' k') = [i, j] `intersect` [i', j', k'] /= []
 overlap_gate (CCX i' j' k') (CX i j) = [i, j] `intersect` [i', j', k'] /= []
 overlap_gate a b
-  | aib == [] = False
+  | null aib = False
   | otherwise = True
   where
     aw = wires_of_gate a
@@ -158,14 +158,14 @@ commute_c_g :: [Gate] -> Gate -> Bool
 commute_c_g col g = all (commute_gate g) col
 
 overlap_c_g :: [Gate] -> Gate -> Bool
-overlap_c_g col g = (any (overlap_gate g) col)
+overlap_c_g col g = any (overlap_gate g) col
 
 assign_column :: Gate -> [[Gate]] -> [[Gate]]
 assign_column g [] = [[g]]
-assign_column g (h : [])
-  | all (commute_gate g) h && not (any (overlap_gate g) h) = (g : h) : []
-  | all (commute_gate g) h = ha : (g : hb) : []
-  | otherwise = [g] : h : []
+assign_column g [h]
+  | all (commute_gate g) h && not (any (overlap_gate g) h) = [(g : h)]
+  | all (commute_gate g) h = [ha, (g : hb)]
+  | otherwise = [[g], h]
   where
     ol = filter (\x -> wiresOfGate x `intersect` wiresOfGate g /= []) h
     ha = ol
@@ -191,15 +191,13 @@ assign_column g (h1 : h2 : t)
 
 assign_column' :: Gate -> [[Gate]] -> [[Gate]]
 assign_column' g [] = [[g]]
-assign_column' g (h : [])
-  | not (overlap_c_g h g) = (g : h) : []
-  | otherwise = [g] : h : []
+assign_column' g [h]
+  | not (overlap_c_g h g) = [(g : h)]
+  | otherwise = [[g], h]
 assign_column' g (h : t)
-  | commute_c_g h g = case head t' == [g] of
-    True -> case overlap_c_g h g of
-      True -> [g] : h : t
-      False -> (g : h) : t
-    _ -> h : t'
+  | commute_c_g h g = if head t' == [g] then (case overlap_c_g h g of
+                                        True -> [g] : h : t
+                                        False -> (g : h) : t) else h : t'
   | otherwise = [g] : h : t
   where
     t' = assign_column' g t
@@ -238,7 +236,7 @@ match (h : t) sc@(h' : t') = case match_column h h' of
     Nothing -> match (h : t) sc'
     Just bt -> return $ bh ++ bt
     where
-      h'' = h' \\ (instantiate_column bh h)
+      h'' = h' \\ instantiate_column bh h
       sc' = h'' : t'
 
 instantiate1 :: Subst1 -> Gate -> Gate
@@ -276,14 +274,14 @@ instantiate1 _ g = g
 type Column = [Gate]
 
 instantiate_column :: Subst -> Column -> Column
-instantiate_column [] c = c
-instantiate_column (h : t) c = instantiate_column t $ map (instantiate1 h) c
+instantiate_column t c
+  = foldl (\ c h -> map (instantiate1 h) c) c t
 
 instantiate :: Subst -> [[Gate]] -> [[Gate]]
 instantiate [] xs = xs
 instantiate (h : t) xs = instantiate t xs'
   where
-    xs' = map (\ys -> map (instantiate1 h) ys) xs
+    xs' = map (map (instantiate1 h)) xs
 
 match_column :: [Gate] -> [Gate] -> Maybe Subst
 match_column [] _ = Just []
@@ -305,16 +303,12 @@ unify_gate (S i) (S i') = unify_gate (H i) (H i')
 unify_gate (Z i) (Z i') = unify_gate (H i) (H i')
 unify_gate (CZ i j) (CZ i' j')
   | i == i' && j == j' = Just []
-  | i /= i' && j == j' = case i < 0 of
-    True -> Just [(i, i')]
-    False -> case i' < 0 of
-      True -> Just [(i', i)]
-      False -> Nothing
-  | i == i' && j /= j' = case j < 0 of
-    True -> Just [(j, j')]
-    False -> case j' < 0 of
-      True -> Just [(j', j)]
-      False -> Nothing
+  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (case i' < 0 of
+                                                     True -> Just [(i', i)]
+                                                     False -> Nothing)
+  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (case j' < 0 of
+                                                     True -> Just [(j', j)]
+                                                     False -> Nothing)
   | i < 0 && j < 0 = Just [(i, i'), (j, j')]
   | i' < 0 && j' < 0 = Just [(i', i), (j', j)]
   | i < 0 && j' < 0 = Just [(i, i'), (j', j)]
@@ -392,8 +386,8 @@ runRules_rep rules sc
 
 -- | like runRule, this also makes Squeezed Circuit loosely squeezed.
 runRules :: Rules -> SqueezedC -> SqueezedC
-runRules [] xss = xss
-runRules (h : t) xss = runRules t (squeeze $ concat $ runRule h xss)
+runRules t xss
+  = foldl (\ xss h -> squeeze $ concat $ runRule h xss) xss t
 
 runRules' :: Rules' -> SqueezedC -> SqueezedC
 runRules' rules xss = foldl' (flip runRule') xss rules
@@ -418,10 +412,8 @@ runRule rule@(l, r) xss@(h : t) = case match l xss of
 runRule' :: Rule' -> [[Gate]] -> [[Gate]]
 runRule' rule [] = []
 runRule' rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
-  Nothing -> squeeze' (h) $ runRule' rule t
-  Just b -> case null lr' || match lr' (drop len xss) == Nothing of
-    True -> runRule' rule $ rewrite' rule' xss
-    False -> squeeze' ha $ runRule' rule xss'
+  Nothing -> squeeze' h $ runRule' rule t
+  Just b -> if null lr' || match lr' (drop len xss) == Nothing then runRule' rule $ rewrite' rule' xss else squeeze' ha $ runRule' rule xss'
     where
       ha = [head $ head $ fst $ fst rule']
       h' = h \\ ha
@@ -433,16 +425,16 @@ runRule' rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
 rewrite :: Rule -> [[Gate]] -> [[Gate]]
 rewrite (l, r) xss = xss'
   where
-    xssl = zipWith (\x y -> y \\ x) l xss
-    xssr = zipWith (\x y -> x ++ y) r (xssl ++ repeat [])
+    xssl = zipWith (flip \\) l xss
+    xssr = zipWith ((++)) r (xssl ++ repeat [])
     xss' = xssr ++ drop (length xssl) xss
 
 rewrite' :: Rule' -> [[Gate]] -> [[Gate]]
 rewrite' (l@(ll, lr), r@(rl, rr)) xss = xss'
   where
-    xssl = zipWith (\x y -> y \\ x) ll xss
-    xssr = zipWith (\x y -> x ++ y) rr' (xssl ++ repeat [])
-    xss' = squeeze' ((concat (rl' ++ xssr))) (drop (length xssl) xss)
+    xssl = zipWith (flip \\) ll xss
+    xssr = zipWith ((++)) rr' (xssl ++ repeat [])
+    xss' = squeeze' (concat (rl' ++ xssr)) (drop (length xssl) xss)
     lenl = length xssl
     lenrr = length rr
     rr' = take (max lenl lenrr) $ rr ++ repeat []
@@ -473,7 +465,7 @@ hrules' =
 adjust_CZ_CCZ (CCZ i j k) = CCZ i' j' k'
   where
     xs = sort [i, j, k]
-    i' = xs !! 0
+    i' = head xs
     j' = xs !! 1
     k' = xs !! 2
 adjust_CZ_CCZ (CZ i j) = CZ (min i j) (max i j)
@@ -508,7 +500,7 @@ isCX (CX _ _) = True
 isCX _ = False
 
 isCCX :: Gate -> Bool
-isCCX (CCX _ _ _) = True
+isCCX (CCX {}) = True
 isCCX _ = False
 
 cxccx_rules =
@@ -524,9 +516,7 @@ halve_cxccx xs = (l, r)
   where
     cxs = filter isCX xs
     len' = 13 -- length cxs
-    len = case length cxs `mod` 2 == 0 of
-      True -> length cxs `div` 2
-      False -> length cxs `div` 2 + 1 + 1
+    len = if length cxs `mod` 2 == 0 then length cxs `div` 2 else length cxs `div` 2 + 1 + 1
     lcx = take len cxs
     rcx = drop len cxs
     lccx = takeWhile isCCX xs
@@ -546,9 +536,7 @@ mv_cxccx_rep (m, r) = (m', r')
     xss' = runRules_rep cxccx_rules xss
     rc = last xss'
     (rcx, rm) = partition isCX rc
-    (m', r') = case rcx == [] of
-      True -> (m, r)
-      False -> mv_cxccx_rep (m'', r'')
+    (m', r') = if rcx == [] then (m, r) else mv_cxccx_rep (m'', r'')
     m'' = concat (take (length xss' -1) xss') ++ rm
     r'' = rcx ++ r
 

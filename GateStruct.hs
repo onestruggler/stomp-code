@@ -107,7 +107,7 @@ reindexGate f (Init s i) = Init s (f i)
 reindexGate f (Term s i) = Term s (f i)
 
 reindexCir :: (Int -> Int) -> [Gate] -> [Gate]
-reindexCir f term = (map (reindexGate f) term)
+reindexCir f term = map (reindexGate f) term
 
 wiresOfGate :: Gate -> [Int]
 wiresOfGate (I i) = [i]
@@ -144,12 +144,12 @@ wiresOfCir term = foldl union [] (map wiresOfGate term)
 --gate_at_ind gate ind =
 
 gateAB :: Gate -> (Qubit -> Circ ())
-gateAB (I i) = \q -> do
+gateAB (I i) q = do
   let igate = named_gate_at "I"
   igate q
   return ()
 
-gl2cir :: [Qubit] -> Gate -> Circ ([Qubit])
+gl2cir :: [Qubit] -> Gate -> Circ [Qubit]
 gl2cir qs (I i) = return qs
 gl2cir qs (Init s i) = do
   named_gate (decodeQState s) (qs !! (i -1))
@@ -182,47 +182,47 @@ gl2cir qs (H i) = do
   gate_H (qs !! (i -1))
   return qs
 gl2cir qs (M i) = do
-  label qs (take (length qs) $ repeat "|")
+  label qs (replicate (length qs) "|")
   --  named_gate "M" (qs !! (i-1))
   return qs
-gl2cir (qs) (CS' i j) = do
+gl2cir qs (CS' i j) = do
   gate_S_inv (qs !! (i -1)) `controlled` (qs !! (j -1))
   return qs
-gl2cir (qs) (CS i j) = do
+gl2cir qs (CS i j) = do
   gate_S (qs !! (i -1)) `controlled` (qs !! (j -1))
   return qs
-gl2cir (qs) (Cnot i j) = do
+gl2cir qs (Cnot i j) = do
   qnot (qs !! (i -1)) `controlled` (qs !! (j -1))
   return qs
-gl2cir (qs) (CX i j) = do
+gl2cir qs (CX i j) = do
   qnot (qs !! (i -1)) `controlled` (qs !! (j -1))
   return qs
-gl2cir (qs) (CZ i j) = do
+gl2cir qs (CZ i j) = do
   gate_Z (qs !! (i -1)) `controlled` (qs !! (j -1))
   return qs
-gl2cir (qs) (Swap i j) = do
+gl2cir qs (Swap i j) = do
   swap_at (qs !! (i -1)) (qs !! (j -1))
   return qs
-gl2cir (qs) (CCZ i j k) = do
-  gate_Z (qs !! (i -1)) `controlled` [(qs !! (j -1)), (qs !! (k -1))]
+gl2cir qs (CCZ i j k) = do
+  gate_Z (qs !! (i -1)) `controlled` [qs !! (j -1), qs !! (k -1)]
   return qs
-gl2cir (qs) (Ga k is) = do
-  named_gate (show (k `mod` 8)) (qs !! ((Set.findMin is) -1)) `controlled` (map (\x -> qs !! (x -1)) $ Set.toList $ Set.delete (Set.findMin is) is)
+gl2cir qs (Ga k is) = do
+  named_gate (show (k `mod` 8)) (qs !! (Set.findMin is -1)) `controlled` map (\x -> qs !! (x -1)) (Set.toList $ Set.delete (Set.findMin is) is)
   return qs
-gl2cir (qs) (Toffoli i j k) = do
-  qnot (qs !! (i -1)) `controlled` [(qs !! (j -1)), (qs !! (k -1))]
+gl2cir qs (Toffoli i j k) = do
+  qnot (qs !! (i -1)) `controlled` [qs !! (j -1), qs !! (k -1)]
   return qs
-gl2cir (qs) (CCX i j k) = do
-  qnot (qs !! (i -1)) `controlled` [(qs !! (j -1)), (qs !! (k -1))]
+gl2cir qs (CCX i j k) = do
+  qnot (qs !! (i -1)) `controlled` [qs !! (j -1), qs !! (k -1)]
   return qs
-gl2cir (qs) (Toffoli4 i j k l) = do
-  qnot (qs !! (i -1)) `controlled` [(qs !! (j -1)), (qs !! (k -1)), (qs !! (l -1))]
+gl2cir qs (Toffoli4 i j k l) = do
+  qnot (qs !! (i -1)) `controlled` [qs !! (j -1), qs !! (k -1), qs !! (l -1)]
   return qs
-gl2cir (qs) (Toffolin is) = do
-  qnot (qs !! ((head is) -1)) `controlled` (map (\x -> qs !! (x -1)) $ drop 1 is)
+gl2cir qs (Toffolin is) = do
+  qnot (qs !! (head is -1)) `controlled` map (\x -> qs !! (x -1)) (drop 1 is)
   return qs
-gl2cir (qs) (P is) = do
-  label (map (\x -> qs !! (x -1)) $ is) "P"
+gl2cir qs (P is) = do
+  label (map (\x -> qs !! (x -1)) is) "P"
   return qs
 gl2cir qs (Init s i) = do
   named_gate (decodeQState s) (qs !! (i -1))
@@ -230,8 +230,8 @@ gl2cir qs (Init s i) = do
 gl2cir qs (Term s i) = do
   named_gate (decodeQState' s) (qs !! (i -1))
   return qs
-gl2cir (qs) (CNZ is) = do
-  gate_Z (qs !! ((head is) -1)) `controlled` (map (\x -> qs !! (x -1)) $ drop 1 is)
+gl2cir qs (CNZ is) = do
+  gate_Z (qs !! (head is -1)) `controlled` map (\x -> qs !! (x -1)) (drop 1 is)
   return qs
 
 -- | for translate {0,1,2...7} to {0, pi/4,....-pi/4}
@@ -266,22 +266,22 @@ decodeQState' s = case s of
   QY -> "<Y|"
   QMY -> "<-Y|"
 
-gl2cir1 :: [Qubit] -> Gate -> Circ ([Qubit])
+gl2cir1 :: [Qubit] -> Gate -> Circ [Qubit]
 gl2cir1 qs (I i) = return qs
 gl2cir1 qs (X i) = do
-  gate_X (qs !! (i))
+  gate_X (qs !! i)
   return qs
 gl2cir1 qs (Y i) = do
-  gate_Y (qs !! (i))
+  gate_Y (qs !! i)
   return qs
 gl2cir1 qs (Z i) = do
-  gate_Z (qs !! (i))
+  gate_Z (qs !! i)
   return qs
 gl2cir1 qs (S i) = do
-  gate_S (qs !! (i))
+  gate_S (qs !! i)
   return qs
 gl2cir1 qs (T i) = do
-  gate_T (qs !! (i))
+  gate_T (qs !! i)
   return qs
 --gl2cir1 qs (S' i) = do
 --gate_S_inv (qs !! (i))
@@ -290,40 +290,40 @@ gl2cir1 qs (T i) = do
 --gate_T_inv (qs !! (i))
 --return qs
 gl2cir1 qs (H i) = do
-  gate_H (qs !! (i))
+  gate_H (qs !! i)
   return qs
 gl2cir1 qs (M i) = do
-  named_gate "M" (qs !! (i))
+  named_gate "M" (qs !! i)
   return qs
-gl2cir1 (qs) (CS' i j) = do
-  gate_S_inv (qs !! (i)) `controlled` (qs !! (j))
+gl2cir1 qs (CS' i j) = do
+  gate_S_inv (qs !! i) `controlled` (qs !! j)
   return qs
-gl2cir1 (qs) (CS i j) = do
-  gate_S (qs !! (i)) `controlled` (qs !! (j))
+gl2cir1 qs (CS i j) = do
+  gate_S (qs !! i) `controlled` (qs !! j)
   return qs
-gl2cir1 (qs) (Cnot i j) = do
-  qnot (qs !! (i)) `controlled` (qs !! (j))
+gl2cir1 qs (Cnot i j) = do
+  qnot (qs !! i) `controlled` (qs !! j)
   return qs
-gl2cir1 (qs) (CX i j) = do
-  qnot (qs !! (i)) `controlled` (qs !! (j))
+gl2cir1 qs (CX i j) = do
+  qnot (qs !! i) `controlled` (qs !! j)
   return qs
-gl2cir1 (qs) (CZ i j) = do
-  gate_Z (qs !! (i)) `controlled` (qs !! (j))
+gl2cir1 qs (CZ i j) = do
+  gate_Z (qs !! i) `controlled` (qs !! j)
   return qs
-gl2cir1 (qs) (CCZ i j k) = do
-  gate_Z (qs !! (i)) `controlled` [(qs !! (j)), (qs !! (k))]
+gl2cir1 qs (CCZ i j k) = do
+  gate_Z (qs !! i) `controlled` [qs !! (j), qs !! (k)]
   return qs
-gl2cir1 (qs) (Toffoli i j k) = do
-  qnot (qs !! (i)) `controlled` [(qs !! (j)), (qs !! (k))]
+gl2cir1 qs (Toffoli i j k) = do
+  qnot (qs !! i) `controlled` [qs !! (j), qs !! (k)]
   return qs
-gl2cir1 (qs) (Toffoli4 i j k l) = do
-  qnot (qs !! (i)) `controlled` [(qs !! (j)), (qs !! (k)), (qs !! (l))]
+gl2cir1 qs (Toffoli4 i j k l) = do
+  qnot (qs !! i) `controlled` [qs !! (j), qs !! (k), qs !! (l)]
   return qs
-gl2cir1 (qs) (Toffolin is) = do
-  qnot (qs !! ((head is))) `controlled` (map (\x -> qs !! (x)) $ drop 1 is)
+gl2cir1 qs (Toffolin is) = do
+  qnot (qs !! head is) `controlled` map (\x -> qs !! (x)) (drop 1 is)
   return qs
-gl2cir1 (qs) (P is) = do
-  label (map (\x -> qs !! (x)) $ is) "P"
+gl2cir1 qs (P is) = do
+  label (map (\x -> qs !! (x)) is) "P"
   return qs
 
 isT :: Gate -> Bool
@@ -337,7 +337,7 @@ test = do
   q <- qinit False
   p <- qinit True
   r <- qinit True
-  gl2cir ([p, q, r] ++ (replicate 10 qubit)) (Cnot 1 2)
+  gl2cir ([p, q, r] ++ replicate 10 qubit) (Cnot 1 2)
   gate_W_at q r
   gl2cir [p, q, r] (X 3)
   gl2cir [p, q, r] (P [1, 3])

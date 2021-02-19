@@ -38,7 +38,7 @@ tikz_of_gate n (Toffoli i j k) = (1, code)
     code x = [printf "\\controlled{\\notgate}{%0.2f,%d}{%d,%d};" x i j k]
 tikz_of_gate n (Ga p ws) = (1, code)
   where
-    code x = [(printf "\\gencontrolled{\\gate{%d}}{\\gate{%d}}{%0.2f,%d}" p p x (ws' !! 0)) ++ cws ++ ";"]
+    code x = [printf "\\gencontrolled{\\gate{%d}}{\\gate{%d}}{%0.2f,%d}" p p x (ws' !! 0) ++ cws ++ ";"]
     ws' = Set.toList ws
     cws = string_of_list "{" "," "}" "{}" show ws'
 tikz_of_gate n (H i) = (1.5, code)
@@ -80,7 +80,7 @@ assign_columns = aux Map.empty (-1)
         wires = convex' (wiresOfGate h)
         c = 1 + foldl' (\x w -> max x (Map.findWithDefault (-1) w m)) c0 wires
         c1 = c0
-        m' = foldr (\w m -> Map.insert w c m) m wires
+        m' = foldr (`Map.insert` c) m wires
 
 -- | Print a Clifford circuit in TikZ format, with labels. The gates
 -- are sorted into columns.
@@ -89,7 +89,7 @@ tikz_of_clifford_with_labels n gates l1s l2s = str
   where
     (colgates, ncols) = assign_columns gates
     gatemap = foldr (\(c, g) m -> Map.insertWith (++) c [g] m) Map.empty colgates
-    widthmap = Map.map (\gs -> maximum (map (fst . tikz_of_gate n) gs)) gatemap
+    widthmap = Map.map (maximum . map (fst . tikz_of_gate n)) gatemap
     (width', centermap) = Map.mapAccum (\p w -> (p + w, p + 0.5 * w)) 0.5 widthmap
     render = do
       (c, g) <- colgates
@@ -110,10 +110,10 @@ tikz_of_clifford_with_labels n gates l1s l2s = str
         ++ "\\end{qcircuit}\n"
     leftlabels :: Double -> Int -> [String] -> [String]
     leftlabels x n [] = []
-    leftlabels x n (h : t) = (printf "\\leftlabel{%s}{%0.2f,%d}" h x (n -1)) : leftlabels x (n -1) t
+    leftlabels x n (h : t) = printf "\\leftlabel{%s}{%0.2f,%d}" h x (n -1) : leftlabels x (n -1) t
     rightlabels :: Double -> Int -> [String] -> [String]
     rightlabels x n [] = []
-    rightlabels x n (h : t) = (printf "\\rightlabel{%s}{%0.2f,%d}" h x (n -1)) : rightlabels x (n -1) t
+    rightlabels x n (h : t) = printf "\\rightlabel{%s}{%0.2f,%d}" h x (n -1) : rightlabels x (n -1) t
 
 -- | Print a Clifford circuit in TikZ format.
 tikz_of_clifford :: Int -> [Gate] -> String
@@ -134,7 +134,7 @@ string_of_list lpar comma rpar nil string_of_elt lst =
 
 -- | Print a list, one element per line.
 print_list :: (Show a) => [a] -> IO ()
-print_list as = sequence_ [putStrLn (show a) | a <- as]
+print_list as = sequence_ [print a | a <- as]
 
 ------------------------------------------------------
 
@@ -145,21 +145,21 @@ type Rule = ([Gate], [Gate])
 
 type Rules = [Rule]
 
-hrules = map (\x -> (x, fst (mvhn 1 x) ++ snd (mvhn 1 x))) hrules_redexes
+hrules = map (\x -> (x, uncurry (++) (mvhn 1 x))) hrules_redexes
   where
     eval x = unJust $ execStateT (moveh x) ([], [])
 
-hrule x = (x, fst (mvhn 10 x) ++ snd (mvhn 10 x))
+hrule x = (x, uncurry (++) (mvhn 10 x))
 
-hrule' x = (x, fst (mvs) ++ (snd $ snd (mvs)))
+hrule' x = (x, fst mvs ++ snd (snd (mvs)))
   where
     mvs = unJust $ runStateT (moveh_step x) ([], [])
 
-srule x = (x, fst (mvs) ++ (snd $ snd (mvs)))
+srule x = (x, fst mvs ++ snd (snd (mvs)))
   where
     mvs = unJust $ runStateT (moves_step x) ([], [])
 
-cxrule x = (x, fst (mvs) ++ (snd $ snd (mvs)))
+cxrule x = (x, fst mvs ++ snd (snd (mvs)))
   where
     mvs = unJust $ runStateT (movecx_step x) ([], [])
 
@@ -230,7 +230,7 @@ cxrules_redexes =
   ]
 
 tikz_of_rules :: [Rule] -> String
-tikz_of_rules rs = string_of_list "\\begin{eqnarray}\n" "\\\\\\nonumber\\\\[0ex]\n" "\\end{eqnarray}" "" tikz_of_rule rs
+tikz_of_rules = string_of_list "\\begin{eqnarray}\n" "\\\\\\nonumber\\\\[0ex]\n" "\\end{eqnarray}" "" tikz_of_rule
 
 tikz_of_rule :: Rule -> String
 tikz_of_rule (l, r) = s
@@ -249,7 +249,7 @@ tikz_of_rule' (l, r) = putStrLn s
 tikz_of_example :: Int -> [Gate] -> IO ()
 tikz_of_example n cir = putStrLn s
   where
-    nmv = map (\n -> mvhn n) [1 .. n]
+    nmv = map mvhn [1 .. n]
     len = length $ wiresOfCir cir
     ns = map (\fn -> fn cir) nmv
     ss =

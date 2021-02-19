@@ -13,20 +13,20 @@ import System.Environment
 import Text.ParserCombinators.ReadP
 
 next_word :: ReadP String
-next_word = many $ satisfy (\x -> not (x `elem` " \n\r"))
+next_word = many $ satisfy (\x -> notElem x " \n\r")
 
 qGate :: [String] -> ReadP Gate
 qGate s =
   qCCZ s
     <++ qtof2 s
     --  <++ ( qCnot1 s)
-    <++ (qCnot3 s)
-    <++ (qX s)
+    <++ qCnot3 s
+    <++ qX s
     --  <++ ( qNot s)
-    <++ (qZ s)
-    <++ (qT s)
-    <++ (qH s)
-    <++ (qS s)
+    <++ qZ s
+    <++ qT s
+    <++ qH s
+    <++ qS s
 
 qS s = do
   skipSpaces
@@ -201,7 +201,7 @@ names_v = do
   char '.'
   char 'v'
   skipSpaces
-  str <- ((many $ satisfy (\x -> x /= '.')))
+  str <- many $ satisfy (\x -> x /= '.')
   return $ if str /= "BEGIN" then words str else error "parse error, .v line is no good!"
 
 names_v' :: ReadP [String]
@@ -209,19 +209,17 @@ names_v' = do
   char '.'
   char 'v'
   skipSpaces
-  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
-  return $ words str
+  words <$> (many $ satisfy (\x -> x /= '.' && x /= 'B'))
 
 header :: ReadP [String]
 header = do
-  vs <- names_v
-  return vs
+  names_v
 
 qgates :: [String] -> ReadP [Gate]
 qgates s = do
   g <- qGate s
   skipSpaces
-  gs <- (qgates s) <++ return []
+  gs <- qgates s <++ return []
   skipSpaces
   return (g : gs)
 
@@ -240,8 +238,7 @@ names_v1 = do
   char '.'
   char 'v'
   skipSpaces
-  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
-  return $ words str
+  words <$> (many $ satisfy (\x -> x /= '.' && x /= 'B'))
 
 qcir1 = do
   s <- names_v1
@@ -255,19 +252,19 @@ qcir1 = do
 parseQC :: String -> IO [Gate]
 parseQC str = do
   --  str <- readFile $ s
-  let (gl, re) = head $ (readP_to_S qcir1) str
+  let (gl, re) = head $ readP_to_S qcir1 str
   --  putStrLn str
-  return $ gl
+  return gl
 
 parseQC' :: String -> IO [Gate]
 parseQC' s = do
-  str <- readFile $ s
-  let (gl, re) = head $ (readP_to_S qcir1) str
+  str <- readFile s
+  let (gl, re) = head $ readP_to_S qcir1 str
   --  putStrLn str
-  return $ gl
+  return gl
 
 readQC :: IO String
 readQC = do
-  str <- readFile $ "qc.qc"
-  let (gl, re) = head $ (readP_to_S qcir) str
-  return $ str
+  str <- readFile "qc.qc"
+  let (gl, re) = head $ readP_to_S qcir str
+  return str

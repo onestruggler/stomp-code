@@ -99,7 +99,7 @@ parseCir = do
   skipWithBreak
   body <- endBy parseGate skipWithBreak
   string "END"
-  return $ body
+  return body
 
 parseHeaderLine s = do
   string s
@@ -119,7 +119,7 @@ parseFile = do
   skipMany $ sep <|> delimiter
   skipSpace
   eof
-  return $ DotTfc qubits (inputs) (outputs) (concat cir)
+  return $ DotTfc qubits inputs outputs (concat cir)
 
 parseDotTfc :: String -> Either ParseError DotTfc
 parseDotTfc = parse parseFile ".qc parser"
@@ -139,12 +139,12 @@ d2cir (DotTfc q i o glist) = (length q, map g2g glist)
     g2g (Gate "S" ps) = GS.S (ix $ head ps)
     g2g (Gate "H" ps) = GS.H (ix $ head ps)
     g2g (Gate "not" ps) = GS.X (ix $ head ps)
-    g2g (Gate "cnot" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
-    g2g (Gate "CNOT" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
-    g2g (Gate "CX" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
-    g2g (Gate "tof" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))
-    g2g (Gate "Tof" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))
-    g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))
+    g2g (Gate "cnot" ps) = GS.CX (ix (ps !! 1)) (ix (head ps))
+    g2g (Gate "CNOT" ps) = GS.CX (ix (ps !! 1)) (ix (head ps))
+    g2g (Gate "CX" ps) = GS.CX (ix (ps !! 1)) (ix (head ps))
+    g2g (Gate "tof" ps) = GS.CCX (ix (ps !! 2)) (ix (head ps)) (ix (ps !! 1))
+    g2g (Gate "Tof" ps) = GS.CCX (ix (ps !! 2)) (ix (head ps)) (ix (ps !! 1))
+    g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (head ps)) (ix (ps !! 1))
 
 parseQC :: String -> IO (Int, [GS.Gate])
 parseQC bs = case parseDotTfc bs of
@@ -154,4 +154,4 @@ parseQC' :: String -> IO [GS.Gate]
 parseQC' fn = do
   bs <- readFile fn
   (p1, p2) <- parseQC bs
-  return $ p2
+  return p2

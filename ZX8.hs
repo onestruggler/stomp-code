@@ -35,22 +35,22 @@ import qualified ToFile as ToF
 id56s :: [Identity]
 id56s = map toId id56s'
   where
-    id56s' = map (\xs -> map (\(F.G i ws) -> (sfl ws, i)) xs) (F.id56s [0 .. 5])
+    id56s' = map (map (\(F.G i ws) -> (sfl ws, i))) (F.id56s [0 .. 5])
 
 id67s :: [Identity]
 id67s = map toId id67s'
   where
-    id67s' = map (\xs -> map (\(F.G i ws) -> (sfl ws, i)) xs) (F.id67s [0 .. 6])
+    id67s' = map (map (\(F.G i ws) -> (sfl ws, i))) (F.id67s [0 .. 6])
 
 id6s :: [Identity]
 id6s = map toId id6s'
   where
-    id6s' = map (\xs -> map (\(F.G i ws) -> (sfl ws, i)) xs) (drop 1 $ F.id6s [0 .. 5])
+    id6s' = map (map (\(F.G i ws) -> (sfl ws, i))) (drop 1 $ F.id6s [0 .. 5])
 
 id45s :: [Identity]
 id45s = map toId id45s'
   where
-    id45s' = map (\xs -> map (\(F.G i ws) -> (sfl ws, i)) xs) F.i45eff
+    id45s' = map (map (\(F.G i ws) -> (sfl ws, i))) F.i45eff
 
 id4s :: [Identity]
 id4s = [toId $ idFunOn4Wires [0, 1, 2, 3]]
@@ -79,7 +79,7 @@ decompG nw (Ga p ws)
         ++ [Ga 1 (sfl xs) | xs <- F.choosen 3 inds]
 
 decompGad :: Int -> [Gate] -> LMR
-decompGad n cir = return $ concat $ map (decompG n) cir
+decompGad n cir = return $ concatMap (decompG n) cir
 
 gad2gate :: Gadget -> Gate
 gad2gate (k, v) = Ga v k
@@ -97,10 +97,9 @@ wid96 = take 8 wid96'
 wid96' :: [Identity]
 wid96' = ids
   where
-    ids1 = map toId $ [idn 4, idn 5, idn 6, idn 7]
+    ids1 = map toId [idn 4, idn 5, idn 6, idn 7]
     ids3 =
-      [toId $ idn 5 ++ idn 4 ++ idnw [1 .. 4]]
-        ++ map idn3 [6 .. 25]
+      (toId $ idn 5 ++ idn 4 ++ idnw [1 .. 4]) : map idn3 [6 .. 25]
     idsb = [idsb5, idsb6, idsb7, idsb8]
     ids' = ids1 ++ idsb ++ ids3
     ids = sortBy (compare `on` (tcount . return)) ids'
@@ -108,7 +107,7 @@ wid96' = ids
 wid49 :: [Identity]
 wid49 = ids
   where
-    ids1 = map toId $ [idn 4, idn 5, idn 6, idn 7]
+    ids1 = map toId [idn 4, idn 5, idn 6, idn 7]
     ids3 =
       [idn3 6, idn3 7, idn3 8, idn3 9, idn3 10]
         ++ [toId $ idn 5 ++ idn 4 ++ idnw [1 .. 4]]
@@ -154,8 +153,8 @@ idn n = ids'
   where
     inds = [0 .. n -1]
     ids' =
-      [(sfl [x], ((((n -2) * (n -3)) `div` 2) `mod` 8)) | x <- inds]
-        ++ [(sfl xs, ((- (n -3)) `mod` 8)) | xs <- F.choosen 2 inds]
+      [(sfl [x], (((n -2) * (n -3)) `div` 2) `mod` 8) | x <- inds]
+        ++ [(sfl xs, (- (n -3)) `mod` 8) | xs <- F.choosen 2 inds]
         ++ [(sfl xs, 1) | xs <- F.choosen 3 inds]
         ++ [(sfl inds, 7)]
 
@@ -165,8 +164,8 @@ idnw inds = ids'
     n = length inds
     ids' = if n >= 4 then ids'' else []
     ids'' =
-      [(sfl [x], (((n -2) * (n -3) `div` 2) `mod` 8)) | x <- inds]
-        ++ [(sfl xs, ((- (n -3)) `mod` 8)) | xs <- F.choosen 2 inds]
+      [(sfl [x], ((n -2) * (n -3) `div` 2) `mod` 8) | x <- inds]
+        ++ [(sfl xs, (- (n -3)) `mod` 8) | xs <- F.choosen 2 inds]
         ++ [(sfl xs, 1) | xs <- F.choosen 3 inds]
         ++ [(sfl inds, 7)]
 
@@ -175,10 +174,10 @@ class Inv a where
   inv :: a -> [a]
 
 instance (Inv a) => Inv [a] where
-  inv cir = [concat $ map inv (reverse cir)]
+  inv cir = [concatMap inv (reverse cir)]
 
 inv_cir :: [Gate] -> [Gate]
-inv_cir cir = concat $ map inv_g (reverse cir)
+inv_cir cir = concatMap inv_g (reverse cir)
 
 inv_g (T i) = [Z i, S i, T i]
 inv_g (S i) = [Z i, S i]
@@ -212,12 +211,12 @@ instance Ord Key where
     | otherwise = compare (Set.size x) (Set.size y)
 
 instance Inv Gadget where
-  inv (ws, p) = [(ws, ((- p) `mod` 8))]
+  inv (ws, p) = [(ws, (- p) `mod` 8)]
 
 -- | This performs "fusion" --- add the phases (mod 8) of two gadgets with
 -- same wires.
 toGads :: [Gadget] -> Gads
-toGads gs = MS.fromListWith (\x y -> (x + y) `mod` 8) gs
+toGads = MS.fromListWith (\x y -> (x + y) `mod` 8)
 
 gad :: Int -> [Int] -> Gate
 gad i ws = Ga i (sfl ws)
@@ -243,12 +242,12 @@ type Identity' = (Int, TGCG)
 
 -- | transform a list of gadgets (that equals identity) to TGCG Identity.
 toId :: [Gadget] -> Identity
-toId = (mypartition (\x -> x `mod` 2 == 1)) . toGads
+toId = mypartition (\x -> x `mod` 2 == 1) . toGads
 
 mypartition p xs = (l, r)
   where
     l = MS.filter (\x -> x `mod` 2 == 1) xs
-    r = MS.filter (\x -> x `mod` 2 == 0) xs
+    r = MS.filter (\x -> even x) xs
 
 tgcg2distr :: TGCG -> Distribution Int
 tgcg2distr (tg, cg) = d
@@ -267,7 +266,7 @@ sampleNwire seed n distr = ws
     sampleN 0 d g = ([], g)
     sampleN n d g =
       let (w, g') = sample (fromDistribution d) g
-       in let (ws, g'') = sampleN (n -1) (assuming (\x -> x /= w) d) g'
+       in let (ws, g'') = sampleN (n -1) (assuming (/= w) d) g'
            in (w : ws, g'')
     ws = fst $ sampleN n distr (mkStdGen seed)
 
@@ -322,23 +321,23 @@ tryId stdg tol id@(tg, cg) mm@(tm, cm) = case nt > dlen - tol of
     nt' =
       foldl'
         ( \a x ->
-            if MS.lookup (fst x) tm /= Nothing
+            if Data.Maybe.isJust (MS.lookup (fst x) tm)
               then a
               else a + 1
         )
         0
         (take (dlen + tol + 1) (MS.toList tg))
     tgintm = map (\x -> (x, MS.lookup (fst x) tm)) (MS.toList tg)
-    (jkeys, nkeys) = partition (\(x, y) -> y /= Nothing) tgintm
-    nt = length $ jkeys
+    (jkeys, nkeys) = partition (\(x, y) -> Data.Maybe.isJust y) tgintm
+    nt = length jkeys
     jkeys' = map fst jkeys
     nkeys' = map fst nkeys
     tm1 = foldl' (\ys x -> MS.delete (fst x) ys) tm jkeys'
-    tm' = foldl' (\ys x -> MS.insert (fst x) (snd x) ys) tm1 nkeys'
+    tm' = foldl' (\ys x -> uncurry MS.insert x ys) tm1 nkeys'
     cm1 =
-      foldl' (\ys x -> MS.insertWith pmod8 (fst x) (snd x) ys) cm $
+      foldl' (\ys x -> MS.insertWith pmod8 (fst x) (snd x) ys) cm
         (map (\(x, y) -> (fst x, pmod8 (snd x) (unJust y))) jkeys)
-    cm' = foldl' (\ys x -> MS.insertWith pmod8 (fst x) (snd x) ys) cm1 $ MS.toList cg
+    cm' = foldl' (\ys x -> uncurry (MS.insertWith pmod8) x ys) cm1 $ MS.toList cg
 
 tryIds :: StdGen -> Int -> [Identity] -> TGCG -> (TGCG, StdGen)
 tryIds stdgen tol ids mm =
@@ -367,11 +366,11 @@ id4ton seed n
   where
     ws = [0 .. n -1]
     fs = [4 .. n]
-    wss = concat $ map (\x -> choosen_linear x ws) fs
+    wss = concatMap (\x -> choosen_linear x ws) fs
     bm = bmask seed (length wss -1)
     bmwss = zip wss (bm ++ [True])
-    wss' = map fst $ filter (\(x, y) -> y) bmwss
-    idns = concat $ map idnw wss'
+    wss' = map fst $ filter (snd) bmwss
+    idns = concatMap idnw wss'
 
 id4ton_dis :: Int -> Int -> Int -> Identity
 id4ton_dis seed n len
@@ -380,16 +379,16 @@ id4ton_dis seed n len
   where
     ws = [0 .. n -1]
     fs = [4 .. n]
-    wss = concat $ map (\x -> choosen_linear x ws) fs
+    wss = concatMap (\x -> choosen_linear x ws) fs
     wss' =
       fst $
         sample_nrep
-          (len)
+          len
           (mkStdGen seed)
           (fromList freq)
-    tot = sum (map (\x -> exp $ fromIntegral $ length x) wss)
-    freq = map (\x -> (x, (exp $ fromIntegral $ length x) / tot)) wss
-    idns = concat $ map idnw wss'
+    tot = sum (map (exp . fromIntegral . length) wss)
+    freq = map (\x -> (x, exp (fromIntegral $ length x) / tot)) wss
+    idns = concatMap idnw wss'
 
 sample_rep n g gen
   | n == 0 = ([], g)
@@ -402,18 +401,18 @@ sample_nrep n g dis
   | n == 0 = ([], g)
   | otherwise =
     let (a, g') = sample (fromDistribution dis) g
-     in let (as, g'') = sample_nrep (n - 1) g' (assuming (\x -> x /= a) dis) in (a : as, g'')
+     in let (as, g'') = sample_nrep (n - 1) g' (assuming (/= a) dis) in (a : as, g'')
 
 sample_nrep' n g dis
   | n == 0 = ([], g)
   | otherwise =
     let (a, g') = sample (fromDistribution dis) g
-     in let (as, g'') = sample_nrep (n - 1) g' (assuming (\x -> x /= a) dis) in (a : as, g'')
+     in let (as, g'') = sample_nrep (n - 1) g' (assuming (/= a) dis) in (a : as, g'')
 
 expandId :: Identity -> [[Int]] -> [Identity]
 expandId id@(tg, cg) wss =
-  [ ( MS.fromList (map (\(k, v) -> (f k, v)) (MS.toList tg)),
-      (MS.fromList (map (\(k, v) -> (f k, v)) (MS.toList cg)))
+  [ ( MS.fromList (map (Data.Bifunctor.first f) (MS.toList tg)),
+      MS.fromList (map (\(k, v) -> (f k, v)) (MS.toList cg))
     )
     | f <- candisfs
   ]
@@ -437,9 +436,7 @@ choosen_linear n xs@(h : t) = ys : zss
 
 pair2fun :: [(Int, Int)] -> (Int -> Int)
 pair2fun [] x = x
-pair2fun p x = case lookup x p of
-  Nothing -> x
-  Just y -> y
+pair2fun p x = Data.Maybe.fromMaybe x (lookup x p)
 
 wiresOfGads :: Gads -> [Int]
 wiresOfGads gads = Set.toList $ foldl' Set.union Set.empty (MS.keys gads)
@@ -450,8 +447,7 @@ wiresOfId id@(t, c) = Set.toList $ foldl' Set.union Set.empty (MS.keys t ++ MS.k
 -- | return n-gadgets that lies on first (n+4) wires, input gads
 -- should have keys of the same size.
 ngads :: Int -> Gads -> Gads
-ngads n gs =
-  MS.foldlWithKey'
+ngads n = MS.foldlWithKey'
     ( \b k v ->
         let b' = MS.insert k v b
          in if (length $ wiresOfGads b') <= n + 4
@@ -459,7 +455,6 @@ ngads n gs =
               else b
     )
     (MS.empty)
-    gs
 
 unif :: TGCG -> Distribution Int
 unif (tg, cg) = uniform $ wiresOfGads tg
@@ -486,7 +481,7 @@ mysampleNws sg n len ws = (xss, sgr)
     (xss', sg') = mysampleNws sg (n -1) len ws
     (x, sg'') = {-# SCC "randomlistN-" #-} randomlistN sg' len m
     m = length ws
-    x' = map (\i -> ws !! i) x
+    x' = map (ws !!) x
     xss = x' : xss'
     sgr = sg''
 
@@ -498,10 +493,10 @@ runIds_sa stdgen rep tol (h : t) mm = (mm'', stdgen')
     wog = wiresOfGads $ fst mm
     (candis_wires, stdgen'') =
       --    = sampleNws stdgen 50000 len (tgcg2distr mm)
-      {-# SCC "mysample-" #-} mysampleNws stdgen rep len (wog)
+      {-# SCC "mysample-" #-} mysampleNws stdgen rep len wog
     idss = expandId h candis_wires
     (mm', stdg') = {-# SCC "TryIds-" #-} tryIds stdgen'' tol idss mm
-    (mm'', stdgen') = (runIds_sa stdg' rep tol t mm')
+    (mm'', stdgen') = runIds_sa stdg' rep tol t mm'
 
 runIds_saw :: StdGen -> Int -> Int -> Int -> [Identity] -> TGCG -> (TGCG, StdGen)
 runIds_saw stdgen rep tol woglen [] mm = (mm, stdgen)
@@ -511,10 +506,10 @@ runIds_saw stdgen rep tol woglen (h : t) mm = (mm'', stdgen')
     wog = [0 .. woglen -1] -- wiresOfGads $ fst mm
     (candis_wires, stdgen'') =
       --    = sampleNws stdgen 50000 len (tgcg2distr mm)
-      {-# SCC "mysample-" #-} mysampleNws stdgen rep len (wog)
+      {-# SCC "mysample-" #-} mysampleNws stdgen rep len wog
     idss = expandId h candis_wires
     (mm', stdg') = {-# SCC "TryIds-" #-} tryIds stdgen'' tol idss mm
-    (mm'', stdgen') = (runIds_saw stdg' rep tol woglen t mm')
+    (mm'', stdgen') = runIds_saw stdg' rep tol woglen t mm'
 
 runIds_saf :: StdGen -> Int -> [Identity] -> TGCG -> (TGCG, StdGen)
 runIds_saf stdgen tol [] mm = (mm, stdgen)
@@ -525,16 +520,14 @@ runIds_saf stdgen tol ids@(h : t) mm = (mm'', stdgen')
     candis_wires = F.choosen len wog
     idss = expandId h candis_wires
     (mm', stdg') = {-# SCC "TryIds-" #-} tryIds stdgen tol idss mm
-    (mm'', stdgen') = (runIds_saf stdg' tol t mm')
+    (mm'', stdgen') = runIds_saf stdg' tol t mm'
 
 runIds_safr :: StdGen -> Int -> [Identity] -> TGCG -> (TGCG, StdGen)
 runIds_safr stdgen tol [] mm = (mm, stdgen)
 runIds_safr stdgen tol ids mm = (mm', stdg')
   where
     (mm1, stdg1) = runIds_saf stdgen tol ids mm
-    (mm', stdg') = case mm1 == mm of
-      True -> (mm, stdg1)
-      False -> runIds_safr stdg1 tol ids mm1
+    (mm', stdg') = if mm1 == mm then (mm, stdg1) else runIds_safr stdg1 tol ids mm1
 
 zxid45s = map toId ids'
   where
@@ -542,7 +535,7 @@ zxid45s = map toId ids'
     w4se = map (\x -> [[], x]) w4s
     w45' =
       [ idnw x1 ++ idnw x2 ++ idnw x3 ++ idnw x4 ++ idnw x5 ++ idnw x6
-        | x1 <- w4se !! 0,
+        | x1 <- head w4se,
           x2 <- w4se !! 1,
           x3 <- w4se !! 2,
           x4 <- w4se !! 3,
@@ -555,11 +548,9 @@ runIds_r :: StdGen -> Int -> [Identity] -> TGCG -> LMMR
 runIds_r stdgen rep ids mm = mm'
   where
     tols = [0] :: [Int]
-    rts = map (\x -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
+    rts = map (\ x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
     ct = foldl (.) id rts
-    ct' = case length wog <= 21 of
-      False -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_sa g rep 0 ids a
-      True -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a
+    ct' = if length wog <= 21 then (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a) else (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_sa g rep 0 ids a)
     mm' = return $ fst $ ct' (mm, stdgen)
     wog = wiresOfGads $ fst mm
 
@@ -567,11 +558,9 @@ runIds_rw :: StdGen -> Int -> [Identity] -> TGCG -> LMMR
 runIds_rw stdgen rep ids mm = do
   (_, (vq, fq), _) <- get
   let tols = [0] :: [Int]
-  let rts = map (\x -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
+  let rts = map (\ x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
   let ct = foldl (.) id rts
-  let ct' = case fq <= 27 of
-        False -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_saw g rep 0 fq ids a
-        True -> \(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a
+  let ct' = if fq <= 27 then (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a) else (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_saw g rep 0 fq ids a)
   let mm' = fst $ ct' (mm, stdgen)
   return mm'
 
@@ -579,7 +568,7 @@ class ToCir a where
   tocir :: a -> [Gate]
   tocir' :: a -> [Gate]
 
-instance ToCir (LMR) where
+instance ToCir LMR where
   tocir lmr = cir
     where
       (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
@@ -594,7 +583,7 @@ instance ToCir (LMR) where
       a' = zx2cir a
       cir = fst s ++ a ++ snd s
 
-instance F.PDFable (LMR) where
+instance F.PDFable LMR where
   topdf lmr = F.topdf (F.LMR l m r)
     where
       (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
@@ -620,14 +609,14 @@ mycmp (Ga p1 ws1) (Ga p2 ws2)
   | Set.size ws1 == Set.size ws2 = compare ws1 ws2
   | otherwise = compare (Set.size ws1) (Set.size ws2)
 
-instance F.PDFable (LMMR) where
+instance F.PDFable LMMR where
   topdf lmmr = F.topdf (F.LMR l m r)
     where
       (a, (s', vqfq, tct)) = runState lmmr (([], []), (0, 0), (0, 0, 0))
       s = s'
-      l = (fst s)
+      l = fst s
       m = sortBy mycmp (gads2cir' (MS.toList $ fst a)) ++ gads2cir' (MS.toList $ snd a)
-      r = (snd s)
+      r = snd s
 
 {-  topdf_file lmmr = F.topdf_file (F.LMR l m r) where
     (a,s') = runState lmmr (([],[]),0)
@@ -637,7 +626,7 @@ instance F.PDFable (LMMR) where
     r =  (F.cir2zx $ snd s)
 -}
 
-instance ToCir (LMMR) where
+instance ToCir LMMR where
   tocir lmr = cir
     where
       (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
@@ -649,7 +638,7 @@ instance ToCir (LMMR) where
       (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
       s = s'
       a' =
-        (gads2cir' (MS.toList (fst a)))
+        gads2cir' (MS.toList (fst a))
           ++ gads2cir' (MS.toList (snd a))
       cir = fst s ++ a' ++ snd s
 
@@ -664,14 +653,14 @@ p2zst 6 j = [Z j, S j]
 p2zst 0 j = []
 
 stepcnot :: [Int] -> [Gate]
-stepcnot (a : b : []) = [Cnot b a]
-stepcnot (a : b : c : t) = [Cnot (last (c : t)) a] ++ stepcnot (b : c : t)
+stepcnot [a, b] = [Cnot b a]
+stepcnot (a : b : c : t) = Cnot (last (c : t)) a : stepcnot (b : c : t)
 
 gad2cir' :: Gadget -> [Gate]
 gad2cir' (ws, p) = [Ga p ws]
 
 gads2cir' :: [Gadget] -> [Gate]
-gads2cir' xs = sortBy mycmp $ concat $ map gad2cir' xs
+gads2cir' xs = sortBy mycmp $ concatMap gad2cir' xs
 
 gad2cir :: Gadget -> [Gate]
 gad2cir (ws, i') = case len of
@@ -687,7 +676,7 @@ gad2cir (ws, i') = case len of
     sts = p2zst i (Set.elemAt (len - 1) ws)
 
 gads2cir :: [Gadget] -> [Gate]
-gads2cir xs = concat $ map gad2cir xs
+gads2cir xs = concatMap gad2cir xs
 
 gads2cir2 xs = gads2cir (MS.toList xs)
 
@@ -695,10 +684,10 @@ zx2cir1 :: Gate -> [Gate]
 zx2cir1 (Ga p ws) = gad2cir (ws, p)
 zx2cir1 x = [x]
 
-zx2cir cir = concat $ map zx2cir1 cir
+zx2cir cir = concatMap zx2cir1 cir
 
 g2zx :: Gate -> [Gate]
-g2zx (CCZ i j k) = (ccz_to_7gs i j k)
+g2zx (CCZ i j k) = ccz_to_7gs i j k
 g2zx (CZ i j) = [Ga 6 (sfl [i, j]), Ga 2 (sfl [i]), Ga 2 (sfl [j])]
 g2zx (Z i) = [Ga 4 (sfl [i])]
 g2zx (S i) = [Ga 2 (sfl [i])]
@@ -713,7 +702,7 @@ g2zx (H i) = [H i]
 g2zx (Init s i) = [Init s i]
 g2zx (Term s i) = []
 
-cir2zx cir = concat (map g2zx cir)
+cir2zx cir = concatMap g2zx cir
 
 cir2lxr :: [Gate] -> LMR
 cir2lxr cir = return $ cir2zx cir
@@ -735,7 +724,7 @@ isTGadget (ws, p) = p `mod` 2 == 1
 
 isTGad :: Gate -> Bool
 isTGad (Ga p ws) = isTGadget (ws, p)
-isTGad (_) = False
+isTGad _ = False
 
 -- | work only when Gadget in the middle
 tolmmr' :: [Gadget] -> LMMR
@@ -769,7 +758,7 @@ pickClifford cir = do
 
 moveH_old :: [Gate] -> LMR
 moveH_old cir = do
-  let circx = map (C.cnot2cx) cir
+  let circx = map C.cnot2cx cir
   cirm <- pickClifford circx
   ((l, r), (vq, fq), tct) <- get
   let F.LMR aa bb cc = F.moveh (map C.cx2cnot cirm)
@@ -780,33 +769,33 @@ moveH_old cir = do
 
 moveH :: [Gate] -> LMR
 moveH cir = do
-  let circx = map (C.cnot2cx) cir
+  let circx = map C.cnot2cx cir
   cirm <- pickClifford circx
   ((l, r), (vq, fq), tct) <- get
   let (p1, p2) = S.mvh cirm
   let cr' = p2 ++ r
   let (pi1, pi2) = S.mvh $ inv_cir p1
-  let cir2 = inv_cir $ pi1
-  let cl = inv_cir $ pi2
+  let cir2 = inv_cir pi1
+  let cl = inv_cir pi2
   let cl' = l ++ cl
   put ((cl', cr'), (vq, fq), tct)
   return cir2
 
 moveCXp :: [Gate] -> LMR
 moveCXp cir = do
-  let circx = map (C.cnot2cx) cir
+  let circx = map C.cnot2cx cir
   cirm <- pickClifford circx
   ((l, r), (vq, fq), tct) <- get
   let (p1, p2) = C.mvcx cirm
   let cr' = p2 ++ r
   let (pi1, pi2) = C.mvcx $ inv_cir p1
-  let cir2 = inv_cir $ pi1
-  let cl = inv_cir $ pi2
+  let cir2 = inv_cir pi1
+  let cl = inv_cir pi2
   let cl' = l ++ cl
   put ((cl', cr'), (vq, fq), tct)
   return cir2
 
-type LR' a = State (([Gate], [Gate])) a
+type LR' a = State ([Gate], [Gate]) a
 
 type MR a = State [Gate] a
 
@@ -832,13 +821,11 @@ insertcsg (Swap i j) (CX k l : t)
     t' <- insertcsg (Swap i j) t
     return $ CX k' l' : t'
   where
-    (k', l') = case i == k of
-      True -> (j, l)
-      False -> case i == l of
-        True -> (k, j)
-        False -> case j == k of
-          True -> (i, l)
-          False -> (k, i)
+    (k', l') = if i == k then (j, l) else (case i == l of
+                                    True -> (k, j)
+                                    False -> case j == k of
+                                      True -> (i, l)
+                                      False -> (k, i))
 insertcsg (Swap i j) (Ga p ws : t) = do
   t' <- insertcsg (Swap i j) t
   return $ x' : t'
@@ -853,7 +840,7 @@ insertcsg a@(CX i j) (b@(CX k l) : t)
   | (length . nub) [i, j, k, l] == 2 && i == k = return t
   | (length . nub) [i, j, k, l] == 2 && i == l =
     insertcsg (CX i j) t >>= insertcsg (Swap i j)
-  | (i == l || j == k) = return $ a : b : t
+  | i == l || j == k = return $ a : b : t
   | otherwise = do
     t' <- insertcsg (CX i j) t
     if head t' /= CX i j
@@ -894,49 +881,37 @@ insertcs (CX i j) [] = [CX i j]
 insertcs (Swap i j) (Swap k l : t)
   | (length . nub) [i, j, k, l] == 2 = t
   | Swap i j > Swap k l = insertcs (Swap k l) $ insertcs (Swap i' j') t
-  | Swap i j <= Swap k l = (Swap i j) : (Swap k l : t)
+  | Swap i j <= Swap k l = Swap i j : (Swap k l : t)
   where
-    i' = case i == k of
-      True -> l
-      False -> case i == l of
-        True -> k
-        _ -> i
-    j' = case j == k of
-      True -> l
-      False -> case j == l of
-        True -> k
-        _ -> j
+    i' = if i == k then l else (case i == l of
+                         True -> k
+                         _ -> i)
+    j' = if j == k then l else (case j == l of
+                         True -> k
+                         _ -> j)
 insertcs (Swap i j) (CX k l : t)
   | (length . nub) [i, j, k, l] == 2 = insertcs (CX l k) $ insertcs (Swap i j) t
   | otherwise = insertcs (CX k' l') $ insertcs (Swap i j) t
   where
-    k' = case k == i of
-      True -> j
-      False -> case k == j of
-        True -> i
-        _ -> k
-    l' = case l == i of
-      True -> j
-      False -> case l == j of
-        True -> i
-        _ -> l
-insertcs (CX i j) (Swap k l : t) = (CX i j) : (Swap k l : t)
+    k' = if k == i then j else (case k == j of
+                         True -> i
+                         _ -> k)
+    l' = if l == i then j else (case l == j of
+                         True -> i
+                         _ -> l)
+insertcs (CX i j) (Swap k l : t) = CX i j : (Swap k l : t)
 insertcs a@(CX i j) (b@(CX k l) : t)
   | (length . nub) [i, j, k, l] == 2 && i == k = t
   | (length . nub) [i, j, k, l] == 2 && i == l =
     insertcs (Swap i j) $ insertcs (CX i j) t
-  | (not (i == l || j == k)) && a > b =
+  | not (i == l || j == k) && a > b =
     insertcs (CX k l) $ insertcs (CX i j) t
   | (i == l || j == k) && a > b =
     insertcs b $ insertcs (CX i' j') $ insertcs a t
   | a <= b = a : (b : t)
   where
-    i' = case i == l of
-      True -> k
-      False -> i
-    j' = case j == k of
-      True -> l
-      False -> j
+    i' = if i == l then k else i
+    j' = if j == k then l else j
 
 normalizecs :: [Gate] -> [Gate]
 normalizecs zx = insertcss zx []
@@ -965,19 +940,17 @@ moveswap_step (Swap i j : Swap k l : t) = do
 moveswap_step (Swap i j : CX k l : t)
   | (i == k && j == l) || (i == l && j == k) =
     return $ CX l k : Swap i j : t
-  | (i == k && j /= l) = return $ CX j l : Swap i j : t
-  | (i /= k && j == l) = return $ CX k i : Swap i j : t
-  | (i == l && j /= k) = return $ CX k j : Swap i j : t
-  | (i /= l && j == k) = return $ CX i l : Swap i j : t
+  | i == k && j /= l = return $ CX j l : Swap i j : t
+  | i /= k && j == l = return $ CX k i : Swap i j : t
+  | i == l && j /= k = return $ CX k j : Swap i j : t
+  | i /= l && j == k = return $ CX i l : Swap i j : t
   | otherwise = return $ CX k l : Swap i j : t
 
 moveswap :: [Gate] -> LR' [Gate]
 moveswap [] = return []
 moveswap [a] = do
   (l, r) <- get
-  case isCliffordg a of
-    True -> put (l, a : r)
-    False -> put (a : l, r)
+  if isCliffordg a then put (l, a : r) else put (a : l, r)
   return []
 moveswap (Swap i j : t) = do
   t' <- moveswap_step $ Swap i j : t
@@ -998,14 +971,12 @@ fusion_wcx1 g [] = [g]
 fusion_wcx1 (Ga p1 ws1) ((Ga p2 ws2) : t)
   | ws1 == ws2 =
     let p3 = ((p1 + p2) `mod` 8)
-     in case p3 == 0 of
-          True -> t
-          False -> Ga p3 ws1 : t
+     in if p3 == 0 then t else Ga p3 ws1 : t
   | ws1 > ws2 = Ga p2 ws2 : fusion_wcx1 (Ga p1 ws1) t
 fusion_wcx1 (CX i j) ((Ga p ws) : t)
-  | (i `member` ws && j `member` ws) =
+  | i `member` ws && j `member` ws =
     Ga p (Set.delete j ws) : fusion_wcx1 (CX i j) t
-  | (i `member` ws && not (j `member` ws)) =
+  | i `member` ws && not (j `member` ws) =
     Ga p (Set.insert j ws) : fusion_wcx1 (CX i j) t
   | otherwise = Ga p ws : fusion_wcx1 (CX i j) t
 fusion_wcx1 h t = h : t
@@ -1058,7 +1029,7 @@ mvcxtc [] (mg, rcx) = (mg, rcx)
 mvcxtc (CX i j : t) (mg, rcx) = mvcxtc t (mg', CX i j : rcx)
   where
     mg' = movecx_tc (CX i j) mg []
-mvcxtc (h : t) (mg, rcx) = mvcxtc t ((h : mg), rcx)
+mvcxtc (h : t) (mg, rcx) = mvcxtc t (h : mg, rcx)
 
 mvcxTC xs = mvcxtc xs ([], [])
 
@@ -1068,7 +1039,7 @@ foldM' f z (x : xs) = do
   z' <- f z x
   z' `seq` foldM' f z' xs
 
-mvcx_left xs = foldM' movecx_left2 () xs
+mvcx_left = foldM' movecx_left2 ()
 
 movecx_left2 :: () -> Gate -> LR' ()
 movecx_left2 () (CX i j) = do
@@ -1080,34 +1051,30 @@ movecx_left2 () h = do
   put (lcx, h : lg)
 
 movecx_left :: [Gate] -> LR' [Gate]
-movecx_left (xs@(CX i j : t)) = do
+movecx_left xs@(CX i j : t) = do
   (lcx, lg) <- get
   let lg' = movecx_left' (CX i j) lg
   put (CX i j : lcx, lg')
   movecx_left t
-movecx_left (xs@(h : t)) = do
+movecx_left xs@(h : t) = do
   (lcx, lg) <- get
   put (lcx, h : lg)
   movecx_left t
 movecx_left [] = return []
 
-movecx_left' (CX i j) ([]) = []
-movecx_left' (CX i j) (Ga p ws : tt) = (Ga p ws') : (movecx_left' (CX i j) tt)
+movecx_left' (CX i j) [] = []
+movecx_left' (CX i j) (Ga p ws : tt) = Ga p ws' : movecx_left' (CX i j) tt
   where
-    ws' = case i `member` ws of
-      True -> case j `member` ws of
-        True -> Set.delete j ws
-        False -> Set.insert j ws
-      False -> ws
+    ws' = if i `member` ws then (case j `member` ws of
+                           True -> Set.delete j ws
+                           False -> Set.insert j ws) else ws
 
-movecx_tc (CX i j) ([]) cs = cs
-movecx_tc (CX i j) (Ga p ws : tt) cs = movecx_tc (CX i j) tt ((Ga p ws') : cs)
+movecx_tc (CX i j) [] cs = cs
+movecx_tc (CX i j) (Ga p ws : tt) cs = movecx_tc (CX i j) tt (Ga p ws' : cs)
   where
-    ws' = case i `member` ws of
-      True -> case j `member` ws of
-        True -> Set.delete j ws
-        False -> Set.insert j ws
-      False -> ws
+    ws' = if i `member` ws then (case j `member` ws of
+                           True -> Set.delete j ws
+                           False -> Set.insert j ws) else ws
 
 movecxccx_i :: [Gate] -> LR' ([Gate], Int)
 movecxccx_i [a]
@@ -1118,29 +1085,29 @@ movecxccx_i [a]
 movecxccx_i (a@(CX i j) : b@(CCX k l m) : t)
   | j == k = do
     (t', n) <- movecxccx_i $ a : t
-    return $ (b : CCX i l m : t', n + 1)
+    return (b : CCX i l m : t', n + 1)
   | otherwise = do
     (t', n) <- movecxccx_i $ a : t
-    return $ (b : t', n)
+    return (b : t', n)
 movecxccx_i (a@(CX i j) : b@(CX k l) : t)
-  | (i == k && j == l) = return $ (t, 0)
-  | (i == l && j == k) = do
+  | i == k && j == l = return (t, 0)
+  | i == l && j == k = do
     (t', n') <- movecxccx_i $ a : t
     let (t'', sw) = moveswap' (Swap i j : t')
     (l, r) <- get
     put (l, sw ++ r)
     return (t'', n')
-  | (i == l && j /= k) = do
+  | i == l && j /= k = do
     (t', n') <- movecxccx_i $ b : t
     (t'', n'') <- movecxccx_i $ a : t'
-    (return $ (t'', n'' + n'))
-  | (i /= l && j == k) = do
+    return $ (t'', n'' + n')
+  | i /= l && j == k = do
     (t', n') <- movecxccx_i $ b : t
     (t'', n'') <- movecxccx_i $ a : t'
-    (return $ (t'', n'' + n'))
+    return $ (t'', n'' + n')
   | otherwise = do
     (t', n') <- movecxccx_i $ a : t
-    return $ (b : t', n')
+    return (b : t', n')
 
 movecxccx_i' :: [Gate] -> (([Gate], Int), ([Gate], [Gate]))
 movecxccx_i' zx = runState (movecxccx_i zx) ([], [])
@@ -1153,13 +1120,13 @@ movecxccx (m, a@(CX i j) : t) = do
     True -> do
       (l, r) <- get
       put (l, rr ++ r)
-      (movecxccx (m, tr))
+      movecxccx (m, tr)
     -- insertcss rr r)
     --      seq (movecxccx (m,tr)) (movecxccx (m,tr))
     False -> do
       (l, r) <- get
       put (l ++ reverse rl, r)
-      (movecxccx (tl, t))
+      movecxccx (tl, t)
 --      seq (movecxccx (tl, t)) (movecxccx (tl, t))
 movecxccx (m, h : t) = do
   movecxccx (h : m, t)
@@ -1180,38 +1147,38 @@ movecx_i [a]
 movecx_i (a@(CX i j) : b@(Ga p ws) : t)
   | i `member` ws && j `member` ws = do
     (t', n') <- movecx_i $ a : t
-    return $
+    return
       ( Ga p wsi : t',
         if p `mod` 2 == 1 then n' - (Set.size ws) else n'
       )
   | i `member` ws = do
     (t', n') <- movecx_i $ a : t
-    return $
+    return
       ( Ga p wsj : t',
         if p `mod` 2 == 1 then n' + (Set.size ws) else n'
       )
   | otherwise = do
     (t', n') <- movecx_i $ a : t
-    return $ (b : t', n')
+    return (b : t', n')
   where
     wsj = Set.insert j ws
     wsi = Set.delete j ws
 movecx_i (a@(CX i j) : b@(CX k l) : t)
-  | (i == k && j == l) = return $ (t, 0)
-  | (i == l && j == k) = do
+  | i == k && j == l = return (t, 0)
+  | i == l && j == k = do
     (t', n') <- movecx_i $ a : t
     let (t'', sw) = moveswap' (Swap i j : t')
     (l, r) <- get
     put (l, sw ++ r)
     return (t'', n')
-  | (i == l && j /= k) = do
+  | i == l && j /= k = do
     (t', n') <- movecx_i $ b : t
     (t'', n'') <- movecx_i $ a : t'
-    (return $ (t'', n'' + n'))
-  | (i /= l && j == k) = do
+    return $ (t'', n'' + n')
+  | i /= l && j == k = do
     (t', n') <- movecx_i $ b : t
     (t'', n'') <- movecx_i $ a : t'
-    (return $ (t'', n'' + n'))
+    return $ (t'', n'' + n')
 
   {-  | (i == l && j /= k) = do
          (t', n') <- movecx_i $ CX k j : t
@@ -1224,7 +1191,7 @@ movecx_i (a@(CX i j) : b@(CX k l) : t)
   -}
   | otherwise = do
     (t', n') <- movecx_i $ a : t
-    return $ (b : t', n')
+    return (b : t', n')
 
 movecx_i' :: [Gate] -> (([Gate], Int), ([Gate], [Gate]))
 movecx_i' zx = runState (movecx_i zx) ([], [])
@@ -1248,13 +1215,13 @@ movecx (m, a@(CX i j) : t) = do
     True -> do
       (l, r) <- get
       put (l, rr ++ r)
-      (movecx (m, tr))
+      movecx (m, tr)
     -- insertcss rr r)
     --      seq (movecx (m,tr)) (movecx (m,tr))
     False -> do
       (l, r) <- get
       put (l ++ reverse rl, r)
-      (movecx (tl, t))
+      movecx (tl, t)
 --      seq (movecx (tl, t)) (movecx (tl, t))
 movecx (m, h : t) = do
   movecx (h : m, t)
@@ -1281,7 +1248,7 @@ movex_step (X i : Ga p ws : t)
   | i `Set.member` ws = return $ Ga (- p `mod` 8) ws : X i : t
   | otherwise = return $ Ga p ws : X i : t
 movex_step (X i : X j : t)
-  | i == j = return $ t
+  | i == j = return t
   | otherwise = do
     t' <- movex_step $ X i : t
     movex_step $ X j : t'
@@ -1314,7 +1281,7 @@ movecx_step (CX i j : Ga p ws : t)
     ws' = Set.delete j ws
     ws'' = Set.insert j ws
 movecx_step (CX i j : CX k l : t)
-  | i == k && j == l = return $ t
+  | i == k && j == l = return t
   | i == l && j == k = do
     t' <- movecx_step $ CX i j : t
     moveswap t'
@@ -1323,9 +1290,7 @@ movex :: [Gate] -> LR' [Gate]
 movex [] = return []
 movex [a] = do
   (l, r) <- get
-  case isCliffordg a of
-    True -> put (l, a : r)
-    False -> put (a : l, r)
+  if isCliffordg a then put (l, a : r) else put (a : l, r)
   return []
 movex (X i : t) = do
   t' <- movex_step $ X i : t
@@ -1353,17 +1318,17 @@ isCliffordg (Swap _ _) = True
 isCliffordg (Y _) = True
 --isCliffordg (S' _) = True
 isCliffordg (Cnot _ _) = True
-isCliffordg (_) = False
+isCliffordg _ = False
 
 -- | cxccx
-cir2lmmr_cxccx cir = initLMR cir >>= (moveCXCCX_half_squee) >>= (\x -> moveH_old $ F.desugar_cir x) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (\x -> {-# SCC "moveCX'-" #-} moveCX' x) >>= tolmmr
+cir2lmmr_cxccx cir = initLMR cir >>= moveCXCCX_half_squee >>= (moveH_old . F.desugar_cir) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (\x -> {-# SCC "moveCX'-" #-} moveCX' x) >>= tolmmr
 
 --cir2lmmr :: [Gate] -> LMMR
-cir2lmmr cir = (initLMR (F.desugar_cir cir)) >>= (moveH) >>= decompH >>= cir2lxr >>= moveSwap >>= moveX >>= (\x -> moveCX' x)
+cir2lmmr cir = initLMR (F.desugar_cir cir) >>= moveH >>= decompH >>= cir2lxr >>= moveSwap >>= moveX >>= moveCX'
 
-cir2lmmr' cir = (moveH (F.desugar_cir cir)) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (\x -> {-# SCC "moveCX'-" #-} moveCX' x) >>= tolmmr
+cir2lmmr' cir = moveH (F.desugar_cir cir) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (\x -> {-# SCC "moveCX'-" #-} moveCX' x) >>= tolmmr
 
-cir2lmmr'2 cir = (moveH cir) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (\xs -> tolmmr $ filter (not . isCX) xs)
+cir2lmmr'2 cir = moveH cir >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= (tolmmr . filter (not . isCX))
 
 gf_split :: [Gate] -> ([Gate], [Gate], [Gate])
 gf_split cir = (l, m, r)
@@ -1384,11 +1349,11 @@ gf_opt cir = cir' where
   l' = tolmmr l >>= t
 -}
 
-cir2lmmr'' cir = (initLMR (F.desugar_cir cir)) >>= (moveH) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= fusion_wCX >>= moveCX >>= tolmmr -- >>= runIds id4s
+cir2lmmr'' cir = initLMR (F.desugar_cir cir) >>= moveH >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= fusion_wCX >>= moveCX >>= tolmmr -- >>= runIds id4s
 
-cir2lmmr2 cir = (initLMR (F.desugar_cir cir)) >>= (moveH) >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= fusion_wCX >>= moveCX >>= decompGad 8 >>= tolmmr --  >>= runId 1
+cir2lmmr2 cir = initLMR (F.desugar_cir cir) >>= moveH >>= decompH >>= cir2lxr >>= pickClifford >>= moveX >>= moveSwap >>= fusion_wCX >>= moveCX >>= decompGad 8 >>= tolmmr --  >>= runId 1
 
-tolxr cir = (initLMR (F.desugar_cir cir)) >>= (moveH)
+tolxr cir = initLMR (F.desugar_cir cir) >>= moveH
 
 tcount :: LMMR -> Int
 tcount lmmr = MS.size $ fst $ evalState lmmr (([], []), (0, 0), (0, 0, 0))
@@ -1401,7 +1366,7 @@ tcount_zx xs = length $ filter isTGad xs'
 tct :: TGCG -> LMMR
 tct tgcg = do
   ((l, r), (vq, fq), (int, fut, idt)) <- get
-  put ((l, r), (vq, fq), (int, fut, (MS.size (fst tgcg))))
+  put ((l, r), (vq, fq), (int, fut, MS.size (fst tgcg)))
   return tgcg
 
 moveSwap :: [Gate] -> LMR
@@ -1496,7 +1461,7 @@ moveCX zx = do
   let (mm', xr') = movecxr $ reverse mm
   --  let (mm, cxr) = partition (not.isCliffordg) $ movecx_R zx
   ((l, r), (vq, fq), tct) <- get
-  put ((l ++ (reverse xr'), xr ++ r), (vq, fq), tct)
+  put ((l ++ reverse xr', xr ++ r), (vq, fq), tct)
   --  put ((l,cxr++r),ii)
   return $ reverse mm'
 
@@ -1510,10 +1475,10 @@ dropWhileB p xs = reverse $ dropWhile p $ reverse xs
 hdecomp :: Gate -> LMR
 hdecomp (H i) = do
   ((lo, ro), (vq, fq), tct) <- get
-  let l = [Init QMY (fq)]
-  let r = [Term QMY (fq)]
+  let l = [Init QMY fq]
+  let r = [Term QMY fq]
   put ((lo ++ l, r ++ ro), (vq, fq + 1), tct)
-  return $ [(Swap i fq), (CZ i fq)]
+  return [(Swap i fq), (CZ i fq)]
 hdecomp g = return [g]
 
 hsdecomp :: [Gate] -> LMR

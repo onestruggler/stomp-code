@@ -13,25 +13,23 @@ import System.Environment
 import Text.ParserCombinators.ReadP
 
 next_word :: ReadP String
-next_word = many $ satisfy (\x -> not (x `elem` ", \n\r"))
+next_word = many $ satisfy (\x -> notElem x ", \n\r")
 
 replace :: Char -> Char -> String -> String
 replace a b [] = []
-replace a b (h : t) = case h == a of
-  True -> b : replace a b t
-  False -> h : replace a b t
+replace a b (h : t) = if h == a then b : replace a b t else h : replace a b t
 
 qGate :: [String] -> ReadP Gate
 qGate s =
-  (qt7 s)
-    <++ (qt6 s)
-    <++ (qt5 s)
-    <++ (qt4 s)
-    <++ (qt3 s)
-    <++ (qt2 s)
-    <++ (qt1 s)
-    <++ (qTT s)
-    <++ (qSS s)
+  qt7 s
+    <++ qt6 s
+    <++ qt5 s
+    <++ qt4 s
+    <++ qt3 s
+    <++ qt2 s
+    <++ qt1 s
+    <++ qTT s
+    <++ qSS s
 
 qSS s = do
   skipSpaces
@@ -88,10 +86,10 @@ qt4 s = do
   target <- next_word
   return
     ( Toffolin
-        [ (unJust (target `elemIndex` s)),
-          (unJust (c1 `elemIndex` s)),
-          (unJust (c2 `elemIndex` s)),
-          (unJust (c3 `elemIndex` s))
+        [ unJust (target `elemIndex` s),
+          unJust (c1 `elemIndex` s),
+          unJust (c2 `elemIndex` s),
+          unJust (c3 `elemIndex` s)
         ]
     )
 
@@ -108,7 +106,7 @@ qt5 s = do
   c4 <- next_word
   string ","
   target <- next_word
-  return (Toffolin [(unJust (target `elemIndex` s)), (unJust (c1 `elemIndex` s)), (unJust (c2 `elemIndex` s)), (unJust (c3 `elemIndex` s)), (unJust (c4 `elemIndex` s))])
+  return (Toffolin [unJust (target `elemIndex` s), unJust (c1 `elemIndex` s), unJust (c2 `elemIndex` s), unJust (c3 `elemIndex` s), unJust (c4 `elemIndex` s)])
 
 qt6 s = do
   skipSpaces
@@ -125,7 +123,7 @@ qt6 s = do
   c5 <- next_word
   string ","
   target <- next_word
-  return (Toffolin [(unJust (target `elemIndex` s)), (unJust (c1 `elemIndex` s)), (unJust (c2 `elemIndex` s)), (unJust (c3 `elemIndex` s)), (unJust (c4 `elemIndex` s)), (unJust (c5 `elemIndex` s))])
+  return (Toffolin [unJust (target `elemIndex` s), unJust (c1 `elemIndex` s), unJust (c2 `elemIndex` s), unJust (c3 `elemIndex` s), unJust (c4 `elemIndex` s), unJust (c5 `elemIndex` s)])
 
 qt7 s = do
   skipSpaces
@@ -144,7 +142,7 @@ qt7 s = do
   c6 <- next_word
   string ","
   target <- next_word
-  return (Toffolin [(unJust (target `elemIndex` s)), (unJust (c1 `elemIndex` s)), (unJust (c2 `elemIndex` s)), (unJust (c3 `elemIndex` s)), (unJust (c4 `elemIndex` s)), (unJust (c5 `elemIndex` s)), (unJust (c6 `elemIndex` s))])
+  return (Toffolin [unJust (target `elemIndex` s), unJust (c1 `elemIndex` s), unJust (c2 `elemIndex` s), unJust (c3 `elemIndex` s), unJust (c4 `elemIndex` s), unJust (c5 `elemIndex` s), unJust (c6 `elemIndex` s)])
 
 qS s = do
   skipSpaces
@@ -287,7 +285,7 @@ names_v = do
   char '.'
   char 'v'
   skipSpaces
-  str <- ((many $ satisfy (\x -> x /= '.')))
+  str <- many $ satisfy (\x -> x /= '.')
   return $ if str /= "BEGIN" then words str else error "parse error, .v line is no good!"
 
 dotv :: ReadP String
@@ -298,10 +296,10 @@ dotv = do
 
 names_v' :: ReadP [String]
 names_v' = do
-  manyTill (satisfy (\c -> True)) dotv
+  manyTill (satisfy (const True)) dotv
   skipSpaces
-  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
-  (many $ satisfy (\x -> x /= 'B'))
+  str <- many $ satisfy (\x -> x /= '.' && x /= 'B')
+  many $ satisfy (\x -> x /= 'B')
   return $ words $ replace ',' ' ' (unwords $ words str)
 
 names_v1 :: ReadP [String]
@@ -309,19 +307,18 @@ names_v1 = do
   char '.'
   char 'v'
   skipSpaces
-  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
+  str <- many $ satisfy (\x -> x /= '.' && x /= 'B')
   return $ words $ replace ',' ' ' (unwords $ words str)
 
 header :: ReadP [String]
 header = do
-  vs <- names_v
-  return vs
+  names_v
 
 qgates :: [String] -> ReadP [Gate]
 qgates s = do
   g <- qGate s
   skipSpaces
-  gs <- (qgates s) <++ return []
+  gs <- qgates s <++ return []
   skipSpaces
   return (g : gs)
 
@@ -329,7 +326,7 @@ qgates1 :: [String] -> ReadP [Gate]
 qgates1 s = do
   g <- qGate s
   skipSpaces
-  gs <- (qgates s) <++ return []
+  gs <- qgates s <++ return []
   skipSpaces
   return (g : gs)
 
@@ -354,21 +351,21 @@ qcir1 = do
 parseTfc :: String -> IO [Gate]
 parseTfc str = do
   --  str <- readFile $ s
-  let (gl, re) = head $ (readP_to_S qcir1) str
+  let (gl, re) = head $ readP_to_S qcir1 str
   let glok = if re /= [] then error ("parse error: " ++ re) else gl
   --putStrLn str
-  return $ glok
+  return glok
 
 parseTfc' :: String -> IO [Gate]
 parseTfc' s = do
-  str <- readFile $ s
-  let (gl, re) = head $ (readP_to_S qcir1) str
+  str <- readFile s
+  let (gl, re) = head $ readP_to_S qcir1 str
   let glok = if re /= [] then error ("parse error: " ++ re) else gl
   --putStrLn str
-  return $ glok
+  return glok
 
 readTfc :: IO String
 readTfc = do
-  str <- readFile $ "qc.qc"
-  let (gl, re) = head $ (readP_to_S qcir) str
-  return $ str
+  str <- readFile "qc.qc"
+  let (gl, re) = head $ readP_to_S qcir str
+  return str

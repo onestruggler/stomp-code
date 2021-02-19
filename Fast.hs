@@ -550,44 +550,28 @@ showcir (LMR l m r) = show l ++ "\n" ++ show m ++ "\n" ++ show r
 
 -- | class for Thing that can be show in pdf.
 class PDFable a where
+  topdf_generic :: Format -> a -> IO ()
   topdf :: a -> IO ()
+  topdf = topdf_generic Preview
   topdf_file :: a -> IO ()
+  topdf_file = topdf_generic PDF
 
 instance PDFable [Gate] where
-  topdf cir = do
+  topdf_generic format cir = do
     print_generic
-      Preview
-      ( \x -> do
-          foldM gl2cir x (reindexCir (+ 1) cir)
-      )
-      (replicate (1 + maximum (wiresOfCir cir)) qubit)
-
-  topdf_file cir = do
-    print_generic
-      PDF
+      format
       ( \x -> do
           foldM gl2cir x (reindexCir (+ 1) cir)
       )
       (replicate (1 + maximum (wiresOfCir cir)) qubit)
 
 instance PDFable [[Gate]] where
-  topdf cir = topdf cir'
-    where
-      cir' = intercalate [M 0] cir
+  topdf_generic format = topdf_generic format . intercalate [M 0]
 
 instance PDFable ZXTerm where
-  topdf cir = do
+  topdf_generic format cir = do
     print_generic
-      Preview
-      ( \x -> do
-          foldM zx2cir x cir
-      )
-      (replicate (1 + maximum (wiresOfTerm cir) - initqw) qubit)
-    where
-      initqw = length $ wiresOfTerm $ filter isInit cir
-  topdf_file cir = do
-    print_generic
-      PDF
+      format
       ( \x -> do
           foldM zx2cir x cir
       )
@@ -596,30 +580,10 @@ instance PDFable ZXTerm where
       initqw = length $ wiresOfTerm $ filter isInit cir
 
 instance PDFable Term where
-  topdf term@(LMR l m r) = do
+  topdf_generic format term@(LMR l m r) = do
     let xs = replicate (1 + maximum (wiresOfTerm cir) - initqw) qubit
     print_generic
-      Preview
-      ( \x -> do
-          x' <- foldM zx2cir x l
-          --                        comment "Clifford on the left"
-          comment ("t-count: " ++ show (tCount term))
-          --                        comment "t-count per wire"
-          label x' (map show (aveTGs term))
-          foldM_ zx2cir x' m
-          comment "Clifford on the right"
-          foldM zx2cir x' r
-      )
-      xs
-    where
-      (ll, lr) = partition isInit l
-      l' = lr ++ ll
-      cir = l ++ m ++ r
-      initqw = length $ wiresOfTerm $ filter isInit cir
-  topdf_file term@(LMR l m r) = do
-    let xs = replicate (1 + maximum (wiresOfTerm cir) - initqw) qubit
-    print_generic
-      PDF
+      format
       ( \x -> do
           x' <- foldM zx2cir x l
           --                        comment "Clifford on the left"
@@ -638,10 +602,10 @@ instance PDFable Term where
       initqw = length $ wiresOfTerm $ filter isInit cir
 
 instance PDFable (LMR [Gate]) where
-  topdf term@(LMR l' m' r') = do
+  topdf_generic format term@(LMR l' m' r') = do
     let xs = replicate (maximum $ wiresOfCir cir) qubit
     print_generic
-      Preview
+      format
       ( \x -> do
           foldM_ gl2cir x l
           comment "Clifford on the left"

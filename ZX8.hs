@@ -584,14 +584,7 @@ instance ToCir LMR where
       cir = fst s ++ a ++ snd s
 
 instance F.PDFable LMR where
-  topdf lmr = F.topdf (F.LMR l m r)
-    where
-      (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
-      s = s'
-      l = fst s
-      m = a
-      r = snd s
-  topdf_file lmr = F.topdf_file (F.LMR l m r)
+  topdf_generic format lmr = F.topdf_generic format (F.LMR l m r)
     where
       (a, (s', vqfq, tct)) = runState lmr (([], []), (0, 0), (0, 0, 0))
       s = s'
@@ -610,7 +603,7 @@ mycmp (Ga p1 ws1) (Ga p2 ws2)
   | otherwise = compare (Set.size ws1) (Set.size ws2)
 
 instance F.PDFable LMMR where
-  topdf lmmr = F.topdf (F.LMR l m r)
+  topdf_generic format lmmr = F.topdf_generic format (F.LMR l m r)
     where
       (a, (s', vqfq, tct)) = runState lmmr (([], []), (0, 0), (0, 0, 0))
       s = s'

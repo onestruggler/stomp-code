@@ -1,33 +1,32 @@
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
-module QCParser (parseQC, parseQC')  where
-import System.Environment
-import Data.Char
-import qualified Data.Set as Set 
-import Data.List
-import GateStruct
+module QCParser (parseQC, parseQC') where
+
 import Control.Monad
+import Data.Char
+import Data.List
+import qualified Data.Set as Set
+import GateStruct
+import System.Environment
 --import Control.Applicative
 
-import Text.ParserCombinators.ReadP 
+import Text.ParserCombinators.ReadP
 
 next_word :: ReadP String
-next_word = many $ satisfy (\x -> not (x `elem` " \n\r")) 
-
-
+next_word = many $ satisfy (\x -> not (x `elem` " \n\r"))
 
 qGate :: [String] -> ReadP Gate
-qGate s =  qCCZ s
-  <++ qtof2 s
---  <++ ( qCnot1 s)
-  <++ ( qCnot3 s)  
-  <++ ( qX s)
---  <++ ( qNot s)  
-  <++ ( qZ s)
-  <++ ( qT s)  
-  <++ ( qH s)
-  <++ ( qS s)    
-
+qGate s =
+  qCCZ s
+    <++ qtof2 s
+    --  <++ ( qCnot1 s)
+    <++ (qCnot3 s)
+    <++ (qX s)
+    --  <++ ( qNot s)
+    <++ (qZ s)
+    <++ (qT s)
+    <++ (qH s)
+    <++ (qS s)
 
 qS s = do
   skipSpaces
@@ -38,7 +37,6 @@ qS s = do
   return (S (unJust (target `elemIndex` s)))
 
 unJust (Just a) = a
-
 
 {-
 qS' s = do
@@ -80,6 +78,7 @@ qZ s = do
   target <- next_word
   skipSpaces
   return (Z (unJust (target `elemIndex` s)))
+
 {-
 qT' s = do
   skipSpaces
@@ -137,7 +136,6 @@ qtof2 s = do
   skipSpaces
   return (CX (unJust (target `elemIndex` s)) (unJust (control `elemIndex` s)))
 
-
 qTof s = do
   skipSpaces
   string "Tof"
@@ -174,7 +172,6 @@ qCCZ s = do
   skipSpaces
   return (CCZ (unJust (target `elemIndex` s)) (unJust (control1 `elemIndex` s)) (unJust (control2 `elemIndex` s)))
 
-
 -- qTof4 s = do
 --   skipSpaces
 --   string "Tof"
@@ -189,7 +186,6 @@ qCCZ s = do
 --   skipSpaces
 --   return (Toffoli (unJust (target `elemIndex` s)) (unJust (control1 `elemIndex` s)) (unJust (control2 `elemIndex` s)) (unJust (control3 `elemIndex` s)))
 
-
 qCZ s = do
   skipSpaces
   string "CZ"
@@ -200,35 +196,28 @@ qCZ s = do
   skipSpaces
   return (CZ (unJust (target `elemIndex` s)) (unJust (control `elemIndex` s)))
 
-
 names_v :: ReadP [String]
 names_v = do
   char '.'
   char 'v'
   skipSpaces
   str <- ((many $ satisfy (\x -> x /= '.')))
-  return $  if str /= "BEGIN" then words str else error "parse error, .v line is no good!"
-
+  return $ if str /= "BEGIN" then words str else error "parse error, .v line is no good!"
 
 names_v' :: ReadP [String]
 names_v' = do
   char '.'
   char 'v'
   skipSpaces
-  str <-  (many $ satisfy (\x -> x /= '.' && x /= 'B'))
+  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
   return $ words str
-
-
 
 header :: ReadP [String]
 header = do
   vs <- names_v
   return vs
 
-  
-
-
-qgates :: [String] ->  ReadP [Gate]
+qgates :: [String] -> ReadP [Gate]
 qgates s = do
   g <- qGate s
   skipSpaces
@@ -236,28 +225,26 @@ qgates s = do
   skipSpaces
   return (g : gs)
 
-
 qcir = do
   s <- names_v'
-  skipSpaces  
+  skipSpaces
   string "BEGIN"
-  skipSpaces  
+  skipSpaces
   gl <- qgates s
   skipSpaces
   string "END"
   return gl
-
 
 names_v1 :: ReadP [String]
 names_v1 = do
   char '.'
   char 'v'
   skipSpaces
-  str <-  (many $ satisfy (\x -> x /= '.' && x /= 'B'))
+  str <- (many $ satisfy (\x -> x /= '.' && x /= 'B'))
   return $ words str
 
 qcir1 = do
-  s <- names_v1  
+  s <- names_v1
   string "BEGIN"
   gl <- many (qGate s)
   skipSpaces
@@ -265,26 +252,22 @@ qcir1 = do
   skipSpaces
   return gl
 
-
 parseQC :: String -> IO [Gate]
 parseQC str = do
---  str <- readFile $ s
-  let (gl,re) = head $ (readP_to_S qcir1) str
---  putStrLn str
+  --  str <- readFile $ s
+  let (gl, re) = head $ (readP_to_S qcir1) str
+  --  putStrLn str
   return $ gl
-
 
 parseQC' :: String -> IO [Gate]
 parseQC' s = do
   str <- readFile $ s
-  let (gl,re) = head $ (readP_to_S qcir1) str
---  putStrLn str
+  let (gl, re) = head $ (readP_to_S qcir1) str
+  --  putStrLn str
   return $ gl
 
 readQC :: IO String
-readQC = do 
+readQC = do
   str <- readFile $ "qc.qc"
-  let (gl,re) = head $ (readP_to_S qcir) str
+  let (gl, re) = head $ (readP_to_S qcir) str
   return $ str
-
-

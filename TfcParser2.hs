@@ -1,61 +1,69 @@
-module TfcParser2 (parseTfc,parseTfc')  where
-import System.Environment
-import Data.Char
-import qualified Data.Set as Set 
-import Data.List
-import qualified GateStruct as GS
-import Control.Monad
+module TfcParser2 (parseTfc, parseTfc') where
 
+import Control.Monad
+import Data.Char
+import Data.List
 {-
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 -}
 
-import Text.Parsec hiding (space)
-import Text.Parsec.Char hiding (space)
 --import Text.Parsec.Number
-
 
 import Data.Map.Strict (Map, (!))
 import qualified Data.Map.Strict as MS
+import qualified Data.Set as Set
+import qualified GateStruct as GS
+import System.Environment
+import Text.Parsec hiding (space)
+import Text.Parsec.Char hiding (space)
 
 type GName = String
+
 type GWire = String
 
 data Gate = Gate GName [GWire] deriving (Eq, Show, Ord)
 
-data DotTfc = DotTfc { qubits  :: [GWire],
-                     inputs  :: [GWire],
-                     outputs :: [GWire],
-                     glist   :: [Gate] }
+data DotTfc = DotTfc
+  { qubits :: [GWire],
+    inputs :: [GWire],
+    outputs :: [GWire],
+    glist :: [Gate]
+  }
 
-
-instance  Show DotTfc where
-  show (DotTfc q i o glist) = intercalate "\n" (q':i':o':bod)
-    where q'  = ".v " ++ showLst q
-          i'  = ".i " ++ showLst (filter (`elem` i) q)
-          o'  = ".o " ++ showLst (filter (`elem` o) q)
-          bod = map show glist
-          showLst = intercalate ","
+instance Show DotTfc where
+  show (DotTfc q i o glist) = intercalate "\n" (q' : i' : o' : bod)
+    where
+      q' = ".v " ++ showLst q
+      i' = ".i " ++ showLst (filter (`elem` i) q)
+      o' = ".o " ++ showLst (filter (`elem` o) q)
+      bod = map show glist
+      showLst = intercalate ","
 
 {- Parser -}
 
 space = char ' '
+
 comma = char ','
+
 semicolon = char ';'
+
 sep = space <|> tab <|> comma
+
 comment = char '#' >> manyTill anyChar endOfLine >> return '#'
+
 delimiter = semicolon <|> endOfLine
 
-skipSpace     = skipMany $ sep <|> comment
+skipSpace = skipMany $ sep <|> comment
+
 skipWithBreak = many1 (skipMany sep >> delimiter >> skipMany sep)
 
 parseID = try $ do
-  c  <- letter
+  c <- letter
   cs <- many (alphaNum <|> char '*')
-  if (c:cs) == "BEGIN" || (c:cs) == "END" then fail "" else return (c:cs)
+  if (c : cs) == "BEGIN" || (c : cs) == "END" then fail "" else return (c : cs)
 
-parseParams = sepEndBy (many1 alphaNum) (many1 sep) 
+parseParams = sepEndBy (many1 alphaNum) (many1 sep)
 
 {-
 parseDiscrete = do
@@ -76,13 +84,12 @@ parseAngle = do
 
 parseGate = do
   name <- parseID
---  param <- optionMaybe parseAngle
---  reps <- option 1 (char '^' >> nat)
+  --  param <- optionMaybe parseAngle
+  --  reps <- option 1 (char '^' >> nat)
   skipSpace
   params <- parseParams
   skipSpace
   return $ Gate name params
-
 
 parseCir = do
   string "BEGIN"
@@ -117,15 +124,16 @@ parseFile = do
 parseDotTfc :: String -> Either ParseError DotTfc
 parseDotTfc = parse parseFile ".qc parser"
 
-unJust (Just a) = a 
+unJust (Just a) = a
 
 d2cir :: DotTfc -> (Int, [GS.Gate])
-d2cir (DotTfc q i o glist) = (length q, map g2g glist) where
-  qix = MS.fromList (zip q [0..length q - 1])
-  ix p = unJust $ MS.lookup p qix
-  g2g (Gate "t1" ps) = GS.X (ix $ head ps)
-  g2g (Gate "t2" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
-  g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))  
+d2cir (DotTfc q i o glist) = (length q, map g2g glist)
+  where
+    qix = MS.fromList (zip q [0 .. length q - 1])
+    ix p = unJust $ MS.lookup p qix
+    g2g (Gate "t1" ps) = GS.X (ix $ head ps)
+    g2g (Gate "t2" ps) = GS.CX (ix (ps !! 1)) (ix (ps !! 0))
+    g2g (Gate "t3" ps) = GS.CCX (ix (ps !! 2)) (ix (ps !! 0)) (ix (ps !! 1))
 
 parseTfc :: String -> IO (Int, [GS.Gate])
 parseTfc bs = case parseDotTfc bs of
@@ -134,5 +142,5 @@ parseTfc bs = case parseDotTfc bs of
 parseTfc' :: String -> IO [GS.Gate]
 parseTfc' fn = do
   bs <- readFile fn
-  (p1,p2) <- parseTfc bs
+  (p1, p2) <- parseTfc bs
   return $ p2

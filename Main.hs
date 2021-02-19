@@ -281,7 +281,7 @@ run stdgen options (x:[]) = do
             "wire" -> (wireids $ {-# SCC "runIds_r-" #-} ZX.runIds_r stdgen )
 
 -}
-  let cir_s = ((ZX.initLMR' ivq (desugar_cir cir_in))  >>= ZX.cir2lmmr')  >>= (ZX.runIds_rw stdgen 20000 []) --  (ZX.id4s ++ ZX.zxid45s))  -- >>= (ZX.runIds_r stdgen 5000  (take 127 ZX.id56s ++ ZX.wid96))
+  let cir_s = ((ZX.initLMR' ivq (desugar_cir cir_in))  >>= ZX.cir2lmmr')  >>= (ZX.runIds_rw stdgen 20000 (ZX.id4s ++ ZX.zxid45s))  -- >>= (ZX.runIds_r stdgen 5000  (take 127 ZX.id56s ++ ZX.wid96))
   let (af, ((ll,rr),wcw@(vq,fq),tct@(int,fut,idt))) = runState (cir_s>>=ZX.tct) (([],[]),(0,0),(0,0,0))
   let cin = ToF.cir2string vq vq  cir_in
   let cio = ToF.cir2string vq fq ( ll ++ (ZX.gads2cir2 (fst af)++ (ZX.gads2cir2 (snd af) ++ rr)))

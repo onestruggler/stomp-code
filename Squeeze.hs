@@ -273,8 +273,8 @@ instantiate1 _ g = g
 type Column = [Gate]
 
 instantiate_column :: Subst -> Column -> Column
-instantiate_column t c
-  = foldl (\ c h -> map (instantiate1 h) c) c t
+instantiate_column t c =
+  foldl (\c h -> map (instantiate1 h) c) c t
 
 instantiate :: Subst -> [[Gate]] -> [[Gate]]
 instantiate [] xs = xs
@@ -381,8 +381,8 @@ runRules_rep rules sc
 
 -- | like runRule, this also makes Squeezed Circuit loosely squeezed.
 runRules :: Rules -> SqueezedC -> SqueezedC
-runRules t xss
-  = foldl (\ xss h -> squeeze $ concat $ runRule h xss) xss t
+runRules t xss =
+  foldl (\xss h -> squeeze $ concat $ runRule h xss) xss t
 
 runRules' :: Rules' -> SqueezedC -> SqueezedC
 runRules' rules xss = foldl' (flip runRule') xss rules

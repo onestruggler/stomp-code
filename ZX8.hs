@@ -10,15 +10,15 @@ import Control.Applicative
 import Control.DeepSeq
 import Control.Monad
 import Control.Monad.State
+import Data.Bifunctor
 import Data.Distribution.Core
 import Data.Distribution.Sample
 import Data.Function
-import Data.Maybe
-import Data.Bifunctor
 import qualified Data.HashMap.Strict as MS
 import qualified Data.HashTable.ST.Basic as HT
 import Data.Hashable
 import Data.List
+import Data.Maybe
 import Data.Ratio
 import qualified Data.Set as Set
 import qualified Fast as F
@@ -296,7 +296,7 @@ sampleNw stdg n di = (ws, stdg')
         else (ws'', stdg'')
 
 sampleNws :: StdGen -> Int -> Int -> Distribution Int -> ([[Int]], StdGen)
-sampleNws stdg 0 n di = ([], stdg) where
+sampleNws stdg 0 n di = ([], stdg)
 sampleNws stdg m n di = (xss, stdg')
   where
     (xss'', stdg'') = sampleNws stdg (m -1) n di
@@ -312,8 +312,9 @@ sampleNws stdg m n di = (xss, stdg')
 -- simulated annealing.
 tryId :: StdGen -> Int -> Identity -> TGCG -> (TGCG, StdGen)
 tryId stdg tol id@(tg, cg) mm@(tm, cm) = if nt > dlen - tol then ((tm', cm'), stdg) else (mm, stdg)
-  -- stdg'
   where
+    -- stdg'
+
     dlen = MS.size tg `div` 2
     --    (tol', stdg') =  randomR (0,tol) stdg
     tol' = tol
@@ -334,7 +335,9 @@ tryId stdg tol id@(tg, cg) mm@(tm, cm) = if nt > dlen - tol then ((tm', cm'), st
     tm1 = foldl' (\ys x -> MS.delete (fst x) ys) tm jkeys'
     tm' = foldl' (flip (uncurry MS.insert)) tm1 nkeys'
     cm1 =
-      foldl' (flip (uncurry (MS.insertWith pmod8))) cm
+      foldl'
+        (flip (uncurry (MS.insertWith pmod8)))
+        cm
         (map (\(x, y) -> (fst x, pmod8 (snd x) (unJust y))) jkeys)
     cm' = foldl' (flip (uncurry (MS.insertWith pmod8))) cm1 $ MS.toList cg
 
@@ -446,7 +449,8 @@ wiresOfId id@(t, c) = Set.toList $ foldl' Set.union Set.empty (MS.keys t ++ MS.k
 -- | return n-gadgets that lies on first (n+4) wires, input gads
 -- should have keys of the same size.
 ngads :: Int -> Gads -> Gads
-ngads n = MS.foldlWithKey'
+ngads n =
+  MS.foldlWithKey'
     ( \b k v ->
         let b' = MS.insert k v b
          in if length (wiresOfGads b') <= n + 4
@@ -547,7 +551,7 @@ runIds_r :: StdGen -> Int -> [Identity] -> TGCG -> LMMR
 runIds_r stdgen rep ids mm = mm'
   where
     tols = [0] :: [Int]
-    rts = map (\ x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
+    rts = map (\x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
     ct = foldl (.) id rts
     ct' = if length wog <= 21 then (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a) else (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_sa g rep 0 ids a)
     mm' = return $ fst $ ct' (mm, stdgen)
@@ -557,7 +561,7 @@ runIds_rw :: StdGen -> Int -> [Identity] -> TGCG -> LMMR
 runIds_rw stdgen rep ids mm = do
   (_, (vq, fq), _) <- get
   let tols = [0] :: [Int]
-  let rts = map (\ x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
+  let rts = map (\x (a, g) -> {-# SCC "runIds_sa-" #-} runIds_saf g x ids a) tols
   let ct = foldl (.) id rts
   let ct' = if fq <= 27 then (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_safr g 0 ids a) else (\(a, g) -> {-# SCC "runIds_sa-" #-} runIds_saw g rep 0 fq ids a)
   let mm' = fst $ ct' (mm, stdgen)
@@ -813,9 +817,11 @@ insertcsg (Swap i j) (CX k l : t)
     t' <- insertcsg (Swap i j) t
     return $ CX k' l' : t'
   where
-    (k', l') = if i == k then (j, l) else (if i == l then (k, j) else (case j == k of
-                                                                True -> (i, l)
-                                                                False -> (k, i)))
+    (k', l')
+      | i == k = (j, l)
+      | i == l = (k, j)
+      | j == k = (i, l)
+      | otherwise = (k, i)
 insertcsg (Swap i j) (Ga p ws : t) = do
   t' <- insertcsg (Swap i j) t
   return $ x' : t'
@@ -1106,15 +1112,21 @@ movecxccx :: ([Gate], [Gate]) -> LR' ([Gate], [Gate])
 movecxccx (m, a@(CX i j) : t) = do
   let ((tr, nr), (lr, rr)) = movecxccx_i' $ a : t
   let ((tl, nl), (ll, rl)) = movecxccx_i' $ a : m
-  if nr < nl then (do
-    (l, r) <- get
-    put (l, rr ++ r)
-    movecxccx (m, tr)) else (do
-    (l, r) <- get
-    put (l ++ reverse rl, r)
-    movecxccx (tl, t))
-    -- insertcss rr r)
-    --      seq (movecxccx (m,tr)) (movecxccx (m,tr))
+  if nr < nl
+    then
+      ( do
+          (l, r) <- get
+          put (l, rr ++ r)
+          movecxccx (m, tr)
+      )
+    else
+      ( do
+          (l, r) <- get
+          put (l ++ reverse rl, r)
+          movecxccx (tl, t)
+      )
+-- insertcss rr r)
+--      seq (movecxccx (m,tr)) (movecxccx (m,tr))
 --      seq (movecxccx (tl, t)) (movecxccx (tl, t))
 movecxccx (m, h : t) = do
   movecxccx (h : m, t)
@@ -1199,15 +1211,21 @@ movecx (m, a@(CX i j) : t) = do
   let nlc = filter (\(Ga p ws) -> j `member` ws) nlt
   let nl' = length nlt - 2 * length nlc
   let ((tl, nl), (ll, rl)) = movecx_i' $ a : m
-  if nr' < nl' then (do
-    (l, r) <- get
-    put (l, rr ++ r)
-    movecx (m, tr)) else (do
-    (l, r) <- get
-    put (l ++ reverse rl, r)
-    movecx (tl, t))
-    -- insertcss rr r)
-    --      seq (movecx (m,tr)) (movecx (m,tr))
+  if nr' < nl'
+    then
+      ( do
+          (l, r) <- get
+          put (l, rr ++ r)
+          movecx (m, tr)
+      )
+    else
+      ( do
+          (l, r) <- get
+          put (l ++ reverse rl, r)
+          movecx (tl, t)
+      )
+-- insertcss rr r)
+--      seq (movecx (m,tr)) (movecx (m,tr))
 --      seq (movecx (tl, t)) (movecx (tl, t))
 movecx (m, h : t) = do
   movecx (h : m, t)

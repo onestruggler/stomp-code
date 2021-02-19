@@ -1,3 +1,5 @@
+{-# LANGUAGE TupleSections #-}
+
 module QuipperParser where
 
 --import Bmv5
@@ -17,9 +19,9 @@ import System.Environment
 
 test_gate = QGate "TT" False [0, 1, 2] [3, 4] [Signed 5 True, Signed 6 False] True
 
-t_arity_in = IM.fromList (map (\x -> (x, Qbit)) [0 .. 10])
+t_arity_in = IM.fromList (map (,Qbit) [0 .. 10])
 
-t_arity_out = IM.fromList (map (\x -> (x, Qbit)) [0 .. 5])
+t_arity_out = IM.fromList (map (,Qbit) [0 .. 5])
 
 cir = (t_arity_in, [test_gate], t_arity_out, 11 :: Int)
 
@@ -54,7 +56,7 @@ parse file = do
   str <- readFile file
   let (eps, circ) = parse_circuit str
   let len = length eps
-  let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
+  let exta1 = xintmap_inserts (map (,Qbit) [0 .. len -1]) xintmap_empty
   let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   preview_bcircuit bcir
@@ -67,7 +69,7 @@ parseQuipper :: String -> IO (Int, [MyGateS.Gate])
 parseQuipper str = do
   let (eps, circ) = parse_circuit str
   let len = length eps
-  let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
+  let exta1 = xintmap_inserts (map (,Qbit) [0 .. len -1]) xintmap_empty
   let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   --  preview_bcircuit bcir
@@ -81,7 +83,7 @@ parseQuipper' s = do
   str <- readFile s
   let (eps, circ) = parse_circuit str
   let len = length eps
-  let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
+  let exta1 = xintmap_inserts (map (,Qbit) [0 .. len -1]) xintmap_empty
   let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   --  preview_bcircuit bcir

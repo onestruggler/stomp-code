@@ -9,10 +9,12 @@ import Control.Monad
 
 import Control.Monad.State
 import Control.Monad.Trans.Writer.Strict
+import Data.Bifunctor
 import Data.Char
 import Data.Function
 import Data.List
 import qualified Data.Map.Strict as M
+import Data.Maybe
 import qualified Data.Set as Set
 import GateStruct
 import QCParser
@@ -21,8 +23,6 @@ import Quipper.Libraries.QuipperASCIIParser
 import QuipperParser
 import System.Environment
 import TfcParser
-import Data.Bifunctor
-import Data.Maybe
 
 --import qc2_inHSformat
 i45eff_inc = sortBy (compare `on` t_count) i45eff
@@ -167,11 +167,18 @@ id_tof_cnot (Cnot i j, Toffoli a b c) = case i /= b && i /= c && j == a of
   True -> (Toffoli a b c, Toffoli i b c, Cnot i j)
 
 preProcess_tof_cnot' :: [Gate] -> Maybe [Gate]
-preProcess_tof_cnot' ((Cnot i j) : (Toffoli a b c) : t) = if i /= b && i /= c && j == a then (do
-                                                            --    t' <-  (preProcess_tof_cnot' ((Cnot i j) : t))
-                                                            return (Toffoli a b c : Toffoli i b c : Cnot i j : t)) else (do
-                                                            --    t' <-  (preProcess_tof_cnot' ((Cnot i j) : t))
-                                                            return (Toffoli a b c : Cnot i j : t))
+preProcess_tof_cnot' ((Cnot i j) : (Toffoli a b c) : t) =
+  if i /= b && i /= c && j == a
+    then
+      ( do
+          --    t' <-  (preProcess_tof_cnot' ((Cnot i j) : t))
+          return (Toffoli a b c : Toffoli i b c : Cnot i j : t)
+      )
+    else
+      ( do
+          --    t' <-  (preProcess_tof_cnot' ((Cnot i j) : t))
+          return (Toffoli a b c : Cnot i j : t)
+      )
 preProcess_tof_cnot' (h : xs) = do
   xs' <- preProcess_tof_cnot' xs
   return (h : xs')
@@ -645,7 +652,8 @@ focusOnwiresCir :: [Int] -> [Gate] -> [Gate]
 focusOnwiresCir wires = filter (\x -> not . null $ wiresOfGate x `intersect` wires)
 
 focusOnwiresCirExactly :: [Int] -> [Gate] -> [Gate]
-focusOnwiresCirExactly wires = filter
+focusOnwiresCirExactly wires =
+  filter
     ( \x ->
         Set.fromList (wiresOfGate x) `Set.isSubsetOf` Set.fromList wires
     )
@@ -657,7 +665,8 @@ focusOnwires :: [Int] -> ZXTerm -> ZXTerm
 focusOnwires wires = filter (\x -> not . null $ wiresOfAtom x `intersect` wires)
 
 focusOnwiresExactly :: [Int] -> ZXTerm -> ZXTerm
-focusOnwiresExactly wires = filter
+focusOnwiresExactly wires =
+  filter
     ( \x ->
         Set.fromList (wiresOfAtom x) `Set.isSubsetOf` wires'
     )
@@ -706,7 +715,8 @@ fuse' (a : t) = last t' : fuse' (init t')
 fuse'1 :: ZXAtom -> ZXTerm -> ZXTerm
 fuse'1 (G p xs) [] = [G p xs]
 fuse'1 a@(G p xs) (h@(G q ys) : t) = if xs == ys then fuse'1 (G (p + q `mod` 8) xs) t else h : fuse'1 a t
-  --(sort xs) == (sort ys), xs ys will always be sorted list
+
+--(sort xs) == (sort ys), xs ys will always be sorted list
 
 -- | fast way to do fusion O(logt)
 
@@ -716,9 +726,13 @@ fuse2 :: ZXTerm -> Maybe ZXTerm
 fuse2 [] = Nothing
 fuse2 [a] = Nothing
 fuse2 (a@(G k is) : b@(G l is') : t) =
-  if sort is == sort is' then return (G ((k + l) `mod` 8) is : t) else (do
-    r1 <- fuse2 $ b : t
-    return $ a : r1)
+  if sort is == sort is'
+    then return (G ((k + l) `mod` 8) is : t)
+    else
+      ( do
+          r1 <- fuse2 $ b : t
+          return $ a : r1
+      )
 fuse2 (h : t) = do
   t' <- fuse2 t
   return (h : t')
@@ -813,10 +827,17 @@ type LogEntry = ZXTerm
 rewriteWithIdentityM :: ZXTerm -> Term -> Writer [LogEntry] Term
 rewriteWithIdentityM eo term@(LMR lo mo ro) =
   if t_count m2' >= 8
-    then if t_count commonGadgets > (t_count e `div` 2) then (do
-           tell [e]
-           return fused) else (do
-           return term)
+    then
+      if t_count commonGadgets > (t_count e `div` 2)
+        then
+          ( do
+              tell [e]
+              return fused
+          )
+        else
+          ( do
+              return term
+          )
     else do
       return term
   where
@@ -922,123 +943,135 @@ id7s wires = [] : [id7 sevenwires | sevenwires <- choosen 7 wires]
 -- indexes in the first argument.
 id45s :: [Int] -> [ZXTerm]
 id45s w =
-  [fuseHomoGs (e4 ++ e5) |
-   ff <- choosen 5 w, e4 <- id4s ff, e5 <- id5s ff]
+  [ fuseHomoGs (e4 ++ e5)
+    | ff <- choosen 5 w,
+      e4 <- id4s ff,
+      e5 <- id5s ff
+  ]
 
 id45s234 w = id45s2 w ++ id45s3 w ++ id45s4 w
 
 id45s5 :: [Int] -> [ZXTerm]
 id45s5 w =
-  [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   let c4 = id4s ff,
-   let e1 = c4 !! 1,
-   let e2 = c4 !! 2,
-   let e3 = c4 !! 3,
-   let e4 = c4 !! 4,
-   let e5 = c4 !! 5,
-   let c5 = id5s ff,
-   let e6 = c5 !! 1]
+  [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6)
+    | ff <- choosen 5 w,
+      let c4 = id4s ff,
+      let e1 = c4 !! 1,
+      let e2 = c4 !! 2,
+      let e3 = c4 !! 3,
+      let e4 = c4 !! 4,
+      let e5 = c4 !! 5,
+      let c5 = id5s ff,
+      let e6 = c5 !! 1
+  ]
 
 id45s3 :: [Int] -> [ZXTerm]
 id45s3 w =
-  [fuseHomoGs (e3 ++ e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   let c4 = id4s ff,
-   let e1 = c4 !! 1,
-   let e2 = c4 !! 2,
-   let e3 = c4 !! 3,
-   let e4 = c4 !! 4,
-   let e5 = c4 !! 5,
-   let c5 = id5s ff,
-   let e6 = c5 !! 1]
+  [ fuseHomoGs (e3 ++ e4 ++ e5 ++ e6)
+    | ff <- choosen 5 w,
+      let c4 = id4s ff,
+      let e1 = c4 !! 1,
+      let e2 = c4 !! 2,
+      let e3 = c4 !! 3,
+      let e4 = c4 !! 4,
+      let e5 = c4 !! 5,
+      let c5 = id5s ff,
+      let e6 = c5 !! 1
+  ]
 
 id45s4 :: [Int] -> [ZXTerm]
 id45s4 w =
-  [fuseHomoGs (e2 ++ e3 ++ e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   let c4 = id4s ff,
-   let e1 = c4 !! 1,
-   let e2 = c4 !! 2,
-   let e3 = c4 !! 3,
-   let e4 = c4 !! 4,
-   let e5 = c4 !! 5,
-   let c5 = id5s ff,
-   let e6 = c5 !! 1]
+  [ fuseHomoGs (e2 ++ e3 ++ e4 ++ e5 ++ e6)
+    | ff <- choosen 5 w,
+      let c4 = id4s ff,
+      let e1 = c4 !! 1,
+      let e2 = c4 !! 2,
+      let e3 = c4 !! 3,
+      let e4 = c4 !! 4,
+      let e5 = c4 !! 5,
+      let c5 = id5s ff,
+      let e6 = c5 !! 1
+  ]
 
 id45s2 :: [Int] -> [ZXTerm]
 id45s2 w =
-  [fuseHomoGs (e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   let c4 = id4s ff,
-   let e1 = c4 !! 1,
-   let e2 = c4 !! 2,
-   let e3 = c4 !! 3,
-   let e4 = c4 !! 4,
-   let e5 = c4 !! 5,
-   let c5 = id5s ff,
-   let e6 = c5 !! 1]
+  [ fuseHomoGs (e4 ++ e5 ++ e6)
+    | ff <- choosen 5 w,
+      let c4 = id4s ff,
+      let e1 = c4 !! 1,
+      let e2 = c4 !! 2,
+      let e3 = c4 !! 3,
+      let e4 = c4 !! 4,
+      let e5 = c4 !! 5,
+      let c5 = id5s ff,
+      let e6 = c5 !! 1
+  ]
 
 id45s1n :: [Int] -> [ZXTerm]
 id45s1n w =
   nub $
-    [fuseHomoGs (e1 ++ e2) |
-   ff <- choosen 5 w,
-   ff4 <- choosen 4 ff,
-   let ffc = id4s ff4,
-   e1 <- ffc,
-   e2 <- id5s ff]
+    [ fuseHomoGs (e1 ++ e2)
+      | ff <- choosen 5 w,
+        ff4 <- choosen 4 ff,
+        let ffc = id4s ff4,
+        e1 <- ffc,
+        e2 <- id5s ff
+    ]
 
 id45s2n :: [Int] -> [ZXTerm]
 id45s2n w =
-  [fuseHomoGs (e1 ++ e2 ++ e3) |
-   ff <- choosen 5 w,
-   let ffc = id4s ff,
-   e1 <- ffc,
-   e2 <- id5s ff,
-   e3 <- ffc,
-   e1 /= e3]
+  [ fuseHomoGs (e1 ++ e2 ++ e3)
+    | ff <- choosen 5 w,
+      let ffc = id4s ff,
+      e1 <- ffc,
+      e2 <- id5s ff,
+      e3 <- ffc,
+      e1 /= e3
+  ]
 
 id45s3n :: [Int] -> [ZXTerm]
 id45s3n w =
   nub $
-    [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4) |
-   ff <- choosen 5 w,
-   let ffc = id4s ff,
-   e1 <- ffc,
-   e2 <- id5s ff,
-   e3 <- ffc,
-   e4 <- ffc]
+    [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4)
+      | ff <- choosen 5 w,
+        let ffc = id4s ff,
+        e1 <- ffc,
+        e2 <- id5s ff,
+        e3 <- ffc,
+        e4 <- ffc
+    ]
 
 id45s4n :: [Int] -> [ZXTerm]
 id45s4n w =
   nub $
-    [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5) |
-   ff <- choosen 5 w,
-   ff4 <- choosen 4 ff,
-   let ffc = id4s ff4,
-   e1 <- ffc,
-   e2 <- id5s ff,
-   e3 <- ffc,
-   e4 <- ffc,
-   e5 <- ffc]
+    [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5)
+      | ff <- choosen 5 w,
+        ff4 <- choosen 4 ff,
+        let ffc = id4s ff4,
+        e1 <- ffc,
+        e2 <- id5s ff,
+        e3 <- ffc,
+        e4 <- ffc,
+        e5 <- ffc
+    ]
 
 id45s5n :: [Int] -> [ZXTerm]
 id45s5n w =
   nub $
-    [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   let ffc = id4s ff,
-   e1 <- ffc,
-   e2 <- id5s ff,
-   e3 <- ffc,
-   e4 <- ffc,
-   e5 <- ffc,
-   e6 <- ffc,
-   let em = filter (== []) [e1, e2, e3, e4, e5, e6],
-   let eml = length em,
-   eml == 0 && (length . nub) [e1, e2, e3, e4, e5, e6] == 6
-     || (length . nub) [e1, e2, e3, e4, e5, e6] == 6 - eml + 1]
+    [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6)
+      | ff <- choosen 5 w,
+        let ffc = id4s ff,
+        e1 <- ffc,
+        e2 <- id5s ff,
+        e3 <- ffc,
+        e4 <- ffc,
+        e5 <- ffc,
+        e6 <- ffc,
+        let em = filter (== []) [e1, e2, e3, e4, e5, e6],
+        let eml = length em,
+        eml == 0 && (length . nub) [e1, e2, e3, e4, e5, e6] == 6
+          || (length . nub) [e1, e2, e3, e4, e5, e6] == 6 - eml + 1
+    ]
 
 i45effun :: [Int] -> [ZXTerm]
 i45effun xs = [map (\(G k ws) -> G k (map efff ws)) i45effi | i45effi <- i45eff, xs4 <- choosen 5 xs, let efff = p2f $ zip [0 .. 4] xs4]
@@ -1061,50 +1094,56 @@ i6effun ws = [e5s ++ e6 | ws6 <- choosen 6 ws, e6 <- id6s ws6, e5s <- i45effun w
 
 id45s' :: [Int] -> [ZXTerm]
 id45s' w =
-  [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6) |
-   ff <- choosen 5 w,
-   e1 <- id4s ff,
-   e2 <- id4s ff,
-   e3 <- id4s ff,
-   e4 <- id4s ff,
-   e5 <- id4s ff,
-   e6 <- id5s ff]
+  [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6)
+    | ff <- choosen 5 w,
+      e1 <- id4s ff,
+      e2 <- id4s ff,
+      e3 <- id4s ff,
+      e4 <- id4s ff,
+      e5 <- id4s ff,
+      e6 <- id5s ff
+  ]
 
 id56s' :: [Int] -> [ZXTerm]
 id56s' w =
-  [fuseHomoGs (e4 ++ e5) |
-   ff <- choosen 6 w, e4 <- id5s ff, e5 <- id6s ff]
+  [ fuseHomoGs (e4 ++ e5)
+    | ff <- choosen 6 w,
+      e4 <- id5s ff,
+      e5 <- id6s ff
+  ]
 
 -- | call with 7 number
 id67s :: [Int] -> [ZXTerm]
 id67s w =
-  [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6 ++ e7 ++ e7') |
-   ff <- choosen 7 w,
-   let f6 = id6s ff,
-   let f7 = id7s ff,
-   e1 <- [f6 !! 1, []],
-   e2 <- [f6 !! 2, []],
-   e3 <- [f6 !! 3, []],
-   e4 <- [f6 !! 4, []],
-   e5 <- [f6 !! 5, []],
-   e6 <- [f6 !! 6, []],
-   e7 <- [f6 !! 7, []],
-   e7' <- [f7 !! 1, []]]
+  [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6 ++ e7 ++ e7')
+    | ff <- choosen 7 w,
+      let f6 = id6s ff,
+      let f7 = id7s ff,
+      e1 <- [f6 !! 1, []],
+      e2 <- [f6 !! 2, []],
+      e3 <- [f6 !! 3, []],
+      e4 <- [f6 !! 4, []],
+      e5 <- [f6 !! 5, []],
+      e6 <- [f6 !! 6, []],
+      e7 <- [f6 !! 7, []],
+      e7' <- [f7 !! 1, []]
+  ]
 
 -- | call with 6 number
 id56s :: [Int] -> [ZXTerm]
 id56s w =
-  [fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6 ++ e7) |
-   ff <- choosen 6 w,
-   let f5 = id5s ff,
-   let f6 = id6s ff,
-   e1 <- [f5 !! 1, []],
-   e2 <- [f5 !! 2, []],
-   e3 <- [f5 !! 3, []],
-   e4 <- [f5 !! 4, []],
-   e5 <- [f5 !! 5, []],
-   e6 <- [f5 !! 6, []],
-   e7 <- [f6 !! 1, []]]
+  [ fuseHomoGs (e1 ++ e2 ++ e3 ++ e4 ++ e5 ++ e6 ++ e7)
+    | ff <- choosen 6 w,
+      let f5 = id5s ff,
+      let f6 = id6s ff,
+      e1 <- [f5 !! 1, []],
+      e2 <- [f5 !! 2, []],
+      e3 <- [f5 !! 3, []],
+      e4 <- [f5 !! 4, []],
+      e5 <- [f5 !! 5, []],
+      e6 <- [f5 !! 6, []],
+      e7 <- [f6 !! 1, []]
+  ]
 
 -- | when calling this function, make sure there are 5 distinct
 -- indexes in the first argument.
@@ -1228,67 +1267,128 @@ bubChoice :: Gate -> Gate -> [Gate] -> Maybe [Gate]
 bubChoice a b t =
   let c1 = bubCL1 (a : t)
    in let c2 = bubCL1 (b : t)
-       in if isNothing c1 then (do
-            t' <- bubCL1 $ b : t
-            return $ a : t') else (do
-            t' <- bubCL1 $ a : t
-            return $ b : t')
+       in if isNothing c1
+            then
+              ( do
+                  t' <- bubCL1 $ b : t
+                  return $ a : t'
+              )
+            else
+              ( do
+                  t' <- bubCL1 $ a : t
+                  return $ b : t'
+              )
 
 -- | bubule Clifford H, CZ, Z to the left end.
 bubCL1 :: [Gate] -> Maybe [Gate]
 bubCL1 [] = Nothing
 bubCL1 [a] = Nothing
-bubCL1 ((H i) : (CCZ j k l) : t) = if i `elem` [j, k, l] then (do
-                                     t' <- bubCL1 $ CCZ j k l : t
-                                     return $ H i : t') else Just $ CCZ j k l : H i : t
-bubCL1 ((X i) : (CCZ j k l) : t) = if i `elem` [j, k, l] then (do
-                                     t' <- bubCL1 $ CCZ j k l : t
-                                     return $ X i : t') else Just $ CCZ j k l : X i : t
+bubCL1 ((H i) : (CCZ j k l) : t) =
+  if i `elem` [j, k, l]
+    then
+      ( do
+          t' <- bubCL1 $ CCZ j k l : t
+          return $ H i : t'
+      )
+    else Just $ CCZ j k l : H i : t
+bubCL1 ((X i) : (CCZ j k l) : t) =
+  if i `elem` [j, k, l]
+    then
+      ( do
+          t' <- bubCL1 $ CCZ j k l : t
+          return $ X i : t'
+      )
+    else Just $ CCZ j k l : X i : t
 bubCL1 ((Z i) : (CCZ j k l) : t) = Just $ CCZ j k l : Z i : t
 bubCL1 ((CZ i a) : (CCZ j k l) : t) = Just $ CCZ j k l : CZ i a : t
-bubCL1 ((Cnot i a) : (CCZ j k l) : t) = if i `elem` [j, k, l] then (do
-                                          t' <- bubCL1 $ CCZ j k l : t
-                                          return $ Cnot i a : t') else Just $ CCZ j k l : Cnot i a : t
-bubCL1 ((H i) : (CZ j k) : t) = if i `elem` [j, k] then (do
-                                  t' <- bubCL1 $ CZ j k : t
-                                  return $ H i : t') else bubChoice (H i) (CZ j k) t
+bubCL1 ((Cnot i a) : (CCZ j k l) : t) =
+  if i `elem` [j, k, l]
+    then
+      ( do
+          t' <- bubCL1 $ CCZ j k l : t
+          return $ Cnot i a : t'
+      )
+    else Just $ CCZ j k l : Cnot i a : t
+bubCL1 ((H i) : (CZ j k) : t) =
+  if i `elem` [j, k]
+    then
+      ( do
+          t' <- bubCL1 $ CZ j k : t
+          return $ H i : t'
+      )
+    else bubChoice (H i) (CZ j k) t
 bubCL1 (p@(CZ i a) : q@(CZ j k) : t) = if sort [i, a] == sort [j, k] then Just t else bubChoice p q t
 bubCL1 (p@(CZ j k) : q@(Z i) : t) = bubChoice p q t
-bubCL1 (p@(CZ j k) : q@(H i) : t) = if i `elem` [j, k] then (do
-                                      t' <- bubCL1 (q : t)
-                                      return $ p : t') else bubChoice p q t
-bubCL1 (p@(CZ j k) : q@(X i) : t) = if i `elem` [j, k] then (do
-                                      t' <- bubCL1 (q : t)
-                                      return $ p : t') else bubChoice p q t
-bubCL1 (p@(CZ j k) : q@(Cnot i a) : t) = if i `elem` [j, k] then (do
-                                           t' <- bubCL1 (q : t)
-                                           return $ p : t') else bubChoice p q t
+bubCL1 (p@(CZ j k) : q@(H i) : t) =
+  if i `elem` [j, k]
+    then
+      ( do
+          t' <- bubCL1 (q : t)
+          return $ p : t'
+      )
+    else bubChoice p q t
+bubCL1 (p@(CZ j k) : q@(X i) : t) =
+  if i `elem` [j, k]
+    then
+      ( do
+          t' <- bubCL1 (q : t)
+          return $ p : t'
+      )
+    else bubChoice p q t
+bubCL1 (p@(CZ j k) : q@(Cnot i a) : t) =
+  if i `elem` [j, k]
+    then
+      ( do
+          t' <- bubCL1 (q : t)
+          return $ p : t'
+      )
+    else bubChoice p q t
 bubCL1 (p@(Cnot i a) : q@(Cnot j k) : t)
   | [i, a] == [j, k] = Just t
   | i /= k && a /= j = bubChoice p q t
   | otherwise = do
-  t' <- bubCL1 $ q : t
-  return $ p : t'
-                                                                          -- we will probably introduce Swap, here is one reason
-bubCL1 (p@(Cnot j k) : q@(Z i) : t) = if i == j then (do
-                                        t' <- bubCL1 $ q : t
-                                        return $ p : t') else bubChoice p q t
+    t' <- bubCL1 $ q : t
+    return $ p : t'
+-- we will probably introduce Swap, here is one reason
+bubCL1 (p@(Cnot j k) : q@(Z i) : t) =
+  if i == j
+    then
+      ( do
+          t' <- bubCL1 $ q : t
+          return $ p : t'
+      )
+    else bubChoice p q t
 bubCL1 (p@(Cnot j k) : q@(H i) : t)
   | i == j = Just $ H i : CZ j k : t
   | i == k = do
-  t' <- bubCL1 $ q : t
-  return $ p : t'
+    t' <- bubCL1 $ q : t
+    return $ p : t'
   | otherwise = bubChoice p q t
-bubCL1 (p@(Cnot j k) : q@(X i) : t) = if i `elem` [j, k] then (do
-                                        t' <- bubCL1 $ q : t
-                                        return $ p : t') else bubChoice p q t
+bubCL1 (p@(Cnot j k) : q@(X i) : t) =
+  if i `elem` [j, k]
+    then
+      ( do
+          t' <- bubCL1 $ q : t
+          return $ p : t'
+      )
+    else bubChoice p q t
 -- commuting Z with H X Z
-bubCL1 ((Z i) : (H j) : t) = if i == j then (do
-                               t' <- bubCL1 $ H j : t
-                               return $ Z i : t') else bubChoice (Z i) (H j) t
-bubCL1 ((Z i) : (X j) : t) = if i == j then (do
-                               t' <- bubCL1 $ X j : t
-                               return $ Z i : t') else bubChoice (Z i) (X j) t
+bubCL1 ((Z i) : (H j) : t) =
+  if i == j
+    then
+      ( do
+          t' <- bubCL1 $ H j : t
+          return $ Z i : t'
+      )
+    else bubChoice (Z i) (H j) t
+bubCL1 ((Z i) : (X j) : t) =
+  if i == j
+    then
+      ( do
+          t' <- bubCL1 $ X j : t
+          return $ Z i : t'
+      )
+    else bubChoice (Z i) (X j) t
 bubCL1 (p@(Z i) : q@(Z j) : t) = if i == j then Just t else bubChoice p q t
 -- commuting X with H X
 bubCL1 (p@(X i) : q@(X j) : t) = if i == j then Just t else bubChoice p q t
@@ -1615,21 +1715,38 @@ bgsorder x y =
 hreduce_step :: [Gate] -> Maybe [Gate]
 hreduce_step [] = Nothing
 hreduce_step [a] = Nothing
-hreduce_step ((H i) : (H j) : t) = if i == j then Just t else (do
-                                     t' <- hreduce_step (H j : t)
-                                     return $ H i : t')
+hreduce_step ((H i) : (H j) : t) =
+  if i == j
+    then Just t
+    else
+      ( do
+          t' <- hreduce_step (H j : t)
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (S j) : (H k) : t) =
-  if nub [i, j, k] == [i] then Just $ [S i, S i, S i, H i, S i, S i, S i] ++ t else (do
-    t' <- hreduce_step $ drop 1 xs
-    return $ H i : t')
+  if nub [i, j, k] == [i]
+    then Just $ [S i, S i, S i, H i, S i, S i, S i] ++ t
+    else
+      ( do
+          t' <- hreduce_step $ drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step ((H i) : (S j) : (S l) : (H m) : t) =
-  if nub [i, j, l, m] == [i] then Just $ X i : t else (do
-    t' <- hreduce_step (S j : S l : H m : t)
-    return $ H i : t')
+  if nub [i, j, l, m] == [i]
+    then Just $ X i : t
+    else
+      ( do
+          t' <- hreduce_step (S j : S l : H m : t)
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (X j) : (H m) : t) =
-  if nub [i, j, m] == [i] then Just $ [S i, S i] ++ t else (do
-    t' <- hreduce_step $drop 1 xs
-    return $ H i : t')
+  if nub [i, j, m] == [i]
+    then Just $ [S i, S i] ++ t
+    else
+      ( do
+          t' <- hreduce_step $drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : (CZ o p) : t) =
   case nub [i, j, k, k', n] == [i] && sort [l, m] == sort [o, p] && i `elem` [l, m] of
     True -> Just $ [CZ o p, S i, S q, H i] ++ t
@@ -1639,13 +1756,21 @@ hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : (CZ o p) : 
       t' <- hreduce_step $ drop 1 xs
       return $ H i : t'
 hreduce_step xs@((H i) : (CZ j k) : (H l) : t) =
-  if nub [i, l] == [i] && i `elem` [j, k] then Just $ Cnot i k : t else (do
-    t' <- hreduce_step $ drop 1 xs
-    return $ H i : t')
+  if nub [i, l] == [i] && i `elem` [j, k]
+    then Just $ Cnot i k : t
+    else
+      ( do
+          t' <- hreduce_step $ drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (Cnot j k) : (H l) : t) =
-  if nub [i, l] == [i] && i == j then Just $ CZ j k : t else (do
-    t' <- hreduce_step $ drop 1 xs
-    return $ H i : t')
+  if nub [i, l] == [i] && i == j
+    then Just $ CZ j k : t
+    else
+      ( do
+          t' <- hreduce_step $ drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : t) =
   case nub [i, j, k, k', n] == [i] && i `elem` [l, m] of
     True -> Just $ [CZ l m, S i, S q, H i, CZ l m] ++ t
@@ -1655,21 +1780,37 @@ hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : t) =
       t' <- hreduce_step $ drop 1 xs
       return $ H i : t'
 hreduce_step ((H i) : (S j) : (S l) : t) =
-  if nub [i, j, l] == [i] then Just $ [X i, H i] ++ t else (do
-    t' <- hreduce_step (S j : S l : t)
-    return $ H i : t')
+  if nub [i, j, l] == [i]
+    then Just $ [X i, H i] ++ t
+    else
+      ( do
+          t' <- hreduce_step (S j : S l : t)
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (X j) : t) =
-  if nub [i, j] == [i] then Just $ [S i, S i, H i] ++ t else (do
-    t' <- hreduce_step $drop 1 xs
-    return $ H i : t')
+  if nub [i, j] == [i]
+    then Just $ [S i, S i, H i] ++ t
+    else
+      ( do
+          t' <- hreduce_step $drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (CZ j k) : t) =
-  if i `elem` [j, k] then Just $ [Cnot i k, H i] ++ t else (do
-    t' <- hreduce_step $ drop 1 xs
-    return $ H i : t')
+  if i `elem` [j, k]
+    then Just $ [Cnot i k, H i] ++ t
+    else
+      ( do
+          t' <- hreduce_step $ drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step xs@((H i) : (Cnot j k) : t) =
-  if i == j then Just $ [CZ j k, H i] ++ t else (do
-    t' <- hreduce_step $ drop 1 xs
-    return $ H i : t')
+  if i == j
+    then Just $ [CZ j k, H i] ++ t
+    else
+      ( do
+          t' <- hreduce_step $ drop 1 xs
+          return $ H i : t'
+      )
 hreduce_step (h : t) = do
   t' <- hreduce_step t
   return (h : t')
@@ -1682,12 +1823,20 @@ hreduce = repeatedly (hreduce_step . constrained_sort)
 hreduce_step35 :: [Gate] -> Maybe [Gate]
 hreduce_step35 [] = Nothing
 hreduce_step35 [a] = Nothing
-hreduce_step35 ((H i) : (H j) : t) = if i == j then Just t else (
-                                       let t1 = hreduce_step35 $ H i : t
-                                        in let t2 = hreduce_step35 $ H j : t
-                                            in if isNothing t1 then (do
-                                                 t' <- hreduce_step35 (H j : t)
-                                                 return $ H i : t') else (if isNothing t2 then return $ H j : unJust t1 else Just $ H j : unJust t1))
+hreduce_step35 ((H i) : (H j) : t) =
+  if i == j
+    then Just t
+    else
+      ( let t1 = hreduce_step35 $ H i : t
+         in let t2 = hreduce_step35 $ H j : t
+             in if isNothing t1
+                  then
+                    ( do
+                        t' <- hreduce_step35 (H j : t)
+                        return $ H i : t'
+                    )
+                  else (if isNothing t2 then return $ H j : unJust t1 else Just $ H j : unJust t1)
+      )
 hreduce_step35 xs@((H i) : (X j) : t) =
   if i == j then Just $ [Z i, H i] ++ t else Just $ [X j, H i] ++ t
 hreduce_step35 xs@((H i) : (Z j) : t) =
@@ -1699,13 +1848,17 @@ hreduce_step35 xs@((H i) : (CZ j k) : t)
 hreduce_step35 xs@((H i) : (Cnot j k) : t)
   | i == j = Just $ [CZ i k, H i] ++ t
   | i == k = do
-  t' <- hreduce_step35 $ Cnot j k : t
-  return $ H i : t'
+    t' <- hreduce_step35 $ Cnot j k : t
+    return $ H i : t'
   | otherwise = return $ [Cnot j k, H i] ++ t
 hreduce_step35 xs@((H i) : (CCZ j k l) : t) =
-  if i `elem` [j, k, l] then (do
-    t' <- hreduce_step35 $ CCZ j k l : t
-    return $ H i : t') else return $ CCZ j k l : H i : t
+  if i `elem` [j, k, l]
+    then
+      ( do
+          t' <- hreduce_step35 $ CCZ j k l : t
+          return $ H i : t'
+      )
+    else return $ CCZ j k l : H i : t
 hreduce_step35 (h : t) = do
   t' <- hreduce_step35 t
   return (h : t')

@@ -7,16 +7,15 @@ import Data.Hashable
 import Data.List
 import Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
-import Data.Set (Set)
-import qualified Data.Set as Set
 --import ZX8
 
+import Data.Maybe (isNothing)
+import Data.Set (Set)
+import qualified Data.Set as Set
 import Fast
 import GateStruct
 import QuipperParser
 import TfcParser2
-
-import Data.Maybe (isNothing)
 
 -- | Gate' which ignore the the qubit it acts on. This type is just for
 -- efficiency reasons.
@@ -343,7 +342,7 @@ instantiate_sg :: Subst -> Gate -> Gate
 instantiate_sg t g = foldl (flip instantiate1) g t
 
 instantiate_sgs :: Subst -> [Gate] -> [Gate]
-instantiate_sgs t c = foldl (\ c h -> map (instantiate1 h) c) c t
+instantiate_sgs t c = foldl (\c h -> map (instantiate1 h) c) c t
 
 instantiate_col :: Subst -> Column -> Column
 instantiate_col bs (mig, mgg) = (mig', mgg')

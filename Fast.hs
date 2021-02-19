@@ -104,9 +104,9 @@ z2x_step :: [Gate] -> Maybe [Gate]
 z2x_step ((H i) : (CCZ a b c) : (H j) : t) =
   if i == j
     then case i of
-      a -> Just $ Toffoli a b c : t
-      b -> Just $ Toffoli b a c : t
-      c -> Just $ Toffoli c a b : t
+      _ | i == a -> Just $ Toffoli a b c : t
+      _ | i == b -> Just $ Toffoli b a c : t
+      _ | i == c -> Just $ Toffoli c a b : t
       _ -> do
         t' <- z2x_step t
         return (H i : CCZ a b c : H j : t')
@@ -1594,15 +1594,12 @@ commute (X i) (CNZ ws) = i `notElem` ws
 commute (X i) (CZ i' j) = i /= i' && i /= j
 commute (X i) (Cnot i' j) = i /= i' && i /= j
 commute (X i) (X i') = True
-commute (X i) (H i') = i /= i'
 commute (X i) (S i') = i /= i'
 commute (X i) (T i') = i /= i'
 commute g (X i) = commute (X i) g
 commute (Cnot i j) (CNZ ws) = i `notElem` ws
 commute (Cnot i j) (CZ i' j') = i /= i' && i /= j'
 commute (Cnot i j) (Cnot i' j') = i /= j' && i' /= j
-commute (Cnot i j) (X i') = i /= i' && i' /= j
-commute (Cnot i j) (H i') = i /= i' && i' /= j
 commute (Cnot i j) (S i') = i /= i'
 commute (Cnot i j) (T i') = i /= i'
 commute g (Cnot i j) = commute (Cnot i j) g
@@ -1685,14 +1682,6 @@ hreduce_step xs@((H i) : (Cnot j k) : (H l) : t) =
   if nub [i, l] == [i] && i == j then Just $ CZ j k : t else (do
     t' <- hreduce_step $ drop 1 xs
     return $ H i : t')
-hreduce_step ((H i) : (S j) : (S l) : t) =
-  if nub [i, j, l] == [i] then Just $ [X i, H i] ++ t else (do
-    t' <- hreduce_step (S j : S l : t)
-    return $ H i : t')
-hreduce_step xs@((H i) : (X j) : t) =
-  if nub [i, j] == [i] then Just $ [S i, S i, H i] ++ t else (do
-    t' <- hreduce_step $drop 1 xs
-    return $ H i : t')
 hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : t) =
   case nub [i, j, k, k', n] == [i] && i `elem` [l, m] of
     True -> Just $ [CZ l m, S i, S q, H i, CZ l m] ++ t
@@ -1701,6 +1690,14 @@ hreduce_step xs@((H i) : (S j) : (S k) : (S k') : (CZ l m) : (H n) : t) =
     False -> do
       t' <- hreduce_step $ drop 1 xs
       return $ H i : t'
+hreduce_step ((H i) : (S j) : (S l) : t) =
+  if nub [i, j, l] == [i] then Just $ [X i, H i] ++ t else (do
+    t' <- hreduce_step (S j : S l : t)
+    return $ H i : t')
+hreduce_step xs@((H i) : (X j) : t) =
+  if nub [i, j] == [i] then Just $ [S i, S i, H i] ++ t else (do
+    t' <- hreduce_step $drop 1 xs
+    return $ H i : t')
 hreduce_step xs@((H i) : (CZ j k) : t) =
   if i `elem` [j, k] then Just $ [Cnot i k, H i] ++ t else (do
     t' <- hreduce_step $ drop 1 xs

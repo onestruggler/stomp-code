@@ -224,12 +224,6 @@ gl2cir qs (Toffolin is) = do
 gl2cir qs (P is) = do
   label (map (\x -> qs !! (x -1)) is) "P"
   return qs
-gl2cir qs (Init s i) = do
-  named_gate (decodeQState s) (qs !! (i -1))
-  return qs
-gl2cir qs (Term s i) = do
-  named_gate (decodeQState' s) (qs !! (i -1))
-  return qs
 gl2cir qs (CNZ is) = do
   gate_Z (qs !! (head is -1)) `controlled` map (\x -> qs !! (x -1)) (drop 1 is)
   return qs

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 {-# OPTIONS_GHC -fno-warn-unused-do-bind #-}
 
 module CirParser where
@@ -28,10 +29,9 @@ runParser m s =
     _ -> error "Parser error."
 
 item :: Parser Char
-item = Parser $ \s ->
-  case s of
-    [] -> []
-    (c : cs) -> [(c, cs)]
+item = Parser $ \case
+  [] -> []
+  (c : cs) -> [(c, cs)]
 
 bind :: Parser a -> (a -> Parser b) -> Parser b
 bind p f = Parser $ \s -> concatMap (\(a, s') -> parse (f a) s') $ parse p s
@@ -583,6 +583,8 @@ main2 = do
   --                       label (drop xn_in x) "|0>"
   --                   ) qs_in
   return $ show cir_in ++ show xn_in
+
+main3 = do
   let cir_out = runParser pcir_out str
   let nn_out = n cir_out
   let xn_out = nx cir_out

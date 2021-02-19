@@ -38,7 +38,7 @@ tikz_of_gate n (Toffoli i j k) = (1, code)
     code x = [printf "\\controlled{\\notgate}{%0.2f,%d}{%d,%d};" x i j k]
 tikz_of_gate n (Ga p ws) = (1, code)
   where
-    code x = [printf "\\gencontrolled{\\gate{%d}}{\\gate{%d}}{%0.2f,%d}" p p x (ws' !! 0) ++ cws ++ ";"]
+    code x = [printf "\\gencontrolled{\\gate{%d}}{\\gate{%d}}{%0.2f,%d}" p p x (head ws') ++ cws ++ ";"]
     ws' = Set.toList ws
     cws = string_of_list "{" "," "}" "{}" show ws'
 tikz_of_gate n (H i) = (1.5, code)
@@ -151,15 +151,15 @@ hrules = map (\x -> (x, uncurry (++) (mvhn 1 x))) hrules_redexes
 
 hrule x = (x, uncurry (++) (mvhn 10 x))
 
-hrule' x = (x, fst mvs ++ snd (snd (mvs)))
+hrule' x = (x, fst mvs ++ snd (snd mvs))
   where
     mvs = unJust $ runStateT (moveh_step x) ([], [])
 
-srule x = (x, fst mvs ++ snd (snd (mvs)))
+srule x = (x, fst mvs ++ snd (snd mvs))
   where
     mvs = unJust $ runStateT (moves_step x) ([], [])
 
-cxrule x = (x, fst mvs ++ snd (snd (mvs)))
+cxrule x = (x, fst mvs ++ snd (snd mvs))
   where
     mvs = unJust $ runStateT (movecx_step x) ([], [])
 

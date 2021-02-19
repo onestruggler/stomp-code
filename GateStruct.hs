@@ -107,7 +107,7 @@ reindexGate f (Init s i) = Init s (f i)
 reindexGate f (Term s i) = Term s (f i)
 
 reindexCir :: (Int -> Int) -> [Gate] -> [Gate]
-reindexCir f term = map (reindexGate f) term
+reindexCir f = map (reindexGate f)
 
 wiresOfGate :: Gate -> [Int]
 wiresOfGate (I i) = [i]
@@ -311,19 +311,19 @@ gl2cir1 qs (CZ i j) = do
   gate_Z (qs !! i) `controlled` (qs !! j)
   return qs
 gl2cir1 qs (CCZ i j k) = do
-  gate_Z (qs !! i) `controlled` [qs !! (j), qs !! (k)]
+  gate_Z (qs !! i) `controlled` [qs !! j, qs !! k]
   return qs
 gl2cir1 qs (Toffoli i j k) = do
-  qnot (qs !! i) `controlled` [qs !! (j), qs !! (k)]
+  qnot (qs !! i) `controlled` [qs !! j, qs !! k]
   return qs
 gl2cir1 qs (Toffoli4 i j k l) = do
-  qnot (qs !! i) `controlled` [qs !! (j), qs !! (k), qs !! (l)]
+  qnot (qs !! i) `controlled` [qs !! j, qs !! k, qs !! l]
   return qs
 gl2cir1 qs (Toffolin is) = do
-  qnot (qs !! head is) `controlled` map (\x -> qs !! (x)) (drop 1 is)
+  qnot (qs !! head is) `controlled` map (qs !!) (drop 1 is)
   return qs
 gl2cir1 qs (P is) = do
-  label (map (\x -> qs !! (x)) is) "P"
+  label (map (qs !!) is) "P"
   return qs
 
 isT :: Gate -> Bool

@@ -55,7 +55,7 @@ parse file = do
   let (eps, circ) = parse_circuit str
   let len = length eps
   let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
-  let (bcir@(c, n), a) = extract_simple (id) exta1 (circ eps)
+  let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   preview_bcircuit bcir
   print gl
@@ -68,7 +68,7 @@ parseQuipper str = do
   let (eps, circ) = parse_circuit str
   let len = length eps
   let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
-  let (bcir@(c, n), a) = extract_simple (id) exta1 (circ eps)
+  let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   --  preview_bcircuit bcir
   --  putStrLn $ show gl
@@ -82,7 +82,7 @@ parseQuipper' s = do
   let (eps, circ) = parse_circuit str
   let len = length eps
   let exta1 = xintmap_inserts (map (\x -> (x, Qbit)) [0 .. len -1]) xintmap_empty
-  let (bcir@(c, n), a) = extract_simple (id) exta1 (circ eps)
+  let (bcir@(c, n), a) = extract_simple id exta1 (circ eps)
   let (a1, gl, a2, mm) = c
   --  preview_bcircuit bcir
   --  putStrLn $ show gl

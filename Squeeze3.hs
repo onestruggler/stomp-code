@@ -16,6 +16,8 @@ import GateStruct
 import QuipperParser
 import TfcParser2
 
+import Data.Maybe (isNothing)
+
 -- | Gate' which ignore the the qubit it acts on. This type is just for
 -- efficiency reasons.
 data Gate'
@@ -35,12 +37,12 @@ gate'_of_gate :: Gate -> Gate'
 gate'_of_gate (H _) = H'
 gate'_of_gate (X _) = X'
 gate'_of_gate (CX _ _) = CX'
-gate'_of_gate (CCX {}) = CCX'
+gate'_of_gate CCX {} = CCX'
 gate'_of_gate (T _) = T'
 gate'_of_gate (S _) = S'
 gate'_of_gate (Z _) = Z'
 gate'_of_gate (CZ _ _) = CZ'
-gate'_of_gate (CCZ {}) = CCZ'
+gate'_of_gate CCZ {} = CCZ'
 gate'_of_gate (Swap _ _) = Swap'
 
 wires_of_gate :: Gate -> [Int]
@@ -88,10 +90,10 @@ similar_gate (T _) (T _) = True
 similar_gate (S _) (S _) = True
 similar_gate (Z _) (Z _) = True
 similar_gate (CZ _ _) (CX _ _) = True
-similar_gate (CCZ {}) (CCZ {}) = True
+similar_gate CCZ {} CCZ {} = True
 similar_gate (X _) (X _) = True
 similar_gate (CX _ _) (CX _ _) = True
-similar_gate (CCX {}) (CCX {}) = True
+similar_gate CCX {} CCX {} = True
 similar_gate (Swap _ _) (Swap _ _) = True
 similar_gate (Ga p ws) (Ga p' ws')
   | (p + p') `mod` 2 /= 1 && Set.size ws == Set.size ws' = True
@@ -127,8 +129,8 @@ commute_gate (CCZ i' j' k') (CX i j) = i /= i' && i /= j' && i /= k'
 commute_gate (CX i j) (H k) = k /= i && k /= j
 commute_gate (H k) (CX i j) = k /= i && k /= j
 commute_gate (CX i j) (CX i' j') = i /= j' && j /= i'
-commute_gate (CZ _ _) (CCZ {}) = True
-commute_gate (CCZ {}) (CZ _ _) = True
+commute_gate (CZ _ _) CCZ {} = True
+commute_gate CCZ {} (CZ _ _) = True
 commute_gate (CZ i j) (CX i' j') = i' /= i && i' /= j
 commute_gate (CX i' j') (CZ i j) = i' /= i && i' /= j
 commute_gate (CZ i j) (CZ i' j') = sort [i, j] /= sort [i', j']
@@ -211,7 +213,7 @@ squee_of_gatess = map col_of_gates
 gates_of_col :: Column -> [Gate]
 gates_of_col (mig, mgg) = concat (Map.elems mgg)
 
-gates_of_cols cols = concatMap gates_of_col cols
+gates_of_cols = concatMap gates_of_col
 
 gatess_of_cols = map gates_of_col
 
@@ -239,12 +241,10 @@ commute_gc g (mig, mgg) = b
 assign_col :: Gate -> [Column] -> [Column]
 assign_col a [] = [insert_col a empty_col]
 assign_col g [h]
-  | not (overlap_gc g h) = [(insert_col g h)]
-  | otherwise = [(singleton_col g), h]
+  | not (overlap_gc g h) = [insert_col g h]
+  | otherwise = [singleton_col g, h]
 assign_col a (h : t)
-  | commute_gc a h = if gates_of_col (head t') == [a] then (case overlap_gc a h of
-                                                      True -> singleton_col a : h : t
-                                                      False -> insert_col a h : t) else h : t'
+  | commute_gc a h = if gates_of_col (head t') == [a] then (if overlap_gc a h then singleton_col a : h : t else insert_col a h : t) else h : t'
   | otherwise = singleton_col a : h : t
   where
     t' = assign_col a t
@@ -253,8 +253,8 @@ assign_col a (h : t)
 assign_col' :: Gate -> [Column] -> [Column]
 assign_col' a [] = [insert_col a empty_col]
 assign_col' g [h]
-  | not (overlap_gc g h) = [(insert_col g h)]
-  | otherwise = [(singleton_col g), h]
+  | not (overlap_gc g h) = [insert_col g h]
+  | otherwise = [singleton_col g, h]
 assign_col' a (h1 : h2 : t)
   | not (overlap_gc a h1) = if not (overlap_gc a h2) then h1 : t' else insert_col a h1 : h2 : t
   | otherwise = singleton_col a : h1 : h2 : t
@@ -381,12 +381,8 @@ unify_gate (S i) (S i') = unify_gate (H i) (H i')
 unify_gate (Z i) (Z i') = unify_gate (H i) (H i')
 unify_gate (CZ i j) (CZ i' j')
   | i == i' && j == j' = Just []
-  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (case i' < 0 of
-                                                     True -> Just [(i', i)]
-                                                     False -> Nothing)
-  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (case j' < 0 of
-                                                     True -> Just [(j', j)]
-                                                     False -> Nothing)
+  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (if i' < 0 then Just [(i', i)] else Nothing)
+  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (if j' < 0 then Just [(j', j)] else Nothing)
   | i < 0 && j < 0 = Just [(i, i'), (j, j')]
   | i' < 0 && j' < 0 = Just [(i', i), (j', j)]
   | i < 0 && j' < 0 = Just [(i, i'), (j', j)]
@@ -508,7 +504,7 @@ runRule :: Rule -> [Column] -> [Column]
 runRule rule [] = []
 runRule rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
   Nothing -> squeeze' (gates_of_col h) $ runRule rule t
-  Just b -> if null lr' || match lr' (drop len xss) == Nothing then runRule rule $ rewrite rule' xss else squeeze' [ha] $ runRule rule xss'
+  Just b -> if null lr' || isNothing (match lr' (drop len xss)) then runRule rule $ rewrite rule' xss else squeeze' [ha] $ runRule rule xss'
     where
       ha = head $ head $ fst $ fst rule'
       h' = delete_col ha h
@@ -521,7 +517,7 @@ runRule' :: Rule' -> [Column] -> [Column]
 runRule' rule [] = []
 runRule' rule@(Rule l lg r sep) xss@(h : t) = case match l xss of
   Nothing -> h : runRule' rule t
-  Just b -> if null lg' || match lg' (drop len xss) == Nothing then runRule' rule $ rewrite' rule' xss else singleton_col ha : runRule' rule xss'
+  Just b -> if null lg' || isNothing (match lg' (drop len xss)) then runRule' rule $ rewrite' rule' xss else singleton_col ha : runRule' rule xss'
     where
       ha = head $ head l'
       h' = delete_col ha h
@@ -533,7 +529,7 @@ runRule's :: Rule' -> [Column] -> [Column]
 runRule's rule [] = []
 runRule's rule@(Rule l lg r sep) xss@(h : t) = case match l xss of
   Nothing -> squeeze_SM' (gates_of_col h) $ runRule's rule t
-  Just b -> if null lg' || match lg' (drop len xss) == Nothing then runRule's rule $ rewrite's rule' xss else squeeze_SM' [ha] $ runRule's rule xss'
+  Just b -> if null lg' || isNothing (match lg' (drop len xss)) then runRule's rule $ rewrite's rule' xss else squeeze_SM' [ha] $ runRule's rule xss'
     where
       ha = head $ head l'
       h' = delete_col ha h
@@ -678,7 +674,7 @@ isCX (CX _ _) = True
 isCX _ = False
 
 isCCX :: Gate -> Bool
-isCCX (CCX {}) = True
+isCCX CCX {} = True
 isCCX _ = False
 
 halve_cxccx :: [Gate] -> ([Gate], [Gate])
@@ -716,7 +712,7 @@ mv_cxccx_rep (m, r) = (m', r')
     xss' = runRules_rep' cxccx_rules' xss
     rc = gates_of_col $ last xss'
     (rcx, rm) = partition isCX rc
-    (m', r') = if rcx == [] then (m, r) else mv_cxccx_rep (m'', r'')
+    (m', r') = if null rcx then (m, r) else mv_cxccx_rep (m'', r'')
     m'' = concatMap gates_of_col (take (length xss' -1) xss') ++ rm
     r'' = rcx ++ r
 

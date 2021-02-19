@@ -4,6 +4,7 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.State
 import Control.Monad.Trans.Maybe
+import Data.Bifunctor
 import Data.List
 import qualified Fast as F
 import GateStruct
@@ -72,7 +73,7 @@ moveh_step (H i : CZ j k : t)
     t' <- moveh_step $ H i : t
     return $ CZ j k : t'
 moveh_step (H i : CCZ j k m : t)
-  | notElem i [j, k, m] =
+  | i `notElem` [j, k, m] =
     do
       t' <- moveh_step $ H i : t
       return $ CCZ j k m : t'
@@ -260,11 +261,7 @@ movecx_step (CX i i' : CX j j' : t)
 movecx_step (CX i i' : Swap j j' : t) =
   case (length . sort . nub) [i, i', j, j'] of
     2 -> return $ [Swap j j', CX i' i] ++ t
-    3 -> if i == j then return $ [Swap j j', CX j' i'] ++ t else (case i == j' of
-                                                           True -> return $ [Swap j j', CX j i'] ++ t
-                                                           False -> case i' == j of
-                                                             True -> return $ [Swap j j', CX i j'] ++ t
-                                                             False -> return $ [Swap j j', CX i j] ++ t)
+    3 -> if i == j then return $ [Swap j j', CX j' i'] ++ t else (if i == j' then return $ [Swap j j', CX j i'] ++ t else (if i' == j then return $ [Swap j j', CX i j'] ++ t else return $ [Swap j j', CX i j] ++ t))
     4 -> return $ [Swap j j', CX i i'] ++ t
 
 movecx :: [Gate] -> LR [Gate]
@@ -408,7 +405,7 @@ repeatedly f a = case f a of
 
 mvH f cir = (f cir >>= mvH f) <|> return cir
 
-mvH' f cir = return cir >>= f >>= (mvH' f)
+mvH' f cir = f cir >>= mvH' f
 
 {-
 mvh_n' n cir = moveh cir >>= mvh_n' (n-1)

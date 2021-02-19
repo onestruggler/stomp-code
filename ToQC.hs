@@ -39,7 +39,7 @@ g2cir (G i ws) = case length ws of
     sts = i2st i (last ws)
 
 gs2cir :: [ZXAtom] -> [Gate]
-gs2cir xs = concatMap g2cir xs
+gs2cir = concatMap g2cir
 
 term2cir :: Term -> [Gate]
 term2cir (LMR l m r) = concatMap g2cir (l ++ m ++ r)
@@ -75,7 +75,7 @@ gate2string (CCZ i j k) = "H " ++ show k ++ "\ntof " ++ show i ++ " " ++ show j 
 gate2string (Toffoli i j k) = "tof " ++ show k ++ " " ++ show j ++ " " ++ show i ++ "\n"
 
 cir2string :: [Gate] -> String
-cir2string gl = qc_header (wiresOfCir gl) ++ qc_iheader gl ++ "BEGIN\n" ++ concat (map gate2string gl) ++ "END"
+cir2string gl = qc_header (wiresOfCir gl) ++ qc_iheader gl ++ "BEGIN\n" ++ concatMap gate2string gl ++ "END"
 
 cir2qc :: Handle -> [Gate] -> IO ()
 cir2qc h xs = hPutStrLn h (cir2string xs)

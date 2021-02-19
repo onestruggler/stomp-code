@@ -2,6 +2,7 @@ module Squeeze where
 
 import Control.Monad.State
 import Data.List
+import Data.Maybe
 import Data.Set (Set)
 import qualified Data.Set as Set
 --import ZX8
@@ -71,10 +72,10 @@ similar_gate (T _) (T _) = True
 similar_gate (S _) (S _) = True
 similar_gate (Z _) (Z _) = True
 similar_gate (CZ _ _) (CX _ _) = True
-similar_gate (CCZ {}) (CCZ {}) = True
+similar_gate CCZ {} CCZ {} = True
 similar_gate (X _) (X _) = True
 similar_gate (CX _ _) (CX _ _) = True
-similar_gate (CCX {}) (CCX {}) = True
+similar_gate CCX {} CCX {} = True
 similar_gate (Swap _ _) (Swap _ _) = True
 similar_gate (Ga p ws) (Ga p' ws')
   | (p + p') `mod` 2 /= 1 && Set.size ws == Set.size ws' = True
@@ -100,8 +101,8 @@ commute_gate (CCZ i' j' k') (CX i j) = i /= i' && i /= j' && i /= k'
 commute_gate (CX i j) (H k) = k /= i && k /= j
 commute_gate (H k) (CX i j) = k /= i && k /= j
 commute_gate (CX i j) (CX i' j') = i /= j' && j /= i'
-commute_gate (CZ _ _) (CCZ {}) = True
-commute_gate (CCZ {}) (CZ _ _) = True
+commute_gate (CZ _ _) CCZ {} = True
+commute_gate CCZ {} (CZ _ _) = True
 commute_gate (CZ i j) (CX i' j') = i' /= i && i' /= j
 commute_gate (CX i' j') (CZ i j) = i' /= i && i' /= j
 commute_gate (CZ i j) (CZ i' j') = sort [i, j] /= sort [i', j']
@@ -163,8 +164,8 @@ overlap_c_g col g = any (overlap_gate g) col
 assign_column :: Gate -> [[Gate]] -> [[Gate]]
 assign_column g [] = [[g]]
 assign_column g [h]
-  | all (commute_gate g) h && not (any (overlap_gate g) h) = [(g : h)]
-  | all (commute_gate g) h = [ha, (g : hb)]
+  | all (commute_gate g) h && not (any (overlap_gate g) h) = [g : h]
+  | all (commute_gate g) h = [ha, g : hb]
   | otherwise = [[g], h]
   where
     ol = filter (\x -> wiresOfGate x `intersect` wiresOfGate g /= []) h
@@ -192,12 +193,10 @@ assign_column g (h1 : h2 : t)
 assign_column' :: Gate -> [[Gate]] -> [[Gate]]
 assign_column' g [] = [[g]]
 assign_column' g [h]
-  | not (overlap_c_g h g) = [(g : h)]
+  | not (overlap_c_g h g) = [g : h]
   | otherwise = [[g], h]
 assign_column' g (h : t)
-  | commute_c_g h g = if head t' == [g] then (case overlap_c_g h g of
-                                        True -> [g] : h : t
-                                        False -> (g : h) : t) else h : t'
+  | commute_c_g h g = if head t' == [g] then (if overlap_c_g h g then [g] : h : t else (g : h) : t) else h : t'
   | otherwise = [g] : h : t
   where
     t' = assign_column' g t
@@ -303,12 +302,8 @@ unify_gate (S i) (S i') = unify_gate (H i) (H i')
 unify_gate (Z i) (Z i') = unify_gate (H i) (H i')
 unify_gate (CZ i j) (CZ i' j')
   | i == i' && j == j' = Just []
-  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (case i' < 0 of
-                                                     True -> Just [(i', i)]
-                                                     False -> Nothing)
-  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (case j' < 0 of
-                                                     True -> Just [(j', j)]
-                                                     False -> Nothing)
+  | i /= i' && j == j' = if i < 0 then Just [(i, i')] else (if i' < 0 then Just [(i', i)] else Nothing)
+  | i == i' && j /= j' = if j < 0 then Just [(j, j')] else (if j' < 0 then Just [(j', j)] else Nothing)
   | i < 0 && j < 0 = Just [(i, i'), (j, j')]
   | i' < 0 && j' < 0 = Just [(i', i), (j', j)]
   | i < 0 && j' < 0 = Just [(i, i'), (j', j)]
@@ -413,7 +408,7 @@ runRule' :: Rule' -> [[Gate]] -> [[Gate]]
 runRule' rule [] = []
 runRule' rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
   Nothing -> squeeze' h $ runRule' rule t
-  Just b -> if null lr' || match lr' (drop len xss) == Nothing then runRule' rule $ rewrite' rule' xss else squeeze' ha $ runRule' rule xss'
+  Just b -> if null lr' || isNothing (match lr' (drop len xss)) then runRule' rule $ rewrite' rule' xss else squeeze' ha $ runRule' rule xss'
     where
       ha = [head $ head $ fst $ fst rule']
       h' = h \\ ha
@@ -425,15 +420,15 @@ runRule' rule@(l@(ll, lr), r@(rl, rr)) xss@(h : t) = case match ll xss of
 rewrite :: Rule -> [[Gate]] -> [[Gate]]
 rewrite (l, r) xss = xss'
   where
-    xssl = zipWith (flip \\) l xss
-    xssr = zipWith ((++)) r (xssl ++ repeat [])
+    xssl = zipWith (flip (\\)) l xss
+    xssr = zipWith (++) r (xssl ++ repeat [])
     xss' = xssr ++ drop (length xssl) xss
 
 rewrite' :: Rule' -> [[Gate]] -> [[Gate]]
 rewrite' (l@(ll, lr), r@(rl, rr)) xss = xss'
   where
-    xssl = zipWith (flip \\) ll xss
-    xssr = zipWith ((++)) rr' (xssl ++ repeat [])
+    xssl = zipWith (flip (\\)) ll xss
+    xssr = zipWith (++) rr' (xssl ++ repeat [])
     xss' = squeeze' (concat (rl' ++ xssr)) (drop (length xssl) xss)
     lenl = length xssl
     lenrr = length rr
@@ -500,7 +495,7 @@ isCX (CX _ _) = True
 isCX _ = False
 
 isCCX :: Gate -> Bool
-isCCX (CCX {}) = True
+isCCX CCX {} = True
 isCCX _ = False
 
 cxccx_rules =
@@ -516,7 +511,7 @@ halve_cxccx xs = (l, r)
   where
     cxs = filter isCX xs
     len' = 13 -- length cxs
-    len = if length cxs `mod` 2 == 0 then length cxs `div` 2 else length cxs `div` 2 + 1 + 1
+    len = if even (length cxs) then length cxs `div` 2 else length cxs `div` 2 + 1 + 1
     lcx = take len cxs
     rcx = drop len cxs
     lccx = takeWhile isCCX xs
@@ -536,7 +531,7 @@ mv_cxccx_rep (m, r) = (m', r')
     xss' = runRules_rep cxccx_rules xss
     rc = last xss'
     (rcx, rm) = partition isCX rc
-    (m', r') = if rcx == [] then (m, r) else mv_cxccx_rep (m'', r'')
+    (m', r') = if null rcx then (m, r) else mv_cxccx_rep (m'', r'')
     m'' = concat (take (length xss' -1) xss') ++ rm
     r'' = rcx ++ r
 

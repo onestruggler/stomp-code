@@ -12,6 +12,7 @@ import Data.Char
 import Data.Function
 import Data.List
 import qualified Data.Map.Strict as M
+import Data.Maybe
 import qualified Data.Set as Set
 import Fast
 import qualified Fast
@@ -244,14 +245,14 @@ run stdgen options [x] = do
         ( case lookup "-identity" options of
             Nothing -> const return
             Just ids -> case ids of
-              "4" -> (\ f x -> (f ZX.id4s) x)
-              "6" -> (\ f x -> (f ZX.id6s) x)
-              "45" -> (\ f x -> (f ZX.id4s) x >>= f ZX.id45s)
-              "56" -> (\ f x -> (f ZX.id56s) x)
-              "96" -> (\ f x -> (f ZX.wid96) x)
-              "4-56" -> (\ f x -> (f ZX.id4s) x >>= f ZX.id56s)
-              "456" -> (\ f x -> (f ZX.id4s) x >>= f ZX.id45s >>= f ZX.id6s)
-              "4567" -> (\ f x -> (f ZX.id4s) x >>= f ZX.id45s >>= f ZX.id6s >>= f ZX.id67s)
+              "4" -> (\f x -> f ZX.id4s x)
+              "6" -> (\f x -> f ZX.id6s x)
+              "45" -> (\f x -> f ZX.id4s x >>= f ZX.id45s)
+              "56" -> (\f x -> f ZX.id56s x)
+              "96" -> (\f x -> f ZX.wid96 x)
+              "4-56" -> (\f x -> f ZX.id4s x >>= f ZX.id56s)
+              "456" -> (\f x -> f ZX.id4s x >>= f ZX.id45s >>= f ZX.id6s)
+              "4567" -> (\f x -> f ZX.id4s x >>= f ZX.id45s >>= f ZX.id6s >>= f ZX.id67s)
         ) ::
           ([ZX.Identity] -> ZX.TGCG -> ZX.LMMR) -> ZX.TGCG -> ZX.LMMR
   let order = Data.Maybe.fromMaybe "" (lookup "-order" options)

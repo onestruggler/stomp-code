@@ -13,7 +13,7 @@ import System.Environment
 import Text.ParserCombinators.ReadP
 
 next_word :: ReadP String
-next_word = many $ satisfy (\x -> notElem x ", \n\r")
+next_word = many $ satisfy (`notElem` ", \n\r")
 
 replace :: Char -> Char -> String -> String
 replace a b [] = []
@@ -285,7 +285,7 @@ names_v = do
   char '.'
   char 'v'
   skipSpaces
-  str <- many $ satisfy (\x -> x /= '.')
+  str <- many $ satisfy (/= '.')
   return $ if str /= "BEGIN" then words str else error "parse error, .v line is no good!"
 
 dotv :: ReadP String
@@ -299,7 +299,7 @@ names_v' = do
   manyTill (satisfy (const True)) dotv
   skipSpaces
   str <- many $ satisfy (\x -> x /= '.' && x /= 'B')
-  many $ satisfy (\x -> x /= 'B')
+  many $ satisfy (/= 'B')
   return $ words $ replace ',' ' ' (unwords $ words str)
 
 names_v1 :: ReadP [String]

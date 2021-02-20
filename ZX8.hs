@@ -11,16 +11,13 @@ import Control.DeepSeq
 import Control.Monad
 import Control.Monad.State
 import Data.Bifunctor
-import Data.Distribution.Core
-import Data.Distribution.Sample
+
 import Data.Function
 import qualified Data.HashMap.Strict as MS
 import qualified Data.HashTable.ST.Basic as HT
 import Data.Hashable
 
 import Data.Ratio
---import Data.Distribution.Sample
---import Data.Distribution.Core
 
 import Data.List
 import Data.Maybe
@@ -355,7 +352,6 @@ wiresOfId id@(t, c) = Set.toList $ foldl' Set.union Set.empty (MS.keys t ++ MS.k
 -- | return n-gadgets that lies on first (n+4) wires, input gads
 -- should have keys of the same size.
 ngads :: Int -> Gads -> Gads
-<<<<<<< Updated upstream
 ngads n =
   MS.foldlWithKey'
     ( \b k v ->
@@ -365,18 +361,6 @@ ngads n =
               else b
     )
     MS.empty
-=======
-ngads n gs =  MS.foldlWithKey' (\ b k v ->
-                                 let b' = MS.insert k v b in
-                                   if (length $ wiresOfGads b') <= n+4
-                                   then b' else b) (MS.empty) gs
-
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
-
-
 
 
 -- | randomlistN g n m generate n distinct random numbers from 0 .. m-1

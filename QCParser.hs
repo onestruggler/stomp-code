@@ -264,7 +264,7 @@ parseQC2 str = do
 
 
 
-parseQC' :: String -> IO (Int, [Gate])
+parseQC' :: String -> IO [Gate]
 parseQC' s = do
   str <- readFile s
   let (gl, re) = head $ readP_to_S qcir1 str

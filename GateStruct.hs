@@ -336,5 +336,3 @@ test qs = do
   gl2cir [p, q, r] (X 3)
   gl2cir [p, q, r] (P [1, 3])
 
-main3 = do
-  print_simple Preview test

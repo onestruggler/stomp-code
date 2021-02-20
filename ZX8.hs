@@ -17,6 +17,11 @@ import Data.Function
 import qualified Data.HashMap.Strict as MS
 import qualified Data.HashTable.ST.Basic as HT
 import Data.Hashable
+
+import Data.Ratio
+--import Data.Distribution.Sample
+--import Data.Distribution.Core
+
 import Data.List
 import Data.Maybe
 import Data.Ratio
@@ -249,59 +254,7 @@ mypartition p xs = (l, r)
     l = MS.filter (\x -> x `mod` 2 == 1) xs
     r = MS.filter even xs
 
-tgcg2distr :: TGCG -> Distribution Int
-tgcg2distr (tg, cg) = d
-  where
-    ws = wiresOfGads tg
-    sws = length ws
-    wsp = [(w, p) | w <- ws, let p = prob w]
-    prob w = MS.size (MS.filterWithKey (\k _ -> w `member` k) tg) % sws
-    d = fromList wsp
-
--- | non repeat sampling
-sampleNwire :: Int -> Int -> Distribution Int -> [Int]
-sampleNwire seed n distr = ws
-  where
-    gen = fromDistribution distr
-    sampleN 0 d g = ([], g)
-    sampleN n d g =
-      let (w, g') = sample (fromDistribution d) g
-       in let (ws, g'') = sampleN (n -1) (assuming (/= w) d) g'
-           in (w : ws, g'')
-    ws = fst $ sampleN n distr (mkStdGen seed)
-
--- | repeat sampling, efficient, but sample not follow the the
--- distribution exactly.
-sampleNwire' :: Int -> Int -> Distribution Int -> [Int]
-sampleNwire' seed n distr = ws
-  where
-    ws =
-      if length (nub ws') /= n
-        then sampleNwire' (seed + 1) n distr
-        else ws'
-    gen = fromDistribution distr
-    sampleN 0 d g = ([], g)
-    sampleN n d g =
-      let (w, g') = sample (fromDistribution d) g
-       in let (ws, g'') = sampleN (n -1) d g' in (w : ws, g'')
-    ws' = fst $ sampleN n distr (mkStdGen seed)
-
-sampleNw :: StdGen -> Int -> Distribution Int -> ([Int], StdGen)
-sampleNw stdg n di = (ws, stdg')
-  where
-    (ws'', stdg'') = sample_nrep' n stdg di
-    (ws, stdg') =
-      if length (nub ws'') < n
-        then sampleNw stdg'' n di
-        else (ws'', stdg'')
-
-sampleNws :: StdGen -> Int -> Int -> Distribution Int -> ([[Int]], StdGen)
-sampleNws stdg 0 n di = ([], stdg)
-sampleNws stdg m n di = (xss, stdg')
-  where
-    (xss'', stdg'') = sampleNws stdg (m -1) n di
-    (x, stdg') = sampleNw stdg'' n di
-    xss = x : xss''
+  
 
 -- | check equality of identity
 
@@ -352,64 +305,17 @@ pmod8 :: Int -> Int -> Int
 pmod8 x y = (x + y) `mod` 8
 
 -- | boolean mask
-bmask' n g
-  | n == 0 = ([], g)
-  | otherwise =
-    let (a, g') = sample (fromDistribution (uniform [True, False])) g
-     in let (as, g'') = bmask' (n - 1) g'
-         in (a : as, g'')
 
-bmask seed n = fst $ bmask' n (mkStdGen seed)
 
-id4ton :: Int -> Int -> Identity
-id4ton seed n
-  | n < 4 = error "id4ton: wires less than 4"
-  | otherwise = toId idns
-  where
-    ws = [0 .. n -1]
-    fs = [4 .. n]
-    wss = concatMap (`choosen_linear` ws) fs
-    bm = bmask seed (length wss -1)
-    bmwss = zip wss (bm ++ [True])
-    wss' = map fst $ filter snd bmwss
-    idns = concatMap idnw wss'
+  
 
-id4ton_dis :: Int -> Int -> Int -> Identity
-id4ton_dis seed n len
-  | n < 4 = error "id4ton: wires less than 4"
-  | otherwise = toId idns
-  where
-    ws = [0 .. n -1]
-    fs = [4 .. n]
-    wss = concatMap (`choosen_linear` ws) fs
-    wss' =
-      fst $
-        sample_nrep
-          len
-          (mkStdGen seed)
-          (fromList freq)
-    tot = sum (map (exp . fromIntegral . length) wss)
-    freq = map (\x -> (x, exp (fromIntegral $ length x) / tot)) wss
-    idns = concatMap idnw wss'
 
-sample_rep n g gen
-  | n == 0 = ([], g)
-  | otherwise =
-    let (a, g') = sample gen g
-     in let (as, g'') = sample_rep (n - 1) g' gen
-         in (a : as, g'')
 
-sample_nrep n g dis
-  | n == 0 = ([], g)
-  | otherwise =
-    let (a, g') = sample (fromDistribution dis) g
-     in let (as, g'') = sample_nrep (n - 1) g' (assuming (/= a) dis) in (a : as, g'')
 
-sample_nrep' n g dis
-  | n == 0 = ([], g)
-  | otherwise =
-    let (a, g') = sample (fromDistribution dis) g
-     in let (as, g'') = sample_nrep (n - 1) g' (assuming (/= a) dis) in (a : as, g'')
+
+
+
+
 
 expandId :: Identity -> [[Int]] -> [Identity]
 expandId id@(tg, cg) wss =
@@ -449,6 +355,7 @@ wiresOfId id@(t, c) = Set.toList $ foldl' Set.union Set.empty (MS.keys t ++ MS.k
 -- | return n-gadgets that lies on first (n+4) wires, input gads
 -- should have keys of the same size.
 ngads :: Int -> Gads -> Gads
+<<<<<<< Updated upstream
 ngads n =
   MS.foldlWithKey'
     ( \b k v ->
@@ -458,9 +365,19 @@ ngads n =
               else b
     )
     MS.empty
+=======
+ngads n gs =  MS.foldlWithKey' (\ b k v ->
+                                 let b' = MS.insert k v b in
+                                   if (length $ wiresOfGads b') <= n+4
+                                   then b' else b) (MS.empty) gs
 
-unif :: TGCG -> Distribution Int
-unif (tg, cg) = uniform $ wiresOfGads tg
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+>>>>>>> Stashed changes
+
+
+
 
 -- | randomlistN g n m generate n distinct random numbers from 0 .. m-1
 randomlistN :: StdGen -> Int -> Int -> ([Int], StdGen)

@@ -327,7 +327,7 @@ isT (Toffoli i j k) = True
 isT (Ga i ws) = i `mod` 2 == 1
 isT _ = False
 
-test = do
+test qs = do
   q <- qinit False
   p <- qinit True
   r <- qinit True

@@ -254,12 +254,30 @@ parseQC str = do
   --  putStrLn str
   return gl
 
-parseQC' :: String -> IO [Gate]
+parseQC2 :: String -> IO (Int, [Gate])
+parseQC2 str = do
+--  str <- readFile $ s
+  let (gl,re) = head $ (readP_to_S qcir1) str
+  let n = length $ wiresOfCir gl
+  putStrLn (show gl)
+  return $ (n,gl)
+
+
+
+parseQC' :: String -> IO (Int, [Gate])
 parseQC' s = do
   str <- readFile s
   let (gl, re) = head $ readP_to_S qcir1 str
   --  putStrLn str
   return gl
+
+parseQC'2 :: String -> IO (Int, [Gate])
+parseQC'2 s = do
+  str <- readFile $ s
+  let (gl,re) = head $ (readP_to_S qcir1) str
+  let n = length $ wiresOfCir gl
+--  putStrLn str
+  return $ (n,gl)
 
 readQC :: IO String
 readQC = do
